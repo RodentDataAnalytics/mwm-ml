@@ -33,16 +33,17 @@ function results_strategies_individual_evolution4
     %% plot distributions
     b = 1;
     for c = 1:length(classes)            
-        for g = 1:2            
-            data = [];
-            groups = [];
-            tpos = [];
-            pos = [];
-            sig = [];
-            d = 1;
-            grp = 1;
-            pts_session = [];
-            for t = 1:12         
+        data = [];
+        groups = [];
+        pos = [];
+        d = 1;
+        grp = 1;
+                                
+        for t = 1:12                     
+            d = d + 0.5;    
+                
+            for g = 1:2            
+                pts_session = [];
                 sel = find( g_trajectories_trial == t & g_trajectories_group == g);                
                                 
                 pts = [];
@@ -67,78 +68,57 @@ function results_strategies_individual_evolution4
                 grp = grp + 1;
                 
                 pts_session = [pts_session, pts];
-                if mod(t, 4) == 0                    
-                    % plot distribution
-                    hfig = figure;
-                    hist(pts_session, 20);
-                    pts_session = [];
-                    fn = fullfile(constants.OUTPUT_DIR, sprintf('control_stress_histogram_s%d_g%d_c%d.eps', floor(t / 4), g, c));
-                    export_fig(fn);
-                    close(hfig);
-                end
+%                 if mod(t, 4) == 0                    
+%                     % plot distribution
+%                     hfig = figure;
+%                     hist(pts_session, 20);
+%                     pts_session = [];
+%                     fn = fullfile(constants.OUTPUT_DIR, sprintf('control_stress_histogram_s%d_g%d_c%d.eps', floor(t / 4), g, c));
+%                     export_fig(fn);
+%                     close(hfig);
+%                 end
 
                 pos = [pos, d];
-                d = d + 1;    
-                
-                if rem(t, 4) == 0
-                    d = d + 1;
-                end
-                                
-            end           
-       
-            figure;
-            boxplot(data, groups, 'positions', pos, 'colors', [0 0 0]);     
-
-            lbls = {};
-            for i = 1:12
-                lbls = [lbls, sprintf('T%d', i)];
-            end
-        
+                d = d + 1;                                                    
+            end     
             
-            set(gca, 'Xtick', pos, 'XTIckLabel', lbls, 'DataAspectRatio', [.8, 0.2, 1], 'Ylim', [0, 1.1], 'YTick', [0.2, 0.4, 0.6, 0.8, 1]);
-            ylabel(classes(c).description, 'FontSize', 0.6*constants.FONT_SIZE);
-
-            h = findobj(gca,'Tag','Box');               
-            for j=1:length(h)
-                switch g
-                    case 1
-                      % patch(get(h(j),'XData'), get(h(j), 'YData'), [0 0 0]);
-                    case 2  
-                        patch(get(h(j),'XData'), get(h(j), 'YData'), [0 0 0]);
-                end                                        
-            end
-            set([h], 'LineWidth', 0.8);
-            
-            h = findobj(gca,'Tag','Box');               
-            for j=1:length(h)
-                switch g
-                    case 1
-                       % patch(get(h(j),'XData'), get(h(j), 'YData'), [0 0 0]);
-                    case 2  
-                        patch(get(h(j),'XData'), get(h(j), 'YData'), [0 0 0]);
-                end                                        
-            end
-            
-            h = findobj(gca, 'Tag', 'Outliers');
-            for j=1:length(h)
-                set(h(j), 'MarkerEdgeColor', [0 0 0]);
-            end
-
-            h = findobj(gca, 'Tag', 'Median');
-            for j=1:length(h)
-                switch g
-                    case 1
-                        % line('XData', get(h(j),'XData'), 'YData', get(h(j), 'YData'), 'Color', [1 1 1], 'LineWidth', 2);
-                    case 2  
-                        line('XData', get(h(j),'XData'), 'YData', get(h(j), 'YData'), 'Color', [.9 .9 .9], 'LineWidth', 2);
-                end                                        
-            end
-
-            set(gcf, 'Color', 'w');
-            box off;  
-
-            export_fig(fullfile(constants.OUTPUT_DIR, sprintf('control_stress_friedman_g%d_c%d.eps', g, c)));
+            if rem(t, 4) == 0
+                d = d + 1;
+            end                
         end
+       
+        figure;
+        boxplot(data, groups, 'positions', pos, 'colors', [0 0 0]);     
+        
+        lbls = {};
+        lbls = arrayfun( @(i) sprintf('%d', i), 1:constants.TRIALS, 'UniformOutput', 0);     
+        
+        set(gca, 'XTick', (pos(1:2:2*constants.TRIALS - 1) + pos(2:2:2*constants.TRIALS)) / 2, 'XTickLabel', lbls, 'FontSize', 0.75*constants.FONT_SIZE);                 
+     
+        set(gca, 'LineWidth', constants.AXIS_LINE_WIDTH, 'DataAspectRatio', [1, 0.08, 1], 'FontSize', 0.7*constants.FONT_SIZE);      
+        ylabel(classes(c).description, 'FontSize', 0.8*constants.FONT_SIZE);
+        xlabel('trial', 'FontSize', constants.FONT_SIZE);
+        
+        h = findobj(gca,'Tag','Box');
+        for j=1:2:length(h)
+             patch(get(h(j),'XData'), get(h(j), 'YData'), [0 0 0]);
+        end
+        set([h], 'LineWidth', 0.8);
+   
+        h = findobj(gca, 'Tag', 'Median');
+        for j=1:2:length(h)
+             line('XData', get(h(j),'XData'), 'YData', get(h(j), 'YData'), 'Color', [.9 .9 .9], 'LineWidth', 2);
+        end
+        
+        h = findobj(gca, 'Tag', 'Outliers');
+        for j=1:length(h)
+            set(h(j), 'MarkerEdgeColor', [0 0 0]);
+        end
+        
+        set(gcf, 'Color', 'w');
+        box off;  
+
+        export_fig(fullfile(constants.OUTPUT_DIR, sprintf('control_stress_friedman_c%d.eps', c)));
     end     
 end
 

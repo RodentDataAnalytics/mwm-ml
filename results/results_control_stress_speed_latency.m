@@ -46,8 +46,13 @@ function results_control_stress_speed_latency
         for j=1:2:length(h)
              patch(get(h(j),'XData'), get(h(j), 'YData'), [.9 .9 .9], 'FaceAlpha', .3);
         end
-        set([h], 'LineWidth', 1.5);
+        set([h], 'LineWidth', 1.5);        
    
+        h = findobj(gca, 'Tag', 'Outliers');
+        for j=1:length(h)
+            set(h(j), 'MarkerEdgeColor', [0 0 0]);
+        end
+
         h = findobj(gca, 'Tag', 'Median');
         for j=1:2:length(h)
              line('XData', get(h(j),'XData'), 'YData', get(h(j), 'YData'), 'Color', [0 0 0]);
@@ -104,6 +109,7 @@ function results_control_stress_speed_latency
             end
             
         end
+        
         boxplot(data, groups, 'positions', pos, 'colors', [0 0 0; .7 .7 .7]);
         set(gca, 'LineWidth', constants.AXIS_LINE_WIDTH, 'FontSize', constants.FONT_SIZE);
         
@@ -111,8 +117,7 @@ function results_control_stress_speed_latency
         lbls = arrayfun( @(i) sprintf('%d', i), 1:constants.TRIALS, 'UniformOutput', 0);     
         
         set(gca, 'XTick', (pos(1:2:2*constants.TRIALS - 1) + pos(2:2:2*constants.TRIALS)) / 2, 'XTickLabel', lbls, 'FontSize', 0.75*constants.FONT_SIZE);                 
-        
-        
+                
         if log_y(i)
             set (gca, 'Yscale', 'log');
         else
@@ -124,31 +129,49 @@ function results_control_stress_speed_latency
 
         h = findobj(gca,'Tag','Box');
         for j=1:2:length(h)
-             patch(get(h(j),'XData'), get(h(j), 'YData'), [.9 .9 .9], 'FaceAlpha', .3);
+             patch(get(h(j),'XData'), get(h(j), 'YData'), [0 0 0]);
         end
         set([h], 'LineWidth', 0.8);
    
         h = findobj(gca, 'Tag', 'Median');
         for j=1:2:length(h)
-             line('XData', get(h(j),'XData'), 'YData', get(h(j), 'YData'), 'Color', [0 0 0]);
+             line('XData', get(h(j),'XData'), 'YData', get(h(j), 'YData'), 'Color', [.9 .9 .9], 'LineWidth', 2);
         end
-                
+        
+        h = findobj(gca, 'Tag', 'Outliers');
+        for j=1:length(h)
+            set(h(j), 'MarkerEdgeColor', [0 0 0]);
+        end
+
         % check significances
         for t = 1:constants.TRIALS
-            data_test = [data(groups == 2*t - 1)' ones(sum(groups == 2*t - 1), 1); ...
-                         data(groups == 2*t)' 2*ones(sum(groups == 2*t), 1)];
+           % data_test = [data(groups == 2*t - 1)' ones(sum(groups == 2*t - 1), 1); ...
+           %              data(groups == 2*t)' 2*ones(sum(groups == 2*t), 1)];
 
                    
-                % hip = kstest2(data(groups == 2*t - 1), data(groups == 2*t));
-            hip = AnDarksamtest(data_test, 0.05);                    
-            if hip
-                alpha = 0.05;
-                hip = AnDarksamtest(data_test, 0.01);                    
+           % hip = kstest2(data(groups == 2*t - 1), data(groups == 2*t));
+           % hip = AnDarksamtest(data_test, 0.05);                    
+            p = ranksum(data(groups == 2*t - 1), data(groups == 2*t));                    
             
-                if hip
-                   alpha = 0.01;
+            if p < 0.05
+                if p < 0.01
+                    if p < 0.001
+                        alpha = 0.001;
+                    else
+                        alpha = 0.01;
+                    end
+                else
+                  alpha = 0.05;
                 end
-                                                                    
+                
+                % alpha = 0.05;
+%                 hip = AnDarksamtest(data_test, 0.01);                    
+%             
+%                 if hip
+%                    alpha = 0.01;
+%                 end
+%               
+
                 h = sigstar( {[pos(2*t - 1), pos(t*2)]}, [alpha]);
                 set(h(:, 1), 'LineWidth', 1.5);
                 set(h(:, 2), 'FontSize', 0.7*constants.FONT_SIZE);

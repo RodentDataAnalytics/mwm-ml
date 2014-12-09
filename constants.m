@@ -114,9 +114,9 @@ classdef constants
         SHORT_TRAJECTORIES_TAGS_PATH = '/home/tiago/neuroscience/rat_navigation/trajectories/labels_250_short.csv';
         
         % plot properties
-        AXIS_LINE_WIDTH = 1.8;    % AxesLineWidth
-        FONT_SIZE = 22;      % Fontsize
-        LINE_WIDTH = 1.5;      
+        AXIS_LINE_WIDTH = 1.5;    % AxesLineWidth
+        FONT_SIZE = 20;      % Fontsize
+        LINE_WIDTH = 1.4;      
         OUTPUT_DIR = '/home/tiago/results/'; % where to put all the graphics and other generated output
         CLASSES_COLORMAP = colormap('jet');
     end   
