@@ -4,11 +4,12 @@ function plot_distribution_strategies(distributions, varargin)
     addpath(fullfile(fileparts(mfilename('fullpath')), './extern/cm_and_cb_utilities'));
     addpath(fullfile(fileparts(mfilename('fullpath')), './extern/'));
     
-    [mean_row, mean_col, row_labels, col_labels, ticks, ticks_labels, markers, ordered, widths, cm, bh] = ...
+    [mean_row, mean_col, row_labels, col_labels, ticks, ticks_labels, markers, ordered, widths, cm, bh, avgh] = ...
         process_options(varargin, ...
             'MeanRow', 0, 'MeanColumn', 0, 'RowLabels', {}, 'ColumnLabels', {}, ...
             'Ticks', [], 'TicksLabels', {}, 'Markers', {}, 'Ordered', 0, ...
-            'Widths', [], 'ColorMap', constants.CLASSES_COLORMAP, 'BarHeight', 0.8);
+            'Widths', [], 'ColorMap', constants.CLASSES_COLORMAP, 'BarHeight', 0.8, ...
+            'AverageBarsHeight', 0);
     
     ncol = length(distributions) + mean_col;    
     % sanity checks
@@ -59,7 +60,7 @@ function plot_distribution_strategies(distributions, varargin)
         ib = 0.02;
     end    
     w = (l - 2*b - (ncol - 1)*ib)/ncol;
-    h = l - 2*b; 
+    h = l - 2*b - avgh; 
     
     % need to compute the "total" distribution for the mean column
     tot = [];   
@@ -85,7 +86,7 @@ function plot_distribution_strategies(distributions, varargin)
         end
         
         % create an axes inside the parent axes for the ii-the barh           
-        sa = axes('Position', [b + w*(i - 1) + ib*(i - 1), b + 0.05, w, h]); % position the ii-th barh
+        sa = axes('Position', [b + w*(i - 1) + ib*(i - 1), b + 0.05 + avgh, w, h]); % position the ii-th barh
         
         if mean_row
             % one additional row for the mean
@@ -173,7 +174,7 @@ function plot_distribution_strategies(distributions, varargin)
         end
         
         if ~isempty(markers) && ~is_mean_col
-             % mark cases where animal found the platform
+            % mark cases where animal found the platform
             m = markers{i};
             for j = 1:length(m)
                 if m(j) 
@@ -192,5 +193,38 @@ function plot_distribution_strategies(distributions, varargin)
             end
         end
         % set(gca, 'FontSize', 6, 'LineWidth', 0.8);                                    
+        
+        if avgh > 0
+            % create an axes inside the parent axes for the ii-the barh           
+            sa = axes('Position', [b + w*(i - 1) + ib*(i - 1), b + 0.05, w, avgh - 0.02]); 
+            
+            if ordered
+                % rescale colormap
+                if size(cm, 1) > nclasses
+                    cm = cmapping(nclasses, cm);
+                end
+                wbin = widths;            
+                if isempty(wbin)
+                    wbin = ones(1, size(distr, 2)); 
+                end
+                nbins = length(wbin);
+                     
+                tmp = zeros(nclasses, nbins);
+                for k = 1:nbars
+                    for j = 1:nbins
+                        if vals(k, j) > 0
+                            tmp(vals(k, j), j) = tmp(vals(k, j), j) + 1;
+                        end
+                    end                                        
+                end
+                bar((1:nbins)*3.35 - ones(1, nbins)*1.6, tmp', 'Stacked');
+                set(gca,'box','off');                
+                axis off;                
+            else
+                %vals(vals(:) <= 0) = nan; 
+                %barh(1:n, vals, bh, 'Stack', 'Parent', sa);               
+                %colormap(cm);
+            end         
+        end        
     end        
 end        

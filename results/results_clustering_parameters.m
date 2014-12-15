@@ -5,31 +5,50 @@ function results_clustering_parameters
     % initialize data
     cache_trajectory_segments;                    
     
+    ptest = 0;
+    
     % run multiple clusterings with different target number of clusters
     res1 = [];
     res2 = []; 
     res3 = [];
     nc = [];
-
+    test_set = [];      
+    
     for i = 1:12
         n = 10 + i*10;
         nc = [nc, n];
         % get classifier object
         classif = g_segments.classifier(constants.DEFAULT_TAGS_PATH, constants.DEFAULT_FEATURE_SET, constants.TAG_TYPE_BEHAVIOUR_CLASS);
-                    
+        
+        if isempty(test_set)
+            if ptest > 0          
+                fn = fullfile(constants.OUTPUT_DIR, sprintf('test_set.mat', n));
+                if exist(fn ,'file')
+                    load(fn);
+                else                
+                    test_set = zeros(1, classif.nlabels);
+                    idx = 1:classif.nlabels;
+                    test_set(idx(randsample(length(idx), floor(length(idx)*ptest)))) = 1;
+                    save(fn, 'test_set');
+                end
+            else
+                test_set = ones(1, classif.nlabels);
+            end
+        end
+        
         % i) two-phase clustering (default)        
         % see if we already have the data
         fn = fullfile(constants.OUTPUT_DIR, sprintf('clustering_n%d.mat', n));
         if exist(fn ,'file')
             load(fn);
         else            
-            [res, res1st] = classif.cluster_cross_validation(n, 'Folds', 10);
+            [res, res1st] = classif.cluster_cross_validation(n, 'Folds', 10, 'TestSet', test_set);
             save(fn, 'res', 'res1st');
         end               
         res1 = [res1, res];
         res2 = [res2, res1st];
                 
-        % iii) clustering using all the constraints
+        % ii) clustering using all the constraints
         % see if we already have the data
         classif.two_stage = 1;        
         fn = fullfile(constants.OUTPUT_DIR, sprintf('clustering_all_constr_%d.mat', n));

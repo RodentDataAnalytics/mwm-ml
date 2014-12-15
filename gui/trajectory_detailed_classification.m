@@ -11,12 +11,12 @@ function trajectory_detailed_classification( traj_labels_fn, labels_fn, seg_len,
     else
         % filter trajectories
         x = arrayfun( @(t) any(grps == t.group), g_trajectories.items);
-        traj = trajectories(g_trajectories.items(find(x == 1)));
+        traj = trajectories(g_trajectories.items(x == 1));
     end
     
     % select trajectories with at least length >= seg_len
     len = arrayfun( @(t) t.compute_feature(features.LENGTH), traj.items);
-    traj = trajectories( traj.items( find( len >= seg_len ) ));
+    traj = trajectories( traj.items(len >= seg_len));
     
     % read tags for full trajectories
     [labels_data, full_tags] = traj.read_tags(traj_labels_fn);

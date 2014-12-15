@@ -28,7 +28,7 @@ function results_full_trajectories_classification
 %                    
     % we classify them now using different segment lengths
     % len = [125, 150, 175, 200, 225, 250, 275, 300, 325, 350];
-    ovlp = [0.6, 0.8, 0.9, 0.95];
+    ovlp = [0.7, 0.75, 0.8, 0.85, 0.9, 0.95];
     
     pts = [];
     log_file = fopen(fullfile(constants.OUTPUT_DIR, 'full_trajectories_classification_log.txt'), 'w');
@@ -51,8 +51,8 @@ function results_full_trajectories_classification
             classif = segments.classifier(constants.DEFAULT_TAGS_PATH, constants.DEFAULT_FEATURE_SET, constants.TAG_TYPE_BEHAVIOUR_CLASS);
                             
             % run the thing for 3 different number of clusters
-            for j = 1:6
-                nc = [nc, constants.DEFAULT_NUMBER_OF_CLUSTERS + (j - 1)*10];
+            for j = 1:5
+                nc = [nc, constants.DEFAULT_NUMBER_OF_CLUSTERS + (j - 3)*10];
                 mess = sprintf('**** OVLP = %f, Clusters = %d ****', ovlp(i), nc(end));
                 fprintf(log_file, '%s\n', mess);
                 disp(mess);  
@@ -129,19 +129,21 @@ function results_full_trajectories_classification
             
             % run a cross validation with the number of clusters that gave
             % the best resuls           
-%             [~, best_pos] = min(err_class);
-%             cv_results = classif.cluster_cross_validation(nc(best_pos), 'Folds', 10);
-%             cv_err = cv_results.mean_perrors;
-%             cv_err_sd = cv_results.sd_perrors;           
-            
+            [~, best_pos] = min(err_class);
+            cv_results = classif.cluster_cross_validation(nc(best_pos), 'Folds', 10);
+            cv_err = cv_results.mean_perrors;
+            cv_err_sd = cv_results.sd_perrors;           
+            cv_unk = cv_results.mean_punknown;
+            cv_unk_sd = cv_results.sd_punknown;
             % save to a file to avoid doing it all over again
             % save(fn, 'err_class', 'unk', 'cv_err', 'cv_err_sd');
-            save(fn, 'err_class', 'unk');
+            save(fn, 'err_class', 'unk', 'cv_unk', 'cv_unk_sd', 'cv_err', 'cv_err_sd');
         end
+            
         pts = [pts; ovlp(i), ...
             mean(err_class), 1.96*std(err_class)/sqrt(length(err_class) - 1), ...
-            mean(unk), 1.96*std(unk)/sqrt(length(err_class)) ...
-            %cv_err*100, 100*cv_err_sd ...
+            cv_unk*100, 100*cv_unk_sd, ...  % mean(unk), 1.96*std(unk)/sqrt(length(err_class)), ...       
+            cv_err*100, 100*cv_err_sd ...
         ];       
     end
     fclose(log_file);
@@ -161,16 +163,16 @@ function results_full_trajectories_classification
     export_fig(fullfile(constants.OUTPUT_DIR, 'segment_ovlp_dep.eps'));       
     close;
     
-%     clf;
-%     errorbar( pts(:, 1), pts(:, 6), pts(:, 7), 'k-', 'LineWidth', constants.LINE_WIDTH);
-%     hold on;
-%     xlabel('segment overlap', 'FontSize', constants.FONT_SIZE);
-%     ylabel('% errors', 'FontSize', constants.FONT_SIZE);     
-%     box off;         
-%     set(gcf, 'Color', 'w');
-%     set(gca, 'FontSize', constants.FONT_SIZE, 'LineWidth', constants.AXIS_LINE_WIDTH);
-%    % export_fig(fullfile(constants.OUTPUT_DIR, 'segment_length_dep.eps'));       
-%     close;
+     clf;
+     errorbar( pts(:, 1), pts(:, 6), pts(:, 7), 'k-', 'LineWidth', constants.LINE_WIDTH);
+     hold on;
+     xlabel('segment overlap', 'FontSize', constants.FONT_SIZE);
+     ylabel('% errors', 'FontSize', constants.FONT_SIZE);     
+     box off;         
+     set(gcf, 'Color', 'w');
+     set(gca, 'FontSize', constants.FONT_SIZE, 'LineWidth', constants.AXIS_LINE_WIDTH);
+     export_fig(fullfile(constants.OUTPUT_DIR, 'segment_length_dep.eps'));       
+     close;
     
     clf;
     errorbar( pts(:, 1), pts(:, 4), pts(:, 5), 'k-', 'LineWidth', constants.LINE_WIDTH); 

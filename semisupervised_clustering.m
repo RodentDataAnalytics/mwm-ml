@@ -96,7 +96,7 @@ classdef semisupervised_clustering < handle
                 res1st = [];
             end
             
-            [folds, ptraining, nruns, test_set, max_constr] = process_options(varargin, ...
+            [folds, ptraining, nruns, test_set] = process_options(varargin, ...
                 'Folds', 10, 'TrainingPercentage', 0, 'Runs', 1, 'TestSet', [] ...
             ); 
                         
@@ -115,14 +115,19 @@ classdef semisupervised_clustering < handle
 
                     for j = 1:cv.NumTestSets % perforn a N-fold stratified cross-validation                                        
                         % perform classifcation using only a subset of the labels
+                        training = zeros(1, inst.nlabels);
+                        training(idx(cv.training(j))) = 1;
+                        test = zeros(1, inst.nlabels);
+                        test(idx(cv.test(j))) = 1;
+
                         if nargout > 1
                             % get also the results for the 1st stage
                             % clustering
-                            [tmp, tmp2] = inst.internal_cluster(nclusters, cv.training(j), cv.test(j));
+                            [tmp, tmp2] = inst.internal_cluster(nclusters, training, test);
                             res = [res, tmp];
                             res1st = [res1st, tmp2];
                         else
-                            res = [res, inst.internal_cluster(nclusters, cv.training(j), cv.test(j))];
+                            res = [res, inst.internal_cluster(nclusters, training, test)];
                         end                        
                     end
                 else
