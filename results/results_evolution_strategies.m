@@ -17,7 +17,7 @@ function results_evolution_strategies
     distr = g_segments_classification.classes_distribution(g_partitions(g_long_trajectories_idx));
     % plot distribution for each trial
     data = [];        
-    for t = 1:constants.TRIALS
+    for t = 1:g_config.TRIALS
         data = [data, ...
             arrayfun( @(c) sum(distr(g_trajectories_trial(g_long_trajectories_idx) == t, c)), ...
                 1:g_segments_classification.nclasses...
@@ -30,17 +30,17 @@ function results_evolution_strategies
     
     figure(321);
     bar(data', 'Stack'); 
-    colormap(constants.CLASSES_COLORMAP);
+    colormap(g_config.CLASSES_COLORMAP);
     
-    xlabel('trial', 'FontSize', constants.FONT_SIZE);
-    ylabel('percentage', 'FontSize', constants.FONT_SIZE);    
+    xlabel('trial', 'FontSize', g_config.FONT_SIZE);
+    ylabel('percentage', 'FontSize', g_config.FONT_SIZE);    
     box off;
     
-    export_fig(fullfile(constants.OUTPUT_DIR, 'distribution_strat_trials.eps'));
+    export_fig(fullfile(g_config.OUTPUT_DIR, 'distribution_strat_trials.eps'));
     
     % do the same for very long trajectories (latency >80 seconds)
     data = [];
-    for t = 1:constants.TRIALS
+    for t = 1:g_config.TRIALS
         data = [data, ...
             arrayfun( @(c) sum(distr(g_trajectories_trial(g_long_trajectories_idx) == t ...
                              & g_trajectories_latency(g_long_trajectories_idx) > 80, c)), ...
@@ -53,12 +53,12 @@ function results_evolution_strategies
     data = 100*data ./ repmat(sum(data), size(data, 1), 1);
     
     bar(data', 'Stack'); 
-    colormap(constants.CLASSES_COLORMAP);
+    colormap(g_config.CLASSES_COLORMAP);
     
-    xlabel('trial', 'FontSize', constants.FONT_SIZE);
-    ylabel('percentage', 'FontSize', constants.FONT_SIZE);    
+    xlabel('trial', 'FontSize', g_config.FONT_SIZE);
+    ylabel('percentage', 'FontSize', g_config.FONT_SIZE);    
     box off;
     
-    export_fig(fullfile(constants.OUTPUT_DIR, 'distribution_strat_trials_80.eps'));
+    export_fig(fullfile(g_config.OUTPUT_DIR, 'distribution_strat_trials_80.eps'));
 end
 

@@ -18,21 +18,21 @@ function results_strategies_individual_distributions
     % plot the distribution of strategies for each session and group of
     % animals
     for g = 1:2        
-        for s = 1:constants.SESSIONS % for each session
+        for s = 1:g_config.SESSIONS % for each session
             clf;
             distr = {};
             row_labels = {};
             col_labels = {};
             markers = {};
 
-            for t = 1:constants.TRIALS_PER_SESSION
-                trial = (s - 1)*constants.TRIALS_PER_SESSION + t;
+            for t = 1:g_config.TRIALS_PER_SESSION
+                trial = (s - 1)*g_config.TRIALS_PER_SESSION + t;
                 sel = find(g_trajectories_trial == trial & g_trajectories_group == g);
                 distr = [distr, g_trajectories_strat_distr_norm(sel, :).*repmat(g_trajectories_length(sel)', 1, size(g_trajectories_strat_distr_norm, 2))];
                 if t == 1
                     row_labels = arrayfun( @(x) num2str(x.id), g_trajectories.items(sel), 'UniformOutput', 0); 
                 end                
-                markers = [markers, arrayfun( @(idx) g_trajectories_latency(idx) == constants.TRIAL_TIMEOUT, sel)]; 
+                markers = [markers, arrayfun( @(idx) g_trajectories_latency(idx) == g_config.TRIAL_TIMEOUT, sel)]; 
                 col_labels = [col_labels, sprintf('Trial %d', trial)];
             end
                         
@@ -40,7 +40,7 @@ function results_strategies_individual_distributions
                                         'RowLabels', row_labels, 'ColumnLabels', col_labels, ...
                                         'Ticks', [1000 3000], 'TicksLabels', {'10m', '30m'});
             
-            export_fig(fullfile(constants.OUTPUT_DIR, sprintf('detailed_strategies_g%d_s%d.eps', g, s)));
+            export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('detailed_strategies_g%d_s%d.eps', g, s)));
         end
     end 
     
@@ -59,7 +59,7 @@ function results_strategies_individual_distributions
             if t == 1
                 row_labels = arrayfun( @(x) num2str(x.id), g_trajectories.items(sel), 'UniformOutput', 0); 
             end                
-            markers = [markers, arrayfun( @(idx) g_trajectories_latency(idx) == constants.TRIAL_TIMEOUT, sel)]; 
+            markers = [markers, arrayfun( @(idx) g_trajectories_latency(idx) == g_config.TRIAL_TIMEOUT, sel)]; 
             col_labels = [col_labels, sprintf('Trial %d', sel_trials(t))];
         end
 
@@ -67,7 +67,7 @@ function results_strategies_individual_distributions
                                     'RowLabels', row_labels, 'ColumnLabels', col_labels, ...
                                     'Ticks', [1000 3000], 'TicksLabels', {'10m', '30m'});
 
-        export_fig(fullfile(constants.OUTPUT_DIR, sprintf('detailed_strategies_g%d_red.eps', g)));
+        export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('detailed_strategies_g%d_red.eps', g)));
     end     
 end
 

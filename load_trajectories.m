@@ -9,17 +9,17 @@ function [ traj, cal_data ] = load_trajectories(sets, calibrate)
         cal_data = load_calibration_data(sets);
     end
         
-    for i = 1:length(constants.TRAJECTORY_DATA_DIRS)        
+    for i = 1:length(g_config.TRAJECTORY_DATA_DIRS)        
         if isempty(find(sets == i))
             continue;
         end
                                         
-        files = dir(fullfile(constants.TRAJECTORY_DATA_DIRS{i}, '/*.csv') );
+        files = dir(fullfile(g_config.TRAJECTORY_DATA_DIRS{i}, '/*.csv') );
         fprintf('Importing %d trajectories...\n', length(files));
         
         for j = 1:length(files)           
             % read trajectory from fiel
-            [id, trial, pts] = read_trajectory(strcat(constants.TRAJECTORY_DATA_DIRS{i}, '/', files(j).name));
+            [id, trial, pts] = read_trajectory(strcat(g_config.TRAJECTORY_DATA_DIRS{i}, '/', files(j).name));
             
             % extract the day number and check if we need to correct the
             % trial number
@@ -42,7 +42,7 @@ function [ traj, cal_data ] = load_trajectories(sets, calibrate)
             npts = size(pts, 1);
             cuti = npts;
             for k = 0:(size(pts, 1) - 1)
-                if sqrt((pts(npts - k, 2) - constants.PLATFORM_X)^2 + (pts(npts - k, 3) - constants.PLATFORM_Y)^2) > 1.5*constants.PLATFORM_R
+                if sqrt((pts(npts - k, 2) - g_config.PLATFORM_X)^2 + (pts(npts - k, 3) - g_config.PLATFORM_Y)^2) > 1.5*g_config.PLATFORM_R
                     break;
                 end
                 cuti = npts - k - 1;
@@ -50,7 +50,7 @@ function [ traj, cal_data ] = load_trajectories(sets, calibrate)
             pts = pts(1:cuti, :);
             
             % find group for this trajectory
-            temp = constants.TRAJECTORY_GROUPS{i};
+            temp = g_config.TRAJECTORY_GROUPS{i};
             pos = find(temp(:,1) == id); 
             group = temp(pos(1),2);
             % construct trajectory object and append it to list of trajectories

@@ -22,16 +22,16 @@ function results_calibration
         ylabel('Y [cm]');
         zlabel('correction [cm[');
         set(gcf, 'Color', 'w');
-        set(gca, 'FontSize', constants.FONT_SIZE, 'LineWidth', constants.AXIS_LINE_WIDTH);
-        export_fig(fullfile(constants.OUTPUT_DIR, sprintf('calibration_set%d_x.eps', i)));
+        set(gca, 'FontSize', g_config.FONT_SIZE, 'LineWidth', g_config.AXIS_LINE_WIDTH);
+        export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('calibration_set%d_x.eps', i)));
         figure('name', sprintf('Calibration function Y (set %d)', i));
         mesh(xq, yq, Fy(xq, yq));
         xlabel('X [cm]');
         ylabel('Y [cm]');
         zlabel('correction [cm]');
         set(gcf, 'Color', 'w');
-        set(gca, 'FontSize', constants.FONT_SIZE, 'LineWidth', constants.AXIS_LINE_WIDTH);
-        export_fig(sprintf(fullfile(constants.OUTPUT_DIR, 'calibration_set%d_y.eps', i)));        
+        set(gca, 'FontSize', g_config.FONT_SIZE, 'LineWidth', g_config.AXIS_LINE_WIDTH);
+        export_fig(sprintf(fullfile(g_config.OUTPUT_DIR, 'calibration_set%d_y.eps', i)));        
         
         % cross validation        
         n = length(cal_data{i});
@@ -60,18 +60,18 @@ function results_calibration
         
         figure('name', sprintf('Calibration error (set %d)', i));
         set(gcf, 'Color', 'w');
-        set(gca, 'FontSize', constants.FONT_SIZE, 'LineWidth', constants.AXIS_LINE_WIDTH);
-        errorbar(pts(:,1), pts(:,2), pts(:,3), 'k:', 'LineWidth', constants.LINE_WIDTH);
+        set(gca, 'FontSize', g_config.FONT_SIZE, 'LineWidth', g_config.AXIS_LINE_WIDTH);
+        errorbar(pts(:,1), pts(:,2), pts(:,3), 'k:', 'LineWidth', g_config.LINE_WIDTH);
         xlabel('number of calibration points');
         ylabel('error [cm]');        
-        export_fig(fullfile(constants.OUTPUT_DIR, sprintf('calibration_error%d.eps', i)));        
+        export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('calibration_error%d.eps', i)));        
     end
     
 %     traj_cal = [];
 %     traj_uncal = [];
 %     traj_name = {};
-%     for i = 1:length(constants.TRAJECTORY_SNAPSHOTS_DIRS)
-%         samples = dir(strcat(constants.TRAJECTORY_SNAPSHOTS_DIRS{i}, '*.png')); 
+%     for i = 1:length(g_config.TRAJECTORY_SNAPSHOTS_DIRS)
+%         samples = dir(strcat(g_config.TRAJECTORY_SNAPSHOTS_DIRS{i}, '*.png')); 
 %         if length(samples) > 1
 %             figure('name', sprintf('Samples for set %d', i));
 %         end                
@@ -112,7 +112,7 @@ function results_calibration
 %             end
 % 
 %             subaxis(length(samples), 3, (j-1)*3 + 1, 'Spacing', 0.03, 'Padding', 0, 'Margin', 0.05);        
-%             imshow(strcat(constants.TRAJECTORY_SNAPSHOTS_DIRS{i}, samples(i).name), 'Border', 'tight');            
+%             imshow(strcat(g_config.TRAJECTORY_SNAPSHOTS_DIRS{i}, samples(i).name), 'Border', 'tight');            
 %             subaxis(length(samples), 3, (j-1)*3 + 2, 'Spacing', 0.03, 'Padding', 0, 'Margin', 0.05);     
 %             origtraj(idxorig).plot;                        
 %             subaxis(length(samples), 3, (j-1)*3 + 3, 'Spacing', 0.03, 'Padding', 0, 'Margin', 0.05);    
@@ -127,7 +127,7 @@ function results_calibration
 %         origtraj(traj_uncal(i)).plot;
 %         set(gcf, 'Color', 'w');
 %         set(gca,'DataAspectRatio',[1 1 1], 'PlotBoxAspectRatio',[1 1 1]);
-%         export_fig(fullfile(constants.OUTPUT_DIR, sprintf('%s_uncalibrated.eps', traj_name{i})));       
+%         export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('%s_uncalibrated.eps', traj_name{i})));       
 %     end
 %     
 %     for i = 1:length(traj_cal)
@@ -136,7 +136,7 @@ function results_calibration
 %         traj(traj_cal(i)).plot;
 %         set(gcf, 'Color', 'w');
 %         set(gca,'DataAspectRatio',[1 1 1], 'PlotBoxAspectRatio',[1 1 1]);
-%         export_fig(fullfile(constants.OUTPUT_DIR, sprintf('%s_calibrated.eps', traj_name{i})));       
+%         export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('%s_calibrated.eps', traj_name{i})));       
 %     end
 %     
 %     for i = 1:length(cal_data) 

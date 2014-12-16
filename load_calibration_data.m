@@ -3,14 +3,14 @@ function [ cal_data ] = load_calibration_data(sets)
 %   Detailed explanation goes here
     addpath(fullfile(fileparts(mfilename('fullpath')), '/calibration'));
             
-    cache_fn = fullfile(constants.OUTPUT_DIR, ['calibration_data_' arrayfun( @(x) num2str(x), sets) '.mat']);
+    cache_fn = fullfile(g_config.OUTPUT_DIR, ['calibration_data_' arrayfun( @(x) num2str(x), sets) '.mat']);
     if exist(cache_fn ,'file')
         load(cache_fn);
     else                                              
         cal_data = {[], [], []};
 
-        for i = 1:length(constants.TRAJECTORY_SNAPSHOTS_DIRS)        
-            if isempty(find(sets == i))
+        for i = 1:length(g_config.TRAJECTORY_SNAPSHOTS_DIRS)        
+            if isempty(sets == i)
                 continue;
             end
 
@@ -23,7 +23,7 @@ function [ cal_data ] = load_calibration_data(sets)
             end
 
             % load calibration data            
-            files = dir(constants.TRAJECTORY_SNAPSHOTS_DIRS{i});                
+            files = dir(g_config.TRAJECTORY_SNAPSHOTS_DIRS{i});                
             for j = 3:length(files)
                 if files(j).isdir
                    % get day and track number from directory
@@ -31,11 +31,11 @@ function [ cal_data ] = load_calibration_data(sets)
                    day = temp(1);
                    track = temp(2);
                    % find corresponding track file
-                   fn = sprintf('%sday%d_%.4d_00.csv', constants.TRAJECTORY_DATA_DIRS{i}, day, track);
+                   fn = sprintf('%sday%d_%.4d_00.csv', g_config.TRAJECTORY_DATA_DIRS{i}, day, track);
                    if ~exist(fn, 'file')
                        error('Non-existent file');
                    end
-                   cal_data{target} = [cal_data{target}; trajectory_calibration_data(fn, strcat(constants.TRAJECTORY_SNAPSHOTS_DIRS{i}, files(j).name), 100, 100, 100)];                                      
+                   cal_data{target} = [cal_data{target}; trajectory_calibration_data(fn, strcat(g_config.TRAJECTORY_SNAPSHOTS_DIRS{i}, files(j).name), 100, 100, 100)];                                      
                 end
             end    
 

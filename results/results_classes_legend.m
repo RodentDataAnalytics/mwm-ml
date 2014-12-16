@@ -11,17 +11,17 @@ function results_classes_legend
         
     hdummy = figure;
     dummyplot = barh(repmat(1:length(g_trajectories_strat), 2, 1), 'Stack');
-    colormap(constants.CLASSES_COLORMAP);  
+    colormap(g_config.CLASSES_COLORMAP);  
     leg = arrayfun(@(t) t.description, g_trajectories_strat, 'UniformOutput', 0);
     hleg = figure;
     set(gcf, 'Color', 'w');
     legendflex(dummyplot, leg, 'box', 'off', 'nrow', 3, 'ncol', 3, 'ref', hleg, 'fontsize', 8, 'anchor', {'n','n'});
-    export_fig(fullfile(constants.OUTPUT_DIR, 'strategies_legend.eps'));
+    export_fig(fullfile(g_config.OUTPUT_DIR, 'strategies_legend.eps'));
     
     close(hleg);
     close(hdummy);      
     
-    cm =  cmapping(length(g_trajectories_strat), constants.CLASSES_COLORMAP);  
+    cm =  cmapping(length(g_trajectories_strat), g_config.CLASSES_COLORMAP);  
     cm = cm(1:size(cm, 1) - 1, :);
     
     % vertical legend
@@ -32,25 +32,25 @@ function results_classes_legend
     colormap(cm);    
     set(gcf, 'Color', 'w');
     legendflex(dummyplot, leg, 'box', 'off', 'nrow', length(g_trajectories_strat) - 1, 'ncol', 1, 'ref', hleg, 'fontsize', 8, 'anchor', {'n','n'});
-    export_fig(fullfile(constants.OUTPUT_DIR, 'strategies_legend_vert.eps'));
+    export_fig(fullfile(g_config.OUTPUT_DIR, 'strategies_legend_vert.eps'));
     
     close(hleg);
     close(hdummy);      
     
     % reduced legend
     hdummy = figure;
-    dummyplot = barh(repmat(1:length(constants.REDUCED_BEHAVIOURAL_CLASSES), 2, 1), 'Stack');
-    leg = arrayfun(@(t) t.description, constants.REDUCED_BEHAVIOURAL_CLASSES, 'UniformOutput', 0);
-    colormap(constants.CLASSES_COLORMAP);
+    dummyplot = barh(repmat(1:length(g_config.REDUCED_BEHAVIOURAL_CLASSES), 2, 1), 'Stack');
+    leg = arrayfun(@(t) t.description, g_config.REDUCED_BEHAVIOURAL_CLASSES, 'UniformOutput', 0);
+    colormap(g_config.CLASSES_COLORMAP);
     hleg = figure;
     set(gcf, 'Color', 'w');
     legendflex(dummyplot, leg, 'box', 'off', 'nrow', 2, 'ncol', 2, 'ref', hleg, 'fontsize', 8, 'anchor', {'n','n'});
-    export_fig(fullfile(constants.OUTPUT_DIR, 'strategies_legend_reduced.eps'));
+    export_fig(fullfile(g_config.OUTPUT_DIR, 'strategies_legend_reduced.eps'));
     
      % reduced legend BW
     hdummy = figure;
-    dummyplot = barh(repmat(1:length(constants.REDUCED_BEHAVIOURAL_CLASSES), 2, 1), 'Stack');
-    leg = arrayfun(@(t) t.description, constants.REDUCED_BEHAVIOURAL_CLASSES, 'UniformOutput', 0);
+    dummyplot = barh(repmat(1:length(g_config.REDUCED_BEHAVIOURAL_CLASSES), 2, 1), 'Stack');
+    leg = arrayfun(@(t) t.description, g_config.REDUCED_BEHAVIOURAL_CLASSES, 'UniformOutput', 0);
     cm = [0 0 0; ...
           0.8 0.8 0.8; ...
           1 1 1];
@@ -58,7 +58,7 @@ function results_classes_legend
     set(gcf, 'Color', 'w');    
     colormap(cm);
     legendflex(dummyplot, leg, 'box', 'off', 'nrow', 2, 'ncol', 2, 'ref', hleg, 'fontsize', 8, 'anchor', {'n','n'});
-    export_fig(fullfile(constants.OUTPUT_DIR, 'strategies_legend_reduced_bw.eps'));
+    export_fig(fullfile(g_config.OUTPUT_DIR, 'strategies_legend_reduced_bw.eps'));
     
     close(hleg);
     close(hdummy); 

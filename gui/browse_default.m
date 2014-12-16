@@ -9,6 +9,6 @@ for i = 1:length(g_partitions)
     off = off + g_partitions(i);
     sel(i) = off;  
 end
-sel = sel(g_trajectories_latency < constants.TRIAL_TIMEOUT);
+sel = sel(g_trajectories_latency < g_config.TRIAL_TIMEOUT);
 
-browse_trajectories(constants.DEFAULT_TAGS_PATH, g_segments, constants.TAGS, constants.DEFAULT_FEATURE_SET, sel);
+browse_trajectories(g_config.DEFAULT_TAGS_PATH, g_segments, g_config.TAGS, g_config.DEFAULT_FEATURE_SET, sel);

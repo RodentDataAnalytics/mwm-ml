@@ -23,7 +23,7 @@ function [ dist, var, minimum ] = trajectory_distance_platform( traj, xplat, ypl
         
         minimum = min([minimum, d]);        
     end
-    minimum = max(minimum - constants.PLATFORM_R, 0);
+    minimum = max(minimum - g_config.PLATFORM_R, 0);
     dist = 0;
     var = 0;
 end

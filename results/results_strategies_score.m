@@ -20,7 +20,7 @@ function results_strategies_score
     % plot distribution for different trajectory lengths    
     nbins = 9;
     min_len = min(g_trajectories_latency(g_long_trajectories_idx));
-    dt = (constants.TRIAL_TIMEOUT - min_len) / nbins;
+    dt = (g_config.TRIAL_TIMEOUT - min_len) / nbins;
     
     xvals = zeros(1, nbins);
     data = zeros(nbins, g_segments_classification.nclasses);        
@@ -37,13 +37,13 @@ function results_strategies_score
     figure(321);
     area(xvals, data); 
     set(gca,'XDir','reverse');
-    colormap(constants.CLASSES_COLORMAP);
+    colormap(g_config.CLASSES_COLORMAP);
     
-    xlabel('latency [s]', 'FontSize', constants.FONT_SIZE);
-    ylabel('percentage', 'FontSize', constants.FONT_SIZE);    
+    xlabel('latency [s]', 'FontSize', g_config.FONT_SIZE);
+    ylabel('percentage', 'FontSize', g_config.FONT_SIZE);    
     box off;
            
-    export_fig(fullfile(constants.OUTPUT_DIR, 'strategy_distribution_latency.eps'));        
+    export_fig(fullfile(g_config.OUTPUT_DIR, 'strategy_distribution_latency.eps'));        
     
     % calculate weights based on first and last bins
     w = data(end, :) ./ data(1, :);
@@ -53,7 +53,7 @@ function results_strategies_score
         log = [log g_segments_classification.classes(i).description ' = ' num2str(w(i)) '\n'];
     end    
     fprintf(log);
-    f = fopen(fullfile(constants.OUTPUT_DIR, 'scores.txt'), 'w');        
+    f = fopen(fullfile(g_config.OUTPUT_DIR, 'scores.txt'), 'w');        
     fprintf(f, log);
     fclose(f);
     
@@ -62,17 +62,17 @@ function results_strategies_score
     %% look at strategies that led to the platform
     distr = g_segments_classification.classes_distribution(g_partitions(g_long_trajectories_idx), 'MaxSegments', 10, 'Reverse', 1);
     % plot distribution for different trajectory lengths        
-    data = sum(distr(g_trajectories_latency(g_long_trajectories_idx) < constants.TRIAL_TIMEOUT, :));
+    data = sum(distr(g_trajectories_latency(g_long_trajectories_idx) < g_config.TRIAL_TIMEOUT, :));
     
     % normalize the data
     data = 100*data / sum(data);
     
     clf;;
     bar(data); 
-    colormap(constants.CLASSES_COLORMAP);
+    colormap(g_config.CLASSES_COLORMAP);
     
-    % xlabel('latency [s]', 'FontSize', constants.FONT_SIZE);
-    ylabel('percentage', 'FontSize', constants.FONT_SIZE);    
+    % xlabel('latency [s]', 'FontSize', g_config.FONT_SIZE);
+    ylabel('percentage', 'FontSize', g_config.FONT_SIZE);    
     box off;
     
     
@@ -93,7 +93,7 @@ function results_strategies_score
     xpos = [];
     groups = [];
     pos = [0, 0.6, 1.8, 2.4, 3.6, 4.2];
-    for s = 1:constants.SESSIONS
+    for s = 1:g_config.SESSIONS
         for g = 1:2
             idx = g_animals_trajectories_map{g};
                 
@@ -122,8 +122,8 @@ function results_strategies_score
     figure(424);
     pos = [1, 1.2, 2, 2.2, 3, 3.2]; 
     boxplot(data, groups, 'positions', pos, 'colors', [0 0 0; .7 .7 .7]);         
-    lbls = arrayfun( @(i) sprintf('Session %d', i), 1:constants.TRIALS, 'UniformOutput', 0);         
-    set(gca, 'XTick', (pos(1:2:2*constants.SESSIONS - 1) + pos(2:2:2*constants.SESSIONS)) / 2, 'XTickLabel', lbls, 'FontSize', constants.FONT_SIZE);                 
+    lbls = arrayfun( @(i) sprintf('Session %d', i), 1:g_config.TRIALS, 'UniformOutput', 0);         
+    set(gca, 'XTick', (pos(1:2:2*g_config.SESSIONS - 1) + pos(2:2:2*g_config.SESSIONS)) / 2, 'XTickLabel', lbls, 'FontSize', g_config.FONT_SIZE);                 
     h = findobj(gca,'Tag','Box');
     for j=1:2:length(h)
          patch(get(h(j),'XData'), get(h(j), 'YData'), [.9 .9 .9], 'FaceAlpha', .3);
@@ -136,22 +136,22 @@ function results_strategies_score
     end
     set([h], 'LineWidth', 1.8);
    
-    ylabel('score', 'FontSize', constants.FONT_SIZE);
+    ylabel('score', 'FontSize', g_config.FONT_SIZE);
     
   % check significances
-    for s = 1:constants.SESSIONS
+    for s = 1:g_config.SESSIONS
         hip = kstest2(data(groups == 2*s - 1), data(groups == 2*s));
         if hip
             h = sigstar( {[pos(2*s - 1), pos(s*2)]}, [0.05]);
             set(h(:, 1), 'LineWidth', 2);
-            set(h(:, 2), 'FontSize', constants.FONT_SIZE);
+            set(h(:, 2), 'FontSize', g_config.FONT_SIZE);
         end
     end
 
     set(gcf, 'Color', 'w');
-    set(gca, 'FontSize', constants.FONT_SIZE, 'LineWidth', constants.AXIS_LINE_WIDTH);
+    set(gca, 'FontSize', g_config.FONT_SIZE, 'LineWidth', g_config.AXIS_LINE_WIDTH);
     box off;        
-    export_fig(fullfile(constants.OUTPUT_DIR, 'control_stress_score.eps')); 
+    export_fig(fullfile(g_config.OUTPUT_DIR, 'control_stress_score.eps')); 
 
     %% Do the same for the trials
     
@@ -159,10 +159,10 @@ function results_strategies_score
     data = [];
     xpos = [];
     groups = [];
-    pos = 0:0.3:(0.3*(2*constants.TRIALS - 1));
-    pos(2:2:(2*constants.TRIALS)) = pos(2:2:(2*constants.TRIALS)) - repmat(0.1, 1, constants.TRIALS);
+    pos = 0:0.3:(0.3*(2*g_config.TRIALS - 1));
+    pos(2:2:(2*g_config.TRIALS)) = pos(2:2:(2*g_config.TRIALS)) - repmat(0.1, 1, g_config.TRIALS);
         
-    for t = 1:constants.TRIALS
+    for t = 1:g_config.TRIALS
         for g = 1:2
             idx = g_animals_trajectories_map{g};
                 
@@ -192,11 +192,11 @@ function results_strategies_score
    
     figure(424);
     boxplot(data, groups, 'positions', pos, 'colors', [0 0 0; .7 .7 .7]);     
-    ylabel('score', 'FontSize', constants.FONT_SIZE);
-    xlabel('trial', 'FontSize', constants.FONT_SIZE);
+    ylabel('score', 'FontSize', g_config.FONT_SIZE);
+    xlabel('trial', 'FontSize', g_config.FONT_SIZE);
 
-    lbls = arrayfun( @(i) sprintf('%d', i), 1:constants.TRIALS, 'UniformOutput', 0);         
-    set(gca, 'XTick', (pos(1:2:2*constants.TRIALS - 1) + pos(2:2:2*constants.TRIALS)) / 2, 'XTickLabel', lbls, 'FontSize', 0.6*constants.FONT_SIZE);                 
+    lbls = arrayfun( @(i) sprintf('%d', i), 1:g_config.TRIALS, 'UniformOutput', 0);         
+    set(gca, 'XTick', (pos(1:2:2*g_config.TRIALS - 1) + pos(2:2:2*g_config.TRIALS)) / 2, 'XTickLabel', lbls, 'FontSize', 0.6*g_config.FONT_SIZE);                 
     h = findobj(gca,'Tag','Box');
     for j=1:2:length(h)
          patch(get(h(j),'XData'), get(h(j), 'YData'), [.9 .9 .9], 'FaceAlpha', .3);
@@ -213,18 +213,18 @@ function results_strategies_score
    
     
   % check significances
-    for t = 1:constants.TRIALS
+    for t = 1:g_config.TRIALS
         hip = kstest2(data(groups == 2*t - 1), data(groups == 2*t));
         if hip
             h = sigstar( {[pos(2*t - 1), pos(t*2)]}, [0.05]);
             set(h(:, 1), 'LineWidth', 2);
-            set(h(:, 2), 'FontSize', constants.FONT_SIZE);
+            set(h(:, 2), 'FontSize', g_config.FONT_SIZE);
         end
     end
 
     set(gcf, 'Color', 'w');
-    set(gca, 'LineWidth', constants.AXIS_LINE_WIDTH);
+    set(gca, 'LineWidth', g_config.AXIS_LINE_WIDTH);
     box off;        
-    export_fig(fullfile(constants.OUTPUT_DIR, 'control_stress_trial_score.eps'));
+    export_fig(fullfile(g_config.OUTPUT_DIR, 'control_stress_trial_score.eps'));
 end
 

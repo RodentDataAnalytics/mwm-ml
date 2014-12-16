@@ -28,11 +28,11 @@ function results_control_stress_speed_latency
         groups = [];
         xpos = [];
         pos = [0, 0.4, 1.2, 1.6, 2.4, 2.8];
-        for s = 1:constants.SESSIONS
+        for s = 1:g_config.SESSIONS
             for g = 1:2            
                 map = g_animals_trajectories_map{g};
-                ti = (s - 1)*constants.TRIALS_PER_SESSION + 1;
-                tf = s*constants.TRIALS_PER_SESSION;
+                ti = (s - 1)*g_config.TRIALS_PER_SESSION + 1;
+                tf = s*g_config.TRIALS_PER_SESSION;
                 tmp = mean(values(map(ti:tf, :)));                 
                 data = [data, tmp(:)'];
                 xpos = [xpos, repmat(pos(s*2 - 1 + g - 1), 1, length(tmp(:)))];             
@@ -41,7 +41,7 @@ function results_control_stress_speed_latency
             end
         end
         boxplot(data, groups, 'positions', pos, 'colors', [0 0 0; .7 .7 .7]);     
-        set(gca, 'XTick', [0.2, 1.4, 2.6], 'XTickLabel', {'Session 1', 'Session 2', 'Session 3'}, 'FontSize', constants.FONT_SIZE);         
+        set(gca, 'XTick', [0.2, 1.4, 2.6], 'XTickLabel', {'Session 1', 'Session 2', 'Session 3'}, 'FontSize', g_config.FONT_SIZE);         
         h = findobj(gca,'Tag','Box');
         for j=1:2:length(h)
              patch(get(h(j),'XData'), get(h(j), 'YData'), [.9 .9 .9], 'FaceAlpha', .3);
@@ -59,21 +59,21 @@ function results_control_stress_speed_latency
         end
                 
         % check significances
-        for s = 1:constants.SESSIONS
+        for s = 1:g_config.SESSIONS
             hip = ttest2(data(groups == 2*s - 1), data(groups == 2*s));
             if hip
                 h = sigstar( {[pos(2*s - 1), pos(s*2)]}, [0.05]);
                 set(h(:, 1), 'LineWidth', 2);
-                set(h(:, 2), 'FontSize', constants.FONT_SIZE);
+                set(h(:, 2), 'FontSize', g_config.FONT_SIZE);
             end
         end
                 
         set(gcf, 'Color', 'w');
-        set(gca, 'LineWidth', constants.AXIS_LINE_WIDTH);
+        set(gca, 'LineWidth', g_config.AXIS_LINE_WIDTH);
         box off;        
-        ylabel(ylabels{i}, 'FontSize', constants.FONT_SIZE);
+        ylabel(ylabels{i}, 'FontSize', g_config.FONT_SIZE);
         
-        export_fig(fullfile(constants.OUTPUT_DIR, sprintf('control_stress_%s.eps', names{i}))); 
+        export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('control_stress_%s.eps', names{i}))); 
         
         %%
         %% Do the same for each trial
@@ -83,9 +83,9 @@ function results_control_stress_speed_latency
         xpos = [];
         d = 0.1;
         idx = 1;
-        pos = zeros(1, 2*constants.TRIALS);
-        for s = 1:constants.SESSIONS
-            for t = 1:constants.TRIALS_PER_SESSION
+        pos = zeros(1, 2*g_config.TRIALS);
+        for s = 1:g_config.SESSIONS
+            for t = 1:g_config.TRIALS_PER_SESSION
                 for g = 1:2                    
                     pos(idx) = d;
                     d = d + 0.1;
@@ -96,9 +96,9 @@ function results_control_stress_speed_latency
             d = d + 0.15;
         end
              
-%        pos = 0:0.3:(0.3*(2*constants.TRIALS - 1));
-%        pos(2:2:(2*constants.TRIALS)) = pos(2:2:(2*constants.TRIALS)) - repmat(0.1, 1, constants.TRIALS);
-        for t = 1:constants.TRIALS
+%        pos = 0:0.3:(0.3*(2*g_config.TRIALS - 1));
+%        pos(2:2:(2*g_config.TRIALS)) = pos(2:2:(2*g_config.TRIALS)) - repmat(0.1, 1, g_config.TRIALS);
+        for t = 1:g_config.TRIALS
             for g = 1:2            
                 map = g_animals_trajectories_map{g};
                 tmp = values(map(t, :));                 
@@ -111,12 +111,12 @@ function results_control_stress_speed_latency
         end
         
         boxplot(data, groups, 'positions', pos, 'colors', [0 0 0; .7 .7 .7]);
-        set(gca, 'LineWidth', constants.AXIS_LINE_WIDTH, 'FontSize', constants.FONT_SIZE);
+        set(gca, 'LineWidth', g_config.AXIS_LINE_WIDTH, 'FontSize', g_config.FONT_SIZE);
         
         lbls = {};
-        lbls = arrayfun( @(i) sprintf('%d', i), 1:constants.TRIALS, 'UniformOutput', 0);     
+        lbls = arrayfun( @(i) sprintf('%d', i), 1:g_config.TRIALS, 'UniformOutput', 0);     
         
-        set(gca, 'XTick', (pos(1:2:2*constants.TRIALS - 1) + pos(2:2:2*constants.TRIALS)) / 2, 'XTickLabel', lbls, 'FontSize', 0.75*constants.FONT_SIZE);                 
+        set(gca, 'XTick', (pos(1:2:2*g_config.TRIALS - 1) + pos(2:2:2*g_config.TRIALS)) / 2, 'XTickLabel', lbls, 'FontSize', 0.75*g_config.FONT_SIZE);                 
                 
         if log_y(i)
             set (gca, 'Yscale', 'log');
@@ -124,8 +124,8 @@ function results_control_stress_speed_latency
             set (gca, 'Yscale', 'linear');
         end
         
-        ylabel(ylabels{i}, 'FontSize', constants.FONT_SIZE);
-        xlabel('trial', 'FontSize', constants.FONT_SIZE);
+        ylabel(ylabels{i}, 'FontSize', g_config.FONT_SIZE);
+        xlabel('trial', 'FontSize', g_config.FONT_SIZE);
 
         h = findobj(gca,'Tag','Box');
         for j=1:2:length(h)
@@ -144,7 +144,7 @@ function results_control_stress_speed_latency
         end
 
         % check significances
-        for t = 1:constants.TRIALS
+        for t = 1:g_config.TRIALS
            % data_test = [data(groups == 2*t - 1)' ones(sum(groups == 2*t - 1), 1); ...
            %              data(groups == 2*t)' 2*ones(sum(groups == 2*t), 1)];
 
@@ -174,14 +174,14 @@ function results_control_stress_speed_latency
 
                 h = sigstar( {[pos(2*t - 1), pos(t*2)]}, [alpha]);
                 set(h(:, 1), 'LineWidth', 1.5);
-                set(h(:, 2), 'FontSize', 0.7*constants.FONT_SIZE);
+                set(h(:, 2), 'FontSize', 0.7*g_config.FONT_SIZE);
             end
         end
                 
         set(gcf, 'Color', 'w');
         box off;        
         
-        export_fig(fullfile(constants.OUTPUT_DIR, sprintf('control_stress_trial_%s.eps', names{i})));
+        export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('control_stress_trial_%s.eps', names{i})));
     end
     
     close;

@@ -22,9 +22,9 @@ function results_strategies_cumulative_session
     
     for c = 1:g_segments_classification.nclasses
         figure;        
-        for s = 1:constants.SESSIONS
-            ti = (s - 1)*constants.TRIALS_PER_SESSION + 1;
-            tf = s*constants.TRIALS_PER_SESSION;
+        for s = 1:g_config.SESSIONS
+            ti = (s - 1)*g_config.TRIALS_PER_SESSION + 1;
+            tf = s*g_config.TRIALS_PER_SESSION;
             
             for g = 1:2
                 distr_sel = distr(g_trajectories_trial(g_long_trajectories_idx) >= ti & g_trajectories_trial(g_long_trajectories_idx) < tf & g_trajectories_group(g_long_trajectories_idx) == g, :);
@@ -55,10 +55,10 @@ function results_strategies_cumulative_session
         
         end
         hold off;
-        xlabel(sprintf('%% %s', g_segments_classification.classes(c).description), 'FontSize', constants.FONT_SIZE);
-        ylabel('percentage', 'FontSize', constants.FONT_SIZE);        
+        xlabel(sprintf('%% %s', g_segments_classification.classes(c).description), 'FontSize', g_config.FONT_SIZE);
+        ylabel('percentage', 'FontSize', g_config.FONT_SIZE);        
     end     
 
-    % export_fig(fullfile(constants.OUTPUT_DIR, 'distribution_strat_trials_80.eps'));
+    % export_fig(fullfile(g_config.OUTPUT_DIR, 'distribution_strat_trials_80.eps'));
 end
 

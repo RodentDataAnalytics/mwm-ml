@@ -7,7 +7,7 @@ function results_clustering_constraints_perf
     
     p = [0.05; 0.1; 0.2; 0.4; 0.6; 0.8; 1.0];
     
-    fn = fullfile(constants.OUTPUT_DIR, 'clustering_constrains_perf.mat');
+    fn = fullfile(g_config.OUTPUT_DIR, 'clustering_constrains_perf.mat');
     
     if exist(fn, 'file')
         load(fn);
@@ -16,7 +16,7 @@ function results_clustering_constraints_perf
         results = cell(1, length(p));
 
         % get classifier object
-        classif = g_segments.classifier(constants.DEFAULT_TAGS_PATH, constants.DEFAULT_FEATURE_SET, constants.TAG_TYPE_BEHAVIOUR_CLASS);        
+        classif = g_segments.classifier(g_config.DEFAULT_TAGS_PATH, g_config.DEFAULT_FEATURE_SET, g_config.TAG_TYPE_BEHAVIOUR_CLASS);        
 
         folds = 10;
         cv = cvpartition(1:classif.nlabels, 'k', folds);
@@ -27,7 +27,7 @@ function results_clustering_constraints_perf
                 % constraints
                 classif.pconstraints = p(i);
                 classif.two_stage = 0;
-                new_results = classif.cluster_cross_validation(constants.DEFAULT_NUMBER_OF_CLUSTERS, ...
+                new_results = classif.cluster_cross_validation(g_config.DEFAULT_NUMBER_OF_CLUSTERS, ...
                     'TrainingPercentage', 1., ...
                     'Runs', 1, ...
                     'TestSet', cv.test(j) ...
@@ -55,12 +55,12 @@ function results_clustering_constraints_perf
      
     figure(99);
     ci_fac = 1.96/sqrt(results(1).count);
-    errorbar( arrayfun( @(x) x.mean_nconstraints, results), arrayfun( @(x) 100*x.mean_perrors, results),  arrayfun( @(x) 100*x.sd_perrors*ci_fac, results), 'k-', 'LineWidth', constants.LINE_WIDTH);                       
+    errorbar( arrayfun( @(x) x.mean_nconstraints, results), arrayfun( @(x) 100*x.mean_perrors, results),  arrayfun( @(x) 100*x.sd_perrors*ci_fac, results), 'k-', 'LineWidth', g_config.LINE_WIDTH);                       
     
-    xlabel('N_{contraints}', 'FontSize', constants.FONT_SIZE);
+    xlabel('N_{contraints}', 'FontSize', g_config.FONT_SIZE);
     set (gca, 'Xscale', 'log')
-    ylabel('% errors', 'FontSize', constants.FONT_SIZE);            
+    ylabel('% errors', 'FontSize', g_config.FONT_SIZE);            
     set(gcf, 'Color', 'w');
-    set(gca, 'FontSize', constants.FONT_SIZE, 'LineWidth', constants.AXIS_LINE_WIDTH);
-    export_fig(fullfile(constants.OUTPUT_DIR, 'clustering_constraints_errors.eps'));               
+    set(gca, 'FontSize', g_config.FONT_SIZE, 'LineWidth', g_config.AXIS_LINE_WIDTH);
+    export_fig(fullfile(g_config.OUTPUT_DIR, 'clustering_constraints_errors.eps'));               
 end

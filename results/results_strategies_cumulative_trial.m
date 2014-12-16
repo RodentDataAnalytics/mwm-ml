@@ -21,7 +21,7 @@ function results_strategies_cumulative_session
     
     for c = 1:g_segments_classification.nclasses
         figure;        
-        for t = 1:constants.TRIALS 
+        for t = 1:g_config.TRIALS 
             for g = 1:2
                 distr_sel = distr(g_trajectories_trial(g_long_trajectories_idx) == t & g_trajectories_group(g_long_trajectories_idx) == g, :);
                 % count total number of bins of this class
@@ -51,10 +51,10 @@ function results_strategies_cumulative_session
         
         end
         hold off;
-        xlabel(sprintf('%% %s', g_segments_classification.classes(c).description), 'FontSize', constants.FONT_SIZE);
-        ylabel('percentage', 'FontSize', constants.FONT_SIZE);        
+        xlabel(sprintf('%% %s', g_segments_classification.classes(c).description), 'FontSize', g_config.FONT_SIZE);
+        ylabel('percentage', 'FontSize', g_config.FONT_SIZE);        
     end     
 
-    % export_fig(fullfile(constants.OUTPUT_DIR, 'distribution_strat_trials_80.eps'));
+    % export_fig(fullfile(g_config.OUTPUT_DIR, 'distribution_strat_trials_80.eps'));
 end
 

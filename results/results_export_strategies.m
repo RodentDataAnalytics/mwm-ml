@@ -13,10 +13,10 @@ function results_export_strategies
     traj = trajectories(g_trajectories.items(groups == 1 | groups == 2));
     
     % segment trajectories - ones with less than 2 segments will be discarded
-    [seg, partitions] = traj.divide_into_segments(constants.DEFAULT_SEGMENT_LENGTH, constants.DEFAULT_SEGMENT_OVERLAP, 2);
+    [seg, partitions] = traj.divide_into_segments(g_config.DEFAULT_SEGMENT_LENGTH, g_config.DEFAULT_SEGMENT_OVERLAP, 2);
  
     % classify them
-    [segment_classes, tags] = seg.classify(constants.SEGMENTS_TAGS250_PATH, constants.DEFAULT_FEATURE_SET, 100, 0);    
+    [segment_classes, tags] = seg.classify(g_config.SEGMENTS_TAGS250_PATH, g_config.DEFAULT_FEATURE_SET, 100, 0);    
     
     fi = fopen('/tmp/tags.txt', 'w');
     for i = 1:length(tags)
@@ -27,7 +27,7 @@ function results_export_strategies
      % compute the prefered strategy for a small time window for each
     % trajectory
     N = 9;
-    tw = constants.TRIAL_TIMEOUT / N;
+    tw = g_config.TRIAL_TIMEOUT / N;
     class_distr = [];            
     
     id = [-1, -1, -1];

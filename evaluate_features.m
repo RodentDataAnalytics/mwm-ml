@@ -1,7 +1,7 @@
 function [ comb, res ] = evaluate_features( n, nclusters )
 %RESULTS_FEATURE_SELECTION Summary of this function goes here
 %   Detailed explanation goes here
-    feat = constants.FULL_FEATURE_SET;
+    feat = g_config.FULL_FEATURE_SET;
     
     global g_trajectories; % loaded thru the function bellow that caches trajectories
     cache_trajectories;
@@ -17,11 +17,11 @@ function [ comb, res ] = evaluate_features( n, nclusters )
     fprintf('Number of feature combinations to be tested: %d\n', size(comb, 1));
            
     % segment trajectories - ones with less than 2 segments will be discarded
-    seg = traj.divide_into_segments(constants.DEFAULT_SEGMENT_LENGTH, constants.DEFAULT_SEGMENT_OVERLAP, 2);
+    seg = traj.divide_into_segments(g_config.DEFAULT_SEGMENT_LENGTH, g_config.DEFAULT_SEGMENT_OVERLAP, 2);
         
     res = [];    
     for i = 1:size(comb, 1)
-        [class_idx, cluster_tags, cluster_idx, cluster_map, cluster_centroids, cluster_miss] = seg.classify(constants.SEGMENTS_TAGS320_PATH, comb(i, :), nclusters);
+        [class_idx, cluster_tags, cluster_idx, cluster_map, cluster_centroids, cluster_miss] = seg.classify(g_config.SEGMENTS_TAGS320_PATH, comb(i, :), nclusters);
         % map tags from the classification to the list of trajectory
         % tags
         res = [res; length(cluster_map), sum(cluster_miss == 1 & cluster_idx ~= 0), sum(class_idx == 0)*100./seg.count];               

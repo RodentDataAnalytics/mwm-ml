@@ -57,7 +57,7 @@ function results_strategies_individual_evolution3
                             'ColumnLabels', col_labels, 'RowLabels', row_labels, ...
                             'Ticks', [10, 50, 90], 'TicksLabels', {'10s', '50s', '90s'}, 'AspectRatio', 0.2);
 
-            export_fig(fullfile(constants.OUTPUT_DIR, sprintf('individual_strategies_evol_g%d_%d.eps', g, off)));
+            export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('individual_strategies_evol_g%d_%d.eps', g, off)));
         end
     end                           
 end

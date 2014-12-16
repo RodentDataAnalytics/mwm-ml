@@ -49,7 +49,7 @@ classdef trajectory < handle
             traj.trial = trial;
             traj.segment = segment;
             traj.offset = off;            
-            traj.session = floor(((traj.trial - 1) / constants.TRIALS_PER_SESSION) + 1);        
+            traj.session = floor(((traj.trial - 1) / g_config.TRIALS_PER_SESSION) + 1);        
             traj.start_time = pts(1, 1);
             traj.end_time = pts(end, 1);
         end
@@ -78,7 +78,7 @@ classdef trajectory < handle
         end                              
         
         function [ eff ] = efficiency(traj)
-            min_path = norm( traj.points(1,2) - constants.PLATFORM_X, traj.points(1,3) - constants.PLATFORM_Y);
+            min_path = norm( traj.points(1,2) - g_config.PLATFORM_X, traj.points(1,3) - g_config.PLATFORM_Y);
             len = traj.compute_feature(features.LENGTH);
             if len ~= 0
                 eff = min_path / len;
@@ -180,7 +180,7 @@ classdef trajectory < handle
         function [ V ] = compute_features(traj, feat)
         %COMPUTE_FEATURES Computes a set of features for a trajectory
         %   COMPUTE_FEATURES(traj, [F1, F2, ... FN]) computes features F1, F2, ..
-        %   FN for trajectory traj (features are identified by constants defined 
+        %   FN for trajectory traj (features are identified by g_config defined 
         %   at the beginning of this class    
             V = [];
             for i = 1:length(feat)
@@ -193,7 +193,7 @@ classdef trajectory < handle
                 case features.LATENCY                    
                     [~, v] = trajectory_length(traj.points);
                     if v > 89.5
-                        v = constants.TRIAL_TIMEOUT;
+                        v = g_config.TRIAL_TIMEOUT;
                     end                  
                 case features.LENGTH 
                     % this is used so often that we cache it
@@ -205,12 +205,12 @@ classdef trajectory < handle
                     v = traj.efficiency();
                 case features.MEDIAN_RADIUS
                     if traj.r12_ == -1
-                        [traj.r12_, traj.riqr_] = trajectory_radius(traj.points, constants.CENTRE_X, constants.CENTRE_Y);
+                        [traj.r12_, traj.riqr_] = trajectory_radius(traj.points, g_config.CENTRE_X, g_config.CENTRE_Y);
                     end
                     v = traj.r12_; 
                 case features.IQR_RADIUS
                     if traj.riqr_ == -1
-                        [traj.r12_, traj.riqr_] = trajectory_radius(traj.points, constants.CENTRE_X, constants.CENTRE_Y);
+                        [traj.r12_, traj.riqr_] = trajectory_radius(traj.points, g_config.CENTRE_X, g_config.CENTRE_Y);
                     end
                     v = traj.riqr_;                                    
                 case features.FOCUS                    
@@ -219,13 +219,13 @@ classdef trajectory < handle
                     v = traj.focus_;                    
                 case features.BOUNDARY_CENTRE_RADIUS                
                     traj.compute_boundary;
-                    v = sqrt( (traj.ecentre_(1) - constants.CENTRE_X)^2 + (traj.ecentre_(2) - constants.CENTRE_Y)^2);
+                    v = sqrt( (traj.ecentre_(1) - g_config.CENTRE_X)^2 + (traj.ecentre_(2) - g_config.CENTRE_Y)^2);
                 case features.BOUNDARY_CENTRE_ANGLE 
                     traj.compute_boundary;
-                    v = atan2(traj.ecentre_(2) - constants.CENTRE_Y, traj.ecentre_(1) - constants.CENTRE_X);
+                    v = atan2(traj.ecentre_(2) - g_config.CENTRE_Y, traj.ecentre_(1) - g_config.CENTRE_X);
                 case features.BOUNDARY_CENTRE_DISTANCE_PLATFORM
                     traj.compute_boundary;
-                    v = sqrt( (traj.ecentre_(1) - constants.PLATFORM_X)^2 + (traj.ecentre_(2) - constants.PLATFORM_Y)^2) / constants.ARENA_R;
+                    v = sqrt( (traj.ecentre_(1) - g_config.PLATFORM_X)^2 + (traj.ecentre_(2) - g_config.PLATFORM_Y)^2) / g_config.ARENA_R;
                 case features.BOUNDARY_MINOR_RADIUS
                     traj.compute_boundary;
                     v = traj.a_;
@@ -240,20 +240,20 @@ classdef trajectory < handle
                     v = sqrt(1 - (traj.a_^2)/(traj.b_^2));
                 %case features.PLATFORM_CENTRALITY
                  %   traj.compute_boundary;
-                  %  v = sqrt( (traj.ecentre_(1) - constants.PLATFORM_X)^2 + (traj.ecentre_(2) - constants.PLATFORM_Y)^2);
+                  %  v = sqrt( (traj.ecentre_(1) - g_config.PLATFORM_X)^2 + (traj.ecentre_(2) - g_config.PLATFORM_Y)^2);
                     
                 case features.ANGULAR_DISTANCE_PLATFORM
-                    v = trajectory_angular_distance(traj.points, constants.CENTRE_X, constants.CENTRE_Y, constants.PLATFORM_X, constants.PLATFORM_Y);
+                    v = trajectory_angular_distance(traj.points, g_config.CENTRE_X, g_config.CENTRE_Y, g_config.PLATFORM_X, g_config.PLATFORM_Y);
                 case features.MEDIAN_DISTANCE_PLATFORM
-                    v = trajectory_distance_platform(traj.points, constants.PLATFORM_X, constants.PLATFORM_Y);
+                    v = trajectory_distance_platform(traj.points, g_config.PLATFORM_X, g_config.PLATFORM_Y);
                 case features.MINIMUM_DISTANCE_PLATFORM
-                    [~, ~, v] = trajectory_distance_platform(traj.points, constants.PLATFORM_X, constants.PLATFORM_Y) / constants.ARENA_R;
+                    [~, ~, v] = trajectory_distance_platform(traj.points, g_config.PLATFORM_X, g_config.PLATFORM_Y) / g_config.ARENA_R;
                 case features.PLATFORM_PROXIMITY
-                    v = trajectory_platform_proximity(traj.points, constants.PLATFORM_X, constants.PLATFORM_Y, constants.PLATFORM_R*3);                    
+                    v = trajectory_platform_proximity(traj.points, g_config.PLATFORM_X, g_config.PLATFORM_Y, g_config.PLATFORM_R*3);                    
                 case features.PLATFORM_SURROUNDINGS
-                    v = trajectory_platform_proximity(traj.points, constants.PLATFORM_X, constants.PLATFORM_Y, constants.PLATFORM_R*6);                    
+                    v = trajectory_platform_proximity(traj.points, g_config.PLATFORM_X, g_config.PLATFORM_Y, g_config.PLATFORM_R*6);                    
                 case features.IQR_DISTANCE_PLATFORM
-                    [~, v] = trajectory_distance_platform(traj.points, constants.PLATFORM_X, constants.PLATFORM_Y);
+                    [~, v] = trajectory_distance_platform(traj.points, g_config.PLATFORM_X, g_config.PLATFORM_Y);
                 case features.LOOPS
                     if traj.loops_ == -1
                         [traj.loops_, traj.spin_, traj.kiqr_] = trajectory_loops_spin(traj.points);
@@ -268,7 +268,7 @@ classdef trajectory < handle
                     v = trajectory_average_speed(traj.points, 1);
                 case features.CENTRE_DISTANCE_PLATFORM
                     C = traj.centre;                        
-                    v = sqrt( (C(1) - constants.PLATFORM_X)^2 + (C(2) - constants.PLATFORM_Y)^2);
+                    v = sqrt( (C(1) - g_config.PLATFORM_X)^2 + (C(2) - g_config.PLATFORM_Y)^2);
                 case features.BOUNDARY_COVERED_ANGLE
                     if traj.covang_ == -1
                         traj.compute_boundary;
@@ -306,11 +306,11 @@ classdef trajectory < handle
         function plot(traj)
             axis off;
             daspect([1 1 1]);                      
-            rectangle('Position',[constants.CENTRE_X - constants.ARENA_R, constants.CENTRE_X - constants.ARENA_R, constants.ARENA_R*2, constants.ARENA_R*2],...
+            rectangle('Position',[g_config.CENTRE_X - g_config.ARENA_R, g_config.CENTRE_X - g_config.ARENA_R, g_config.ARENA_R*2, g_config.ARENA_R*2],...
                 'Curvature',[1,1], 'FaceColor',[1, 1, 1], 'edgecolor', [0.2, 0.2, 0.2], 'LineWidth', 3);
             hold on;
             axis square;
-            rectangle('Position',[constants.PLATFORM_X - constants.PLATFORM_R, constants.PLATFORM_Y - constants.PLATFORM_R, 2*constants.PLATFORM_R, 2*constants.PLATFORM_R],...
+            rectangle('Position',[g_config.PLATFORM_X - g_config.PLATFORM_R, g_config.PLATFORM_Y - g_config.PLATFORM_R, 2*g_config.PLATFORM_R, 2*g_config.PLATFORM_R],...
                 'Curvature',[1,1], 'FaceColor',[1, 1, 1], 'edgecolor', [0.2, 0.2, 0.2], 'LineWidth', 3);             
             plot(traj.points(:,2), traj.points(:,3),'k', 'LineWidth', 2);
             set(gca, 'LooseInset', [0,0,0,0]);
@@ -335,7 +335,7 @@ classdef trajectory < handle
         function compute_boundary(traj)
             if traj.focus_ == -1                
                 if isempty(traj.centralpts_)
-                    traj.centralpts_ = traj.central_points(constants.FOCUS_P);
+                    traj.centralpts_ = traj.central_points(g_config.FOCUS_P);
                 end
                 [traj.focus_, traj.ecentre_, traj.a_, traj.b_, traj.inc_] = trajectory_focus(traj.centralpts_, traj.compute_feature(features.LENGTH));
             end

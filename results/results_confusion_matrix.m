@@ -1,7 +1,7 @@
 function results_confusion_matrix
 %RESULTS_CLUSTERING_CONFUSION_MATRIX Computes the confusion matrix of the
 %classification
-    fn = fullfile(constants.OUTPUT_DIR, 'confusion_matrix.mat');
+    fn = fullfile(g_config.OUTPUT_DIR, 'confusion_matrix.mat');
     
     % if output file already exists do nothing
     if exist(fn, 'file')
@@ -14,10 +14,10 @@ function results_confusion_matrix
         folds = 10;
 
         % get classifier object
-        classif = g_segments.classifier(constants.DEFAULT_TAGS_PATH, constants.DEFAULT_FEATURE_SET, constants.TAG_TYPE_BEHAVIOUR_CLASS);
+        classif = g_segments.classifier(g_config.DEFAULT_TAGS_PATH, g_config.DEFAULT_FEATURE_SET, g_config.TAG_TYPE_BEHAVIOUR_CLASS);
 
         % perform a 10-fold cross-validation
-        res = classif.cluster_cross_validation(constants.DEFAULT_NUMBER_OF_CLUSTERS, 'Folds', folds);
+        res = classif.cluster_cross_validation(g_config.DEFAULT_NUMBER_OF_CLUSTERS, 'Folds', folds);
 
         % take the "total confusion matrix"    
         cm = res.results(1).confusion_matrix;

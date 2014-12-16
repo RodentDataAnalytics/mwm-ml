@@ -82,7 +82,7 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
     % read labels if we already have something
     labels_traj = zeros(traj.count, length(tags));
     if exist(labels_fn, 'file')
-        [labels_data, label_tags] = traj.read_tags(labels_fn, constants.TAG_TYPE_ALL);
+        [labels_data, label_tags] = traj.read_tags(labels_fn, g_config.TAG_TYPE_ALL);
         [labels_map, labels_idx] = traj.match_tags(labels_data, label_tags);
         non_matched = sum(labels_idx == -1);
         if non_matched > 0
@@ -102,7 +102,7 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
        
     % the 'undefined' tag index
     undef_tag_idx = -1;
-    matches = find(arrayfun( @(t) strcmp(t.abbreviation, constants.UNDEFINED_TAG_ABBREVIATION), tags));
+    matches = find(arrayfun( @(t) strcmp(t.abbreviation, g_config.UNDEFINED_TAG_ABBREVIATION), tags));
     if ~isempty(matches)
         undef_tag_idx = matches(1);
     end
@@ -136,7 +136,7 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
         if ~isempty(classif_res)
             for i = 1:max(classif_res.cluster_idx)
                 if classif_res.cluster_class_map(i) == 0
-                    lbl = constants.UNDEFINED_TAG_ABBREVIATION;
+                    lbl = g_config.UNDEFINED_TAG_ABBREVIATION;
                 else
                     lbl = classif_res.classes(classif_res.cluster_class_map(i)).abbreviation;
                 end
@@ -194,7 +194,7 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
                 for j = 1:(length(handles) - 1)
                     if ~isempty(classif_res) 
                         idx = -1;
-                        if strcmp(tags(j).abbreviation, constants.UNDEFINED_TAG_ABBREVIATION)                                                            
+                        if strcmp(tags(j).abbreviation, g_config.UNDEFINED_TAG_ABBREVIATION)                                                            
                             idx = 0;
                         else
                             for k = 1:length(classif_res.classes)                            
@@ -270,7 +270,7 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
 %         traj_idx = filter(sorting(cur));
 %         % plot the trajectory/segment        
 %         len = trajectory_length(traj.items(traj_idx).points);     
-%         f = trajectory_focus(traj.items(traj_idx).central_points(constants.FOCUS_P))
+%         f = trajectory_focus(traj.items(traj_idx).central_points(g_config.FOCUS_P))
 %         draw_boundary = get(hboundary, 'value');                    
 %         show_trajectories;
 %     end
@@ -298,7 +298,7 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
             otherwise
                 % classes
                 if val <= classif_res.nclasses + 4
-                    if classif_res.classes(val - 4).abbreviation == constants.UNDEFINED_TAG_ABBREVIATION                                    
+                    if classif_res.classes(val - 4).abbreviation == g_config.UNDEFINED_TAG_ABBREVIATION                                    
                         filter = find(classif_res.class_map == 0);
                     else
                         filter = find(classif_res.class_map == (val - 4));                                    
@@ -317,7 +317,7 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
            distr_status = '';
            for i = 1:length(vals)
                 if vals(i) == 0
-                    lbl = constants.UNDEFINED_TAG_ABBREVIATION;
+                    lbl = g_config.UNDEFINED_TAG_ABBREVIATION;
                 else
                     lbl = classif_res.classes(vals(i)).abbreviation;
                 end
@@ -373,7 +373,7 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
                     hold on;                
                     p = 1;
                     for k = 1:classif_res.nclasses
-                        if ~strcmp(classif_res.classes(k).abbreviation, constants.UNDEFINED_TAG_ABBREVIATION)
+                        if ~strcmp(classif_res.classes(k).abbreviation, g_config.UNDEFINED_TAG_ABBREVIATION)
                             pos = find(classif_res.class_map(filter) == k);      
                             if ~isempty(pos)
                                 plot(feat_values(filter(pos), i), feat_values(filter(pos), j), pointtypes{p});
@@ -391,7 +391,7 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
             subplot(m, l, n);                
             p = 1;
             for k = 1:classif_res.nclasses
-                if strcmp(classif_res.classes(k).abbreviation, constants.UNDEFINED_TAG_ABBREVIATION)
+                if strcmp(classif_res.classes(k).abbreviation, g_config.UNDEFINED_TAG_ABBREVIATION)
                     plot(0, 0, 'dk');
                 else
                     plot(0, 0, pointtypes{p});
@@ -470,7 +470,7 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
         else
             test_p = 0.;
         end
-        classif = traj.classifier(labels_fn, feat, constants.TAG_TYPE_BEHAVIOUR_CLASS);
+        classif = traj.classifier(labels_fn, feat, g_config.TAG_TYPE_BEHAVIOUR_CLASS);
         classif_res = classif.cluster(nclusters, test_p);                
         update_filter_combo;        
         set(gcf,'Pointer','arrow');                
@@ -536,7 +536,7 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
 %                     idx = find(match == 1);
 %                     if ~isempty(idx )                        
 %                         pos = find(labels_traj(:, idx));      
-%                         if ~strcmp(cluster_tags(k).abbreviation, constants.UNDEFINED_TAG_ABBREVIATION)
+%                         if ~strcmp(cluster_tags(k).abbreviation, g_config.UNDEFINED_TAG_ABBREVIATION)
 %                             pt = pointtypes{p};
 %                             p = p + 1;
 %                         else
@@ -557,7 +557,7 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
 %         subplot(m, l, n);                
 %         p = 1;
 %         for k = 1:length(cluster_tags)                   
-%             if strcmp(cluster_tags(k).abbreviation, constants.UNDEFINED_TAG_ABBREVIATION)
+%             if strcmp(cluster_tags(k).abbreviation, g_config.UNDEFINED_TAG_ABBREVIATION)
 %                 plot(0, 0, 'dk');
 %             else
 %                 plot(0, 0, pointtypes{p});

@@ -20,9 +20,9 @@ function results_strategies_individual_evolution
     % bins = [10, 15, 25, 40];        
     bins = [20, 25, 45];    
     
-    classes = constants.REDUCED_BEHAVIOURAL_CLASSES;
+    classes = g_config.REDUCED_BEHAVIOURAL_CLASSES;
     
-    cm = cmapping(length(classes), constants.CLASSES_COLORMAP);
+    cm = cmapping(length(classes), g_config.CLASSES_COLORMAP);
     % custom color map
     % cm = [0, 0, 0; ...
      %%     1, 1, 1];          
@@ -33,15 +33,15 @@ function results_strategies_individual_evolution
     % plot the distribution of strategies for each session and group of
     % animals
     for g = 1:2        
-        for s = 1:constants.SESSIONS % for each session
+        for s = 1:g_config.SESSIONS % for each session
             clf;
             distr = {};
             row_labels = {};
             col_labels = {};
             markers = {};
 
-            for t = 1:constants.TRIALS_PER_SESSION
-                trial = (s - 1)*constants.TRIALS_PER_SESSION + t;
+            for t = 1:g_config.TRIALS_PER_SESSION
+                trial = (s - 1)*g_config.TRIALS_PER_SESSION + t;
                 sel = find(g_trajectories_trial(g_long_trajectories_idx) == trial & g_trajectories_group(g_long_trajectories_idx) == g);
                 
                 % convert array of values to a single integer
@@ -70,7 +70,7 @@ function results_strategies_individual_evolution
                             'ColumnLabels', col_labels, 'RowLabels', row_labels, ...
                             'Ticks', [10, 50, 90], 'TicksLabels', {'10s', '50s', '90s'}, 'AspectRatio', 0.2, 'ColorMap', cm);
 
-            export_fig(fullfile(constants.OUTPUT_DIR, sprintf('individual_strategies_evol_g%d_s%d.eps', g, s)));
+            export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('individual_strategies_evol_g%d_s%d.eps', g, s)));
         end
     end 
     
@@ -110,7 +110,7 @@ function results_strategies_individual_evolution
                          'ColumnLabels', col_labels, 'RowLabels', row_labels, ...
                          'Ticks', [10, 50, 90], 'TicksLabels', {'10s', '50s', '90s'});                             
 
-        export_fig(fullfile(constants.OUTPUT_DIR, sprintf('individual_strategies_evol_g%d_red.eps', g)));
+        export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('individual_strategies_evol_g%d_red.eps', g)));
     end     
          
     %% plot distributions now 
@@ -120,10 +120,10 @@ function results_strategies_individual_evolution
      %   trials = [1, 3, 5, 7, 9, 11];
     %     trials = 1:12;
         
-        for s = 1:constants.SESSIONS
+        for s = 1:g_config.SESSIONS
             % trials = 1:6;
-            ti = (s - 1)*constants.TRIALS_PER_SESSION + 1;
-            tf = s*constants.TRIALS_PER_SESSION;             
+            ti = (s - 1)*g_config.TRIALS_PER_SESSION + 1;
+            tf = s*g_config.TRIALS_PER_SESSION;             
             data = [];
             groups = [];
             tpos = [];
@@ -197,16 +197,16 @@ function results_strategies_individual_evolution
                 lbls = [lbls, sprintf('S%d', i)];
             end
             set(gca, 'Xtick', tpos, 'XTIckLabel', lbls, 'DataAspectRatio', [1, 0.06, 1], 'Ylim', [0, 1.2], 'YTick', [0.2, 0.4, 0.6, 0.8, 1]);
-            ylabel(sprintf('session %d %s', s, bin_lbls{b}), 'FontSize', 0.6*constants.FONT_SIZE);
+            ylabel(sprintf('session %d %s', s, bin_lbls{b}), 'FontSize', 0.6*g_config.FONT_SIZE);
 
 %             lbl = '';
 %             for i = 1:length(trials)
 %                 lbl = [lbl, 'T ' num2str(trials(i)) '             '];
 %             end
-%             xlabel(lbl, 'FontSize', 0.6*constants.FONT_SIZE);
+%             xlabel(lbl, 'FontSize', 0.6*g_config.FONT_SIZE);
 
-    %        lbls = arrayfun( @(i) sprintf('trial %d', i), 6:constants.TRIALS, 'UniformOutput', 0);         
-     %       set(gca, 'XTick', (pos(1:2:2*constants.TRIALS - 1) + pos(2:2:2*constants.TRIALS)) / 2, 'XTickLabel', lbls, 'FontSize', 0.6*constants.FONT_SIZE);                 
+    %        lbls = arrayfun( @(i) sprintf('trial %d', i), 6:g_config.TRIALS, 'UniformOutput', 0);         
+     %       set(gca, 'XTick', (pos(1:2:2*g_config.TRIALS - 1) + pos(2:2:2*g_config.TRIALS)) / 2, 'XTickLabel', lbls, 'FontSize', 0.6*g_config.FONT_SIZE);                 
             h = findobj(gca,'Tag','Box');               
             for j=1:length(h)
                 idx = mod(j, length(classes));
@@ -240,14 +240,14 @@ function results_strategies_individual_evolution
             for i = 1:size(sig, 1)                        
                 h = sigstar( {sig(i, 1:2)}, [sig(i, 3)]);
                 set(h(:, 1), 'LineWidth', 1.2);
-                set(h(:, 2), 'FontSize', 0.6*constants.FONT_SIZE);            
+                set(h(:, 2), 'FontSize', 0.6*g_config.FONT_SIZE);            
             end
 
             set(gcf, 'Color', 'w');
-            set(gca, 'LineWidth', constants.AXIS_LINE_WIDTH);
+            set(gca, 'LineWidth', g_config.AXIS_LINE_WIDTH);
             box off; 
 
-            export_fig(fullfile(constants.OUTPUT_DIR, sprintf('control_stress_evol_s%d_b%d.eps', s, b)));
+            export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('control_stress_evol_s%d_b%d.eps', s, b)));
         end
     end   
 end

@@ -40,7 +40,7 @@ function cache_trajectories
             % select ids based on first trial
             map = find(g_trajectories_group == g & g_trajectories_trial == 1);
             ids = arrayfun( @(x) x.id, g_trajectories.items(map));
-            for t = 2:constants.TRIALS
+            for t = 2:g_config.TRIALS
                 trial_idx = find(g_trajectories_group == g & g_trajectories_trial == t);
                 trial_ids = arrayfun( @(x) x.id, g_trajectories.items(trial_idx));
                 map = [map; arrayfun( @(id) trial_idx(trial_ids == id), ids)];
@@ -50,13 +50,13 @@ function cache_trajectories
             if g == 1
                 nd = g_animals_count(1) - g_animals_count(2);
                 if nd > 0
-                    nd = max(nd, constants.NDISCARD);
+                    nd = max(nd, g_config.NDISCARD);
                 else
-                    nd = max(constants.NDISCARD + nd, 0);
+                    nd = max(g_config.NDISCARD + nd, 0);
                 end
-                for s = 1:constants.SESSIONS                    
-                    ti = (s - 1)*constants.TRIALS_PER_SESSION + 1;
-                    tf = s*constants.TRIALS_PER_SESSION;
+                for s = 1:g_config.SESSIONS                    
+                    ti = (s - 1)*g_config.TRIALS_PER_SESSION + 1;
+                    tf = s*g_config.TRIALS_PER_SESSION;
                     avg_speed = mean(g_trajectories_speed(map(ti:tf, :)));
                     [~, ord] = sort(avg_speed);
                     
@@ -69,14 +69,14 @@ function cache_trajectories
             else
                 nd = g_animals_count(2) - g_animals_count(1);
                 if nd > 0
-                    nd = max(nd, constants.NDISCARD);
+                    nd = max(nd, g_config.NDISCARD);
                 else
-                    nd = max(constants.NDISCARD + nd, 0);
+                    nd = max(g_config.NDISCARD + nd, 0);
                 end
                 
-                for s = 1:constants.SESSIONS                    
-                    ti = (s - 1)*constants.TRIALS_PER_SESSION + 1;
-                    tf = s*constants.TRIALS_PER_SESSION;
+                for s = 1:g_config.SESSIONS                    
+                    ti = (s - 1)*g_config.TRIALS_PER_SESSION + 1;
+                    tf = s*g_config.TRIALS_PER_SESSION;
                     avg_speed = mean(g_trajectories_speed(map(ti:tf, :)));
                     [~, ord] = sort(avg_speed);
                     

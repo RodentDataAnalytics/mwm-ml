@@ -9,17 +9,17 @@ function results_full_trajectories_classification
        
     % load trajectory tags -> these are the tags assigned to the full
     % trajectories
-    [full_labels_data, full_tags] = g_trajectories.read_tags(constants.FULL_TRAJECTORIES_TAGS_PATH, constants.TAG_TYPE_BEHAVIOUR_CLASS);
+    [full_labels_data, full_tags] = g_trajectories.read_tags(g_config.FULL_TRAJECTORIES_TAGS_PATH, g_config.TAG_TYPE_BEHAVIOUR_CLASS);
     full_map = g_trajectories.match_tags(full_labels_data, full_tags);        
     % select only tagged trajectories
     tagged = sum(full_map, 2) > 0;
        
-%     tt = constants.TAGS(tag.tag_position(constants.TAGS, 'TT')); 
-%     ic = constants.TAGS(tag.tag_position(constants.TAGS, 'IC'));
-%     at = constants.TAGS(tag.tag_position(constants.TAGS, 'TS'));
-%     sc = constants.TAGS(tag.tag_position(constants.TAGS, 'SC'));
-%     so = constants.TAGS(tag.tag_position(constants.TAGS, 'SO'));
-%     st = constants.TAGS(tag.tag_position(constants.TAGS, 'ST'));
+%     tt = g_config.TAGS(tag.tag_position(g_config.TAGS, 'TT')); 
+%     ic = g_config.TAGS(tag.tag_position(g_config.TAGS, 'IC'));
+%     at = g_config.TAGS(tag.tag_position(g_config.TAGS, 'TS'));
+%     sc = g_config.TAGS(tag.tag_position(g_config.TAGS, 'SC'));
+%     so = g_config.TAGS(tag.tag_position(g_config.TAGS, 'SO'));
+%     st = g_config.TAGS(tag.tag_position(g_config.TAGS, 'ST'));
 %     
 %     tag_groups = [ tt, ...                           
 %                    tag.combine_tags( [ic, at]), ...
@@ -31,14 +31,14 @@ function results_full_trajectories_classification
     ovlp = [0.7, 0.75, 0.8, 0.85, 0.9, 0.95];
     
     pts = [];
-    log_file = fopen(fullfile(constants.OUTPUT_DIR, 'full_trajectories_classification_log.txt'), 'w');
+    log_file = fopen(fullfile(g_config.OUTPUT_DIR, 'full_trajectories_classification_log.txt'), 'w');
     
     for i = 1:length(ovlp)
         mess = sprintf('**** SEGMENT OVERLAP = %f ****', ovlp(i));
         fprintf(log_file, '%s\n', mess);
         disp(mess);
         
-        fn = fullfile(constants.OUTPUT_DIR, sprintf('full_traj_class_olvp%d.mat', ovlp(i)));
+        fn = fullfile(g_config.OUTPUT_DIR, sprintf('full_traj_class_olvp%d.mat', ovlp(i)));
         if exist(fn, 'file')
            load(fn);
         else                    
@@ -46,13 +46,13 @@ function results_full_trajectories_classification
             unk = [];
             nc = [];
             
-            [segments, partitions] = g_trajectories.divide_into_segments(constants.DEFAULT_SEGMENT_LENGTH, ovlp(i), 2); 
+            [segments, partitions] = g_trajectories.divide_into_segments(g_config.DEFAULT_SEGMENT_LENGTH, ovlp(i), 2); 
             % build classifier
-            classif = segments.classifier(constants.DEFAULT_TAGS_PATH, constants.DEFAULT_FEATURE_SET, constants.TAG_TYPE_BEHAVIOUR_CLASS);
+            classif = segments.classifier(g_config.DEFAULT_TAGS_PATH, g_config.DEFAULT_FEATURE_SET, g_config.TAG_TYPE_BEHAVIOUR_CLASS);
                             
             % run the thing for 3 different number of clusters
             for j = 1:5
-                nc = [nc, constants.DEFAULT_NUMBER_OF_CLUSTERS + (j - 3)*10];
+                nc = [nc, g_config.DEFAULT_NUMBER_OF_CLUSTERS + (j - 3)*10];
                 mess = sprintf('**** OVLP = %f, Clusters = %d ****', ovlp(i), nc(end));
                 fprintf(log_file, '%s\n', mess);
                 disp(mess);  
@@ -153,34 +153,34 @@ function results_full_trajectories_classification
             set(fig,'visible','on','Color','w', 'PaperPosition', [0 0 12 8],...
                 'PaperSize', [12 8],'PaperUnits', 'centimeters'); %Position plot at left hand corner with width 14cm and height 7cm.
             axis off;  
-    errorbar( pts(:, 1), pts(:, 2), pts(:, 3), 'k-', 'LineWidth', constants.LINE_WIDTH);
+    errorbar( pts(:, 1), pts(:, 2), pts(:, 3), 'k-', 'LineWidth', g_config.LINE_WIDTH);
     hold on;
-    xlabel('segment overlap', 'FontSize', constants.FONT_SIZE);
-    ylabel('% classification errors', 'FontSize', constants.FONT_SIZE);     
+    xlabel('segment overlap', 'FontSize', g_config.FONT_SIZE);
+    ylabel('% classification errors', 'FontSize', g_config.FONT_SIZE);     
     box off;         
     set(gcf, 'Color', 'w');
-    set(gca, 'FontSize', constants.FONT_SIZE, 'LineWidth', constants.AXIS_LINE_WIDTH);
-    export_fig(fullfile(constants.OUTPUT_DIR, 'segment_ovlp_dep.eps'));       
+    set(gca, 'FontSize', g_config.FONT_SIZE, 'LineWidth', g_config.AXIS_LINE_WIDTH);
+    export_fig(fullfile(g_config.OUTPUT_DIR, 'segment_ovlp_dep.eps'));       
     close;
     
      clf;
-     errorbar( pts(:, 1), pts(:, 6), pts(:, 7), 'k-', 'LineWidth', constants.LINE_WIDTH);
+     errorbar( pts(:, 1), pts(:, 6), pts(:, 7), 'k-', 'LineWidth', g_config.LINE_WIDTH);
      hold on;
-     xlabel('segment overlap', 'FontSize', constants.FONT_SIZE);
-     ylabel('% errors', 'FontSize', constants.FONT_SIZE);     
+     xlabel('segment overlap', 'FontSize', g_config.FONT_SIZE);
+     ylabel('% errors', 'FontSize', g_config.FONT_SIZE);     
      box off;         
      set(gcf, 'Color', 'w');
-     set(gca, 'FontSize', constants.FONT_SIZE, 'LineWidth', constants.AXIS_LINE_WIDTH);
-     export_fig(fullfile(constants.OUTPUT_DIR, 'segment_length_dep.eps'));       
+     set(gca, 'FontSize', g_config.FONT_SIZE, 'LineWidth', g_config.AXIS_LINE_WIDTH);
+     export_fig(fullfile(g_config.OUTPUT_DIR, 'segment_length_dep.eps'));       
      close;
     
     clf;
-    errorbar( pts(:, 1), pts(:, 4), pts(:, 5), 'k-', 'LineWidth', constants.LINE_WIDTH); 
+    errorbar( pts(:, 1), pts(:, 4), pts(:, 5), 'k-', 'LineWidth', g_config.LINE_WIDTH); 
     hold on;
-    xlabel('segment overlap', 'FontSize', constants.FONT_SIZE);
-    ylabel('% unknown', 'FontSize', constants.FONT_SIZE);            
+    xlabel('segment overlap', 'FontSize', g_config.FONT_SIZE);
+    ylabel('% unknown', 'FontSize', g_config.FONT_SIZE);            
     set(gcf, 'Color', 'w');
     box off;
-    set(gca, 'FontSize', constants.FONT_SIZE, 'LineWidth', constants.AXIS_LINE_WIDTH);
-    export_fig(fullfile(constants.OUTPUT_DIR, 'segment_ovlp_dep_unk.eps'));           
+    set(gca, 'FontSize', g_config.FONT_SIZE, 'LineWidth', g_config.AXIS_LINE_WIDTH);
+    export_fig(fullfile(g_config.OUTPUT_DIR, 'segment_ovlp_dep_unk.eps'));           
 end

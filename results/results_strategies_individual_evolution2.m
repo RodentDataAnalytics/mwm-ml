@@ -53,9 +53,9 @@ function results_strategies_individual_evolution2
             col_labels = {};                                
             idx = ord(off:min(off + N - 1, length(ord)));
             
-            for s = 1:constants.SESSIONS % for each session                
-                for t = 1:constants.TRIALS_PER_SESSION
-                    trial = (s - 1)*constants.TRIALS_PER_SESSION + t;
+            for s = 1:g_config.SESSIONS % for each session                
+                for t = 1:g_config.TRIALS_PER_SESSION
+                    trial = (s - 1)*g_config.TRIALS_PER_SESSION + t;
 
                     if s == 1
                         col_labels = [col_labels, sprintf('trial %d', trial)];                        
@@ -72,7 +72,7 @@ function results_strategies_individual_evolution2
             end
             
             % reverse everything
-            for t = 1:constants.TRIALS_PER_SESSION
+            for t = 1:g_config.TRIALS_PER_SESSION
                 tmp = distr{t};
                 distr{t} = tmp(end:-1:1, :);                                
             end   
@@ -81,7 +81,7 @@ function results_strategies_individual_evolution2
             plot_distribution_strategies(distr, 'Ordered', 1, 'Widths', bins, ...
                        'ColumnLabels', col_labels, 'RowLabels', row_labels, ...
                        'Ticks', [10, 50, 90], 'TicksLabels', {'10s', '50s', '90s'}, 'BarHeight', 1.2);
-            export_fig(fullfile(constants.OUTPUT_DIR, sprintf('individual_strategies_evol_g%d_%d.eps', g, off)));
+            export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('individual_strategies_evol_g%d_%d.eps', g, off)));
         end
     end 
     
@@ -108,7 +108,7 @@ function results_strategies_individual_evolution2
 %                          'ColumnLabels', col_labels, 'RowLabels', row_labels, ...
 %                          'Ticks', [10, 50, 90], 'TicksLabels', {'10s', '50s', '90s'});                             
 % 
-%         export_fig(fullfile(constants.OUTPUT_DIR, sprintf('individual_strategies_evol_g%d_red.eps', g)));
+%         export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('individual_strategies_evol_g%d_red.eps', g)));
 %     end                  
 end
 

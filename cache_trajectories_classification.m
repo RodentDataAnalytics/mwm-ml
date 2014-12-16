@@ -20,15 +20,15 @@ function cache_trajectories_classification
     
     if isempty(g_segments_classification)
         % get classifier object
-        classif = g_segments.classifier(constants.DEFAULT_TAGS_PATH, constants.DEFAULT_FEATURE_SET, constants.TAG_TYPE_BEHAVIOUR_CLASS);
+        classif = g_segments.classifier(g_config.DEFAULT_TAGS_PATH, g_config.DEFAULT_FEATURE_SET, g_config.TAG_TYPE_BEHAVIOUR_CLASS);
         
         % classify segments
-        g_segments_classification = classif.cluster(constants.DEFAULT_NUMBER_OF_CLUSTERS, 0);    
+        g_segments_classification = classif.cluster(g_config.DEFAULT_NUMBER_OF_CLUSTERS, 0);    
         
         % trajectory classes - segment classes + "direct finding" class        
         df_pos = tag.tag_position(g_segments_classification.classes, 'DF'); 
         if ~df_pos
-            g_trajectories_strat = [g_segments_classification.classes, constants.TAGS(tag.tag_position(constants.TAGS, 'DF'))];
+            g_trajectories_strat = [g_segments_classification.classes, g_config.TAGS(tag.tag_position(g_config.TAGS, 'DF'))];
             df_pos = length(g_segments_classification.classes) + 1;
         else
             g_trajectories_strat = g_segments_classification.classes;
@@ -43,6 +43,9 @@ function cache_trajectories_classification
         % repmat(sum(g_trajectories_strat_distr, 2) + (sum(g_trajectories_strat_distr, 2) == 0)*1e-5, 1, length(g_trajectories_strat));                    
         
         g_trajectories_punknown = zeros(length(g_partitions));
-        g_trajectories_punknown(g_partitions > 0) = sum(g_trajectories_strat_distr(g_partitions > 0, :) == 0, 2)' ./ g_partitions(g_partitions > 0);
+        idx = find(g_partitions > 0);
+        g_trajectories_punknown(idx) = ( ...
+            g_partitions(idx) - sum(g_trajectories_strat_distr(idx, :) > 0, 2)'  ...
+        ) ./ g_partitions(idx);
     end   
 end

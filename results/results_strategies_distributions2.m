@@ -20,9 +20,9 @@ function results_strategies_distributions2
     % bins = [10, 15, 25, 40];        
     bins = [90];    
     
-    classes = constants.REDUCED_BEHAVIOURAL_CLASSES;
+    classes = g_config.REDUCED_BEHAVIOURAL_CLASSES;
     
-    cm = cmapping(length(classes), constants.CLASSES_COLORMAP);
+    cm = cmapping(length(classes), g_config.CLASSES_COLORMAP);
     % custom color map
     % cm = [0, 0, 0; ...
      %%     1, 1, 1];          
@@ -73,7 +73,7 @@ function results_strategies_distributions2
 %                     hfig = figure;
 %                     hist(pts_session, 20);
 %                     pts_session = [];
-%                     fn = fullfile(constants.OUTPUT_DIR, sprintf('control_stress_histogram_s%d_g%d_c%d.eps', floor(t / 4), g, c));
+%                     fn = fullfile(g_config.OUTPUT_DIR, sprintf('control_stress_histogram_s%d_g%d_c%d.eps', floor(t / 4), g, c));
 %                     export_fig(fn);
 %                     close(hfig);
 %                 end
@@ -91,13 +91,13 @@ function results_strategies_distributions2
         boxplot(data, groups, 'positions', pos, 'colors', [0 0 0]);     
         
         lbls = {};
-        lbls = arrayfun( @(i) sprintf('%d', i), 1:constants.TRIALS, 'UniformOutput', 0);     
+        lbls = arrayfun( @(i) sprintf('%d', i), 1:g_config.TRIALS, 'UniformOutput', 0);     
         
-        set(gca, 'XTick', (pos(1:2:2*constants.TRIALS - 1) + pos(2:2:2*constants.TRIALS)) / 2, 'XTickLabel', lbls, 'FontSize', 0.75*constants.FONT_SIZE);                 
+        set(gca, 'XTick', (pos(1:2:2*g_config.TRIALS - 1) + pos(2:2:2*g_config.TRIALS)) / 2, 'XTickLabel', lbls, 'FontSize', 0.75*g_config.FONT_SIZE);                 
      
-        set(gca, 'LineWidth', constants.AXIS_LINE_WIDTH, 'DataAspectRatio', [1, 0.08, 1], 'FontSize', 0.7*constants.FONT_SIZE);      
-        ylabel(classes(c).description, 'FontSize', 0.8*constants.FONT_SIZE);
-        xlabel('trial', 'FontSize', constants.FONT_SIZE);
+        set(gca, 'LineWidth', g_config.AXIS_LINE_WIDTH, 'DataAspectRatio', [1, 0.08, 1], 'FontSize', 0.7*g_config.FONT_SIZE);      
+        ylabel(classes(c).description, 'FontSize', 0.8*g_config.FONT_SIZE);
+        xlabel('trial', 'FontSize', g_config.FONT_SIZE);
         
         h = findobj(gca,'Tag','Box');
         for j=1:2:length(h)
@@ -118,7 +118,7 @@ function results_strategies_distributions2
         set(gcf, 'Color', 'w');
         box off;  
 
-        export_fig(fullfile(constants.OUTPUT_DIR, sprintf('control_stress_friedman_c%d.eps', c)));
+        export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('control_stress_friedman_c%d.eps', c)));
     end     
 end
 

@@ -13,7 +13,7 @@ function results_distribution_segments
         
     labels_map = g_segments_classification.input_labels;    
     class_map = g_segments_classification.class_map;    
-    unk_idx = tag.tag_position(g_segments_classification.classes, constants.UNDEFINED_TAG_ABBREVIATION);
+    unk_idx = tag.tag_position(g_segments_classification.classes, g_config.UNDEFINED_TAG_ABBREVIATION);
                 
     % maximum number of segments for one trajectory
     max_seg = max(g_partitions);
@@ -53,7 +53,7 @@ function results_distribution_segments
     data = data(:, 1:250);   
     % plot bars
     figure;
-    cm = [1 1 1; 0 0 0; .6 .6 .6; .85 .85 .85];    
+    cm = [1 1 1; .0 .4 .0; .7 .7 .7; .85 .85 .85];    
     colormap(cm);
     caxis([1 4]);
     daspect([1 1 1]);
@@ -63,5 +63,5 @@ function results_distribution_segments
     box off;        
     axis off;
     
-    export_fig(fullfile(constants.OUTPUT_DIR, 'distribution_segments.png'), '-m2.5');
+    export_fig(fullfile(g_config.OUTPUT_DIR, 'distribution_segments.png'), '-m3');
 end

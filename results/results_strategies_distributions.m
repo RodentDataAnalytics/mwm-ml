@@ -18,7 +18,7 @@ function results_strategies_distributions
     bins = [90]; % [20, 25, 45];    
     % bins = [90];
     
-    classes = constants.REDUCED_BEHAVIOURAL_CLASSES;
+    classes = g_config.REDUCED_BEHAVIOURAL_CLASSES;
     % classes = g_segments_classification.classes; 
     [~, full_strat_distr] = g_segments.classes_mapping_time(g_segments_classification, bins, ...
                                                            'Classes', classes, ...
@@ -32,7 +32,7 @@ function results_strategies_distributions
     data = [];        
     for c = 1:length(classes)
         figure;        
-        for s = 1:constants.SESSIONS                        
+        for s = 1:g_config.SESSIONS                        
             for g = 1:2                
                 sel = distr(g_trajectories_session(g_long_trajectories_idx) == s & g_trajectories_group(g_long_trajectories_idx) == g);
                 
@@ -72,13 +72,13 @@ function results_strategies_distributions
 %             end
         end
         hold off;
-        xlabel(sprintf('%% %s', g_segments_classification.classes(c).description), 'FontSize', constants.FONT_SIZE);
-        ylabel('percentage', 'FontSize', constants.FONT_SIZE);
+        xlabel(sprintf('%% %s', g_segments_classification.classes(c).description), 'FontSize', g_config.FONT_SIZE);
+        ylabel('percentage', 'FontSize', g_config.FONT_SIZE);
         
 
     end         
     
-    % export_fig(fullfile(constants.OUTPUT_DIR, 'distribution_strat_trials.eps'));
+    % export_fig(fullfile(g_config.OUTPUT_DIR, 'distribution_strat_trials.eps'));
     
     
 end

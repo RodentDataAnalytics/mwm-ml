@@ -21,7 +21,7 @@ function trajectory_detailed_classification( traj_labels_fn, labels_fn, seg_len,
     % read tags for full trajectories
     [labels_data, full_tags] = traj.read_tags(traj_labels_fn);
     traj_map = traj.match_tags(labels_data, full_tags);    
-    beh_idx = find( arrayfun( @(t) t.type == constants.TAG_TYPE_BEHAVIOUR_CLASS, full_tags) );    
+    beh_idx = find( arrayfun( @(t) t.type == g_config.TAG_TYPE_BEHAVIOUR_CLASS, full_tags) );    
     full_tags = full_tags(beh_idx);
     traj_map = traj_map(:, beh_idx);        
     

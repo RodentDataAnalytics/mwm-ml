@@ -56,7 +56,7 @@ function results_strategies_individual_evolution4
         plot_distribution_strategies(distr, 'Ordered', 1, 'Widths', bins, ...
                    'ColumnLabels', col_labels, 'RowLabels', row_labels, ...
                    'Ticks', [10, 50, 90], 'TicksLabels', {'10s', '50s', '90s'}, 'BarHeight', 1.2, 'AverageBarsHeight', 0.2);
-        export_fig(fullfile(constants.OUTPUT_DIR, sprintf('individual_strategies_red_g%d.eps', g)));        
+        export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('individual_strategies_red_g%d.eps', g)));        
     end                      
 end
 

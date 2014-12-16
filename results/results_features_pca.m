@@ -1,11 +1,11 @@
 function results_features_pca
-    feat = constants.FULL_FEATURE_SET;
+    feat = g_config.FULL_FEATURE_SET;
     
     global g_trajectories; % loaded thru the function bellow that caches trajectories
     cache_trajectories;
    
     % segment trajectories - ones with less than 2 segments will be discarded
-    [seg, partitions] = g_trajectories.divide_into_segments(constants.DEFAULT_SEGMENT_LENGTH, constants.DEFAULT_SEGMENT_OVERLAP, 2);
+    [seg, partitions] = g_trajectories.divide_into_segments(g_config.DEFAULT_SEGMENT_LENGTH, g_config.DEFAULT_SEGMENT_OVERLAP, 2);
     feat_val = seg.compute_features(feat);
 
     n = seg.count;

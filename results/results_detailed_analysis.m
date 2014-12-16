@@ -10,7 +10,7 @@
     close(hdummy);
     
     % print(gcf, '-dpdf', '/tmp/detailed_strategies_legend');
-    export_fig(fullfile(constants.OUTPUT_DIR, 'strategies_legend.eps');
+    export_fig(fullfile(g_config.OUTPUT_DIR, 'strategies_legend.eps');
         
 
 function results_detailed_analysis
@@ -177,7 +177,7 @@ function results_detailed_analysis
                 text(max_len / 2, n + 4, cur{i*2 + 1}, 'FontSize', 1.1*fsz, 'HorizontalAlignment','center');
                  % mark cases where animal found the platform
                 for j = 1:length(sel)
-                    if traj_lat(sel(j)) == constants.TRIAL_TIMEOUT
+                    if traj_lat(sel(j)) == g_config.TRIAL_TIMEOUT
                         hold on;                     
                        % text( traj_length(sel(j)) + 100, j + 1, sprintf('* (%d)', found_counter(j)), 'FontSize', fsz, 'FontWeight', 'bold'); 
                         text( traj_length(sel(j)) + 100, j + 1, 'x', 'FontSize', fsz, 'FontWeight', 'bold'); 
@@ -214,13 +214,13 @@ function results_detailed_analysis
     %%%%
     
     % use a reduced set of classes
-    tag_groups = [  tag.combine_tags( [constants.TAGS(2), constants.TAGS(3)] ), ... % TT + IC
-                    constants.TAGS(11), ...                         %AT
-                    tag.combine_tags( [constants.TAGS(7), constants.TAGS(10)]), ... % SC + SO
-                    constants.TAGS(5), ... % CR                                                 
-                    constants.TAGS(6) ]; % ST                               
+    tag_groups = [  tag.combine_tags( [g_config.TAGS(2), g_config.TAGS(3)] ), ... % TT + IC
+                    g_config.TAGS(11), ...                         %AT
+                    tag.combine_tags( [g_config.TAGS(7), g_config.TAGS(10)]), ... % SC + SO
+                    g_config.TAGS(5), ... % CR                                                 
+                    g_config.TAGS(6) ]; % ST                               
     
-    [segment_classes, tags] = seg.classify(constants.SEGMENTS_TAGS250_PATH, constants.DEFAULT_FEATURE_SET, 100, 0, tag_groups);                         
+    [segment_classes, tags] = seg.classify(g_config.SEGMENTS_TAGS250_PATH, g_config.DEFAULT_FEATURE_SET, 100, 0, tag_groups);                         
                  
     % we compute the distribution of strategies by number of segments and
     % time as well
@@ -259,7 +259,7 @@ function results_detailed_analysis
                 continue;            
             end
             % take only the long enough trajectories
-            sel = sel(traj_length(sel) > 2*constants.DEFAULT_SEGMENT_LENGTH);
+            sel = sel(traj_length(sel) > 2*g_config.DEFAULT_SEGMENT_LENGTH);
             % also, remove any trajectories withtout class information
             sel = sel(sum(full_distr(sel, 1:length(tag_groups)), 2) > 0);
             [~, idx] = sort(traj_length(sel), 'descend');
@@ -388,8 +388,8 @@ function results_detailed_analysis
                 hold on;                
             end           
                 
-            tick1 = 1000 / ((1. - constants.DEFAULT_SEGMENT_OVERLAP)*constants.DEFAULT_SEGMENT_LENGTH);
-            tick2 = 3000 / ((1. - constants.DEFAULT_SEGMENT_OVERLAP)*constants.DEFAULT_SEGMENT_LENGTH);
+            tick1 = 1000 / ((1. - g_config.DEFAULT_SEGMENT_OVERLAP)*g_config.DEFAULT_SEGMENT_LENGTH);
+            tick2 = 3000 / ((1. - g_config.DEFAULT_SEGMENT_OVERLAP)*g_config.DEFAULT_SEGMENT_LENGTH);
             set(gca,'XLim', [0, max_seg], 'XTick', [tick1, tick2], 'XTickLabel', {'10m', '30m'});
             set(gca,'box','off');           
 
@@ -400,7 +400,7 @@ function results_detailed_analysis
             text(max_seg / 2 + 10, nmax_bars + 2, cur{i*2 + 1}, 'FontSize', 1.1*fsz, 'HorizontalAlignment','center');
              % mark cases where animal has not found the platform
             for j = 1:nbars
-                if traj_lat(sel(j)) == constants.TRIAL_TIMEOUT
+                if traj_lat(sel(j)) == g_config.TRIAL_TIMEOUT
                     hold on;                     
                    % text( traj_length(sel(j)) + 100, j + 1, sprintf('* (%d)', found_counter(j)), 'FontSize', fsz, 'FontWeight', 'bold'); 
                     text( partitions(sel(j)) + 2, j + 0.2, 'x', 'FontSize', fsz, 'FontWeight', 'bold'); 
@@ -460,12 +460,12 @@ function results_detailed_analysis
         
             for t = 1:4
                 axes('Position', [0.06 + (t - 1)*0.24, 0.1, 0.21, 0.85]);  
-                % sel = find(groups == g & traj_length > 3*constants.DEFAULT_SEGMENT_LENGTH & (trials == ((d-1)*4 + t)));
+                % sel = find(groups == g & traj_length > 3*g_config.DEFAULT_SEGMENT_LENGTH & (trials == ((d-1)*4 + t)));
                 
                 if g == 1
-                    sel = find(groups == 1 & session_speed < non_stress_max_speed & traj_length > 3*constants.DEFAULT_SEGMENT_LENGTH & (trials == ((d-1)*4 + t)));
+                    sel = find(groups == 1 & session_speed < non_stress_max_speed & traj_length > 3*g_config.DEFAULT_SEGMENT_LENGTH & (trials == ((d-1)*4 + t)));
                 else
-                    sel = find(groups == 2 & session_speed >= stress_min_speed(d) & traj_length > 3*constants.DEFAULT_SEGMENT_LENGTH & (trials == ((d-1)*4 + t)));
+                    sel = find(groups == 2 & session_speed >= stress_min_speed(d) & traj_length > 3*g_config.DEFAULT_SEGMENT_LENGTH & (trials == ((d-1)*4 + t)));
                 end
                 accum_strat = zeros(50, length(tag_groups));
 
@@ -493,8 +493,8 @@ function results_detailed_analysis
                 set(gca, 'FontSize', 2*fsz);    
                 axis tight;
                 set(gca,'box','off');       
-                tick1 = 1000 / ((1. - constants.DEFAULT_SEGMENT_OVERLAP)*constants.DEFAULT_SEGMENT_LENGTH);
-                tick2 = 3000 / ((1. - constants.DEFAULT_SEGMENT_OVERLAP)*constants.DEFAULT_SEGMENT_LENGTH);
+                tick1 = 1000 / ((1. - g_config.DEFAULT_SEGMENT_OVERLAP)*g_config.DEFAULT_SEGMENT_LENGTH);
+                tick2 = 3000 / ((1. - g_config.DEFAULT_SEGMENT_OVERLAP)*g_config.DEFAULT_SEGMENT_LENGTH);
                 set(gca,'XTick', [tick1, tick2], 'XTickLabel', {'10m', '30m'});           
                 xlabel(sprintf('Trial %d', (d - 1)*4 + t), 'FontSize', 2*fsz);            
                 if t == 1
@@ -530,11 +530,11 @@ function results_detailed_analysis
         for j = 1:3
             t0 = (j - 1)*4;            
             for g = 1:2
-                % sel = find(groups == g & traj_length > 2*constants.DEFAULT_SEGMENT_LENGTH & (trials == (t0 + 1) | trials == (t0 + 2) | trials == (t0 + 3) | trials == (t0 + 4)));
+                % sel = find(groups == g & traj_length > 2*g_config.DEFAULT_SEGMENT_LENGTH & (trials == (t0 + 1) | trials == (t0 + 2) | trials == (t0 + 3) | trials == (t0 + 4)));
                 if g == 1
-                    sel = find(groups == 1 & session_speed < non_stress_max_speed & traj_length > 2*constants.DEFAULT_SEGMENT_LENGTH & (trials == (t0 + 1) | trials == (t0 + 2) | trials == (t0 + 3) | trials == (t0 + 4)));
+                    sel = find(groups == 1 & session_speed < non_stress_max_speed & traj_length > 2*g_config.DEFAULT_SEGMENT_LENGTH & (trials == (t0 + 1) | trials == (t0 + 2) | trials == (t0 + 3) | trials == (t0 + 4)));
                 else
-                    sel = find(groups == 2 & session_speed >= stress_min_speed(j) & traj_length > 2*constants.DEFAULT_SEGMENT_LENGTH & (trials == (t0 + 1) | trials == (t0 + 2) | trials == (t0 + 3) | trials == (t0 + 4)));
+                    sel = find(groups == 2 & session_speed >= stress_min_speed(j) & traj_length > 2*g_config.DEFAULT_SEGMENT_LENGTH & (trials == (t0 + 1) | trials == (t0 + 2) | trials == (t0 + 3) | trials == (t0 + 4)));
                 end
                 
                 tmp = sum(full_distr(sel, ind), 2);   

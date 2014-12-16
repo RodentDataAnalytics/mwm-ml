@@ -17,7 +17,7 @@ function cache_trajectory_segments
     cache_trajectories;
     
     if isempty(g_segments)
-        [g_segments, g_partitions] = g_trajectories.divide_into_segments(constants.DEFAULT_SEGMENT_LENGTH, constants.DEFAULT_SEGMENT_OVERLAP, 2);
+        [g_segments, g_partitions] = g_trajectories.divide_into_segments(g_config.DEFAULT_SEGMENT_LENGTH, g_config.DEFAULT_SEGMENT_OVERLAP, 2);
         g_long_trajectories_idx = find(g_partitions ~= 0);
         g_long_trajectories_map = 1:length(g_partitions);
         g_long_trajectories_map(g_partitions == 0) = 0;

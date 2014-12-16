@@ -275,7 +275,7 @@ classdef trajectories < handle
             end                
             
             % add the 'undefined' tag index
-            undef_tag_idx = tag.tag_position(tags, constants.UNDEFINED_TAG_ABBREVIATION);
+            undef_tag_idx = tag.tag_position(tags, g_config.UNDEFINED_TAG_ABBREVIATION);
             if undef_tag_idx > 0
                 tags = tags([1:undef_tag_idx - 1, (undef_tag_idx + 1):length(tags)]);          
                 tag_new_idx = [1:undef_tag_idx, undef_tag_idx:length(tags)];
@@ -338,7 +338,7 @@ classdef trajectories < handle
                 nbins = length(bins);
             else
                 nbins = bins;
-                bins = repmat(constants.TRIAL_TIMEOUT / nbins, 1, nbins);
+                bins = repmat(g_config.TRIAL_TIMEOUT / nbins, 1, nbins);
             end
             
             if isempty(classes)
@@ -547,11 +547,11 @@ classdef trajectories < handle
                         end
                         if ~found                            
                             % add to tags list
-                            for l = 1:length(constants.TAGS)
-                                if strcmp(constants.TAGS(l).abbreviation, labels{i, k})
+                            for l = 1:length(g_config.TAGS)
+                                if strcmp(g_config.TAGS(l).abbreviation, labels{i, k})
                                     found = 1;                                        
-                                    if nargin < 2 || tag_type == constants.TAG_TYPE_ALL || constants.TAGS(l).type == tag_type
-                                        tags = [tags, constants.TAGS(l)];
+                                    if nargin < 2 || tag_type == g_config.TAG_TYPE_ALL || g_config.TAGS(l).type == tag_type
+                                        tags = [tags, g_config.TAGS(l)];
                                         lbls_idx = [lbls_idx, length(tags)];
                                     end
                                     break;

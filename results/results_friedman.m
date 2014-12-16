@@ -17,7 +17,7 @@ function results_friedman3
     % bins = [30, 60];    
     bins = [90];
     
-    classes = constants.REDUCED_BEHAVIOURAL_CLASSES;
+    classes = g_config.REDUCED_BEHAVIOURAL_CLASSES;
     % classes = g_segments_classification.classes; 
     [~, full_strat_distr] = g_segments.classes_mapping_time(g_segments_classification, bins, 'Classes', classes, 'DiscardUnknown', 0);
     
@@ -27,8 +27,8 @@ function results_friedman3
     for c = 1:length(classes)            
         for b = 1:length(bins)        
             % construct matrix for the Friedman test
-            m = zeros(constants.TRIALS*n, 2);                        
-            for t = 1:constants.TRIALS      
+            m = zeros(g_config.TRIALS*n, 2);                        
+            for t = 1:g_config.TRIALS      
                 for g = 1:2                                        
                     sel = find( g_trajectories_trial == t & g_trajectories_group == g);                
                     
@@ -48,7 +48,7 @@ function results_friedman3
             pa = anova2(m, n);
             str = sprintf('Class: %s\tSection: %d\tp_frdm: %g\tp_anova: %g', classes(c).description, b, p, pa);
             disp(str);
-            % export_fig(fullfile(constants.OUTPUT_DIR, sprintf('control_stress_evol_s%d_b%d.eps', s, b)));
+            % export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('control_stress_evol_s%d_b%d.eps', s, b)));
         end
     end   
 end

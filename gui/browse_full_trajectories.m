@@ -1,4 +1,4 @@
 global g_trajectories;
 cache_trajectories;
 
-browse_trajectories(constants.FULL_TRAJECTORIES_TAGS_PATH, g_trajectories, constants.TAGS, constants.DEFAULT_FEATURE_SET, []);
+browse_trajectories(g_config.FULL_TRAJECTORIES_TAGS_PATH, g_trajectories, g_config.TAGS, g_config.DEFAULT_FEATURE_SET, []);
