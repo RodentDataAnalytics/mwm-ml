@@ -7,10 +7,8 @@ function results_strategies_distributions
     global g_trajectories_trial;    
     global g_trajectories_session;
     global g_trajectories_group;        
-    global g_trajectories_speed;        
     global g_segments_classification;
     global g_long_trajectories_idx;
-    global g_animals_trajectories_map;
         
     % classify trajectories
     cache_trajectories_classification; 
@@ -20,7 +18,7 @@ function results_strategies_distributions
     
     classes = g_config.REDUCED_BEHAVIOURAL_CLASSES;
     % classes = g_segments_classification.classes; 
-    [~, full_strat_distr] = g_segments.classes_mapping_time(g_segments_classification, bins, ...
+    [~, full_strat_distr] = g_segments.classes_mapping_ordered(g_segments_classification, bins, ...
                                                            'Classes', classes, ...
                                                            'DiscardUnknown', 0);
     

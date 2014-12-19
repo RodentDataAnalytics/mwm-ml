@@ -28,7 +28,7 @@ function results_strategies_distributions2
      %%     1, 1, 1];          
 %     cm = cm ./ repmat(255, size(cm, 1), size(cm, 2));
 %     
-    [~, full_strat_distr] = g_segments.classes_mapping_time(g_segments_classification, bins, 'Classes', classes, 'DiscardUnknown', 0);
+    [~, full_strat_distr] = g_segments.classes_mapping_ordered(g_segments_classification, bins, 'Classes', classes, 'DiscardUnknown', 0);
          
     %% plot distributions
     b = 1;

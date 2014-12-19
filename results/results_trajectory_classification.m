@@ -1,13 +1,27 @@
 function results_trajectory_classification
+    addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/cm_and_cb_utilities'));
+        
     %%  load all trajectories and compute feature values if necessary (data is then cached)
     global g_trajectories_strat_distr_norm;
     global g_trajectories_strat;
     global g_trajectories;
     global g_trajectories_punknown;
+    global g_segments;
+    global g_segments_classification;
+    global g_long_trajectories_map;
+    global g_partitions;
     
     cache_trajectories_classification;
        
+    strat_distr = g_segments.classes_mapping_ordered(g_segments_classification, -1);
+
     ids = [1, 1, 57; 1, 1, 6; 3, 1, 4; 1, 2, 48; 1, 1, 55; 1, 3, 41; 2, 3, 17; 2, 2, 4];
+    
+    cm = g_config.CLASSES_COLORMAP;
+    % rescale colormap    
+    if size(cm, 1) > g_segments_classification.nclasses
+        cm = cmapping(g_segments_classification.nclasses, cm);
+    end
     
     for i = 1:size(ids, 1)
         idx = -1;
@@ -29,6 +43,32 @@ function results_trajectory_classification
         end    
         
         fprintf('UNK: %f%%', g_trajectories_punknown(idx));
+                
+        % segments
+        nseg = g_partitions(idx);
+        seg0 = 1;
+        if idx > 1
+            s = cumsum(g_partitions);        
+            seg0 = s(idx - 1);
+        end
+        
+        distr = strat_distr(g_long_trajectories_map(idx), :);
+        
+        % plot trajectory
+        figure;            
+        for j = 1:nseg
+            clr = [0 0 0];
+            if distr(j) > 0
+                clr = cm(distr(j), :);
+            end            
+            if j == 1
+                g_segments.items(seg0 + j - 1).plot('Color', clr);
+            else
+                g_segments.items(seg0 + j - 1).plot('Color', clr, 'DrawArena', 0);
+            end
+            hold on;
+        end    
+        close;
     end
     
 %     % plot clusters    

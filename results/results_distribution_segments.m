@@ -53,7 +53,7 @@ function results_distribution_segments
     data = data(:, 1:250);   
     % plot bars
     figure;
-    cm = [1 1 1; .0 .4 .0; .7 .7 .7; .85 .85 .85];    
+    cm = [1 1 1; .1 .45 .1; .7 .7 .7; .85 .85 .85];    
     colormap(cm);
     caxis([1 4]);
     daspect([1 1 1]);

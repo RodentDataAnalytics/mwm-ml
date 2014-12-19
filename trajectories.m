@@ -15,6 +15,7 @@ classdef trajectories < handle
     properties(GetAccess = 'protected', SetAccess = 'protected')
         hash_ = -1;
         trajhash_ = [];
+        partitions_ = [];
     end
     
     methods
@@ -96,8 +97,29 @@ classdef trajectories < handle
                     p = p + 1;
                 end
             end
-
+            segments.partitions_ = partition;
+            
             fprintf(': %d segments created.\n', segments.count);
+        end
+        
+        function out = partitions(inst)
+            if inst.count > 0 && isempty(inst.partitions_)
+                id = [-1, -1, -1];
+                n = 0;
+                for i = 1:inst.count    
+                    if ~isequal(id, inst.items(i).data_identification)
+                        if n > 0
+                           inst.partitions_ = [inst.partitions_, n];
+                        end
+                        id = inst.items(i).data_identification;                            
+                    end
+                    n = n + 1;
+                end
+                if n > 0
+                    inst.partitions_ = [inst.partitions_, n];
+                end                        
+            end
+            out = inst.partitions_;
         end
         
         function out = remove_outliers(obj, feat, k, n)
@@ -327,18 +349,23 @@ classdef trajectories < handle
             res = semisupervised_clustering([extra_feat; inst.compute_features(feat)], [extra_lbl, labels], tags, length(extra_lbl));            
         end                            
         
-        function [major_classes, full_distr] = classes_mapping_time(inst, results, bins, varargin)        
+        function [major_classes, full_distr] = classes_mapping_ordered(inst, results, bins, varargin)        
             % compute the prefered strategy for a small time window for each
             % trajectory
             addpath(fullfile(fileparts(mfilename('fullpath')), '/extern'));
-            [classes, discard_unk] = process_options(varargin, ...
+            [classes, discard_unk, tm] = process_options(varargin, ...
                 'Classes', [], 'DiscardUnknown', 1);
           
-            if isvector(bins)
+            if isvector(bins) && length(bins) > 1
                 nbins = length(bins);
             else
-                nbins = bins;
-                bins = repmat(g_config.TRIAL_TIMEOUT / nbins, 1, nbins);
+                if bins == -1
+                    % binning is done for each segment
+                    nbins = max(inst.partitions);                   
+                else
+                    nbins = bins;
+                    bins = repmat(g_config.TRIAL_TIMEOUT / nbins, 1, nbins);
+                end                    
             end
             
             if isempty(classes)
@@ -354,11 +381,14 @@ classdef trajectories < handle
             end
             major_classes = [];
                 
-            tbins = [0, cumsum(bins)];
-    
+            if bins ~= -1
+                tbins = [0, cumsum(bins)];
+            end
+            
             id = [-1, -1, -1];
             class_distr_traj = [];
             unk = [];
+            iseg = 0;
             for i = 1:inst.count    
                 if ~isequal(id, inst.items(i).data_identification)
                     id = inst.items(i).data_identification;
@@ -385,10 +415,18 @@ classdef trajectories < handle
                                     traj_distr(j) = pos;
                                 end
                             else
-                                if inst.items(i - 1).end_time < tbins(j)
-                                    traj_distr(j) = -1;
+                                if bins == -1
+                                    if j > iseg
+                                        traj_distr(j) = -1;
+                                    else
+                                        traj_distr(j) = 0;
+                                    end
                                 else
-                                    traj_distr(j) = 0;
+                                    if inst.items(i - 1).end_time < tbins(j)
+                                        traj_distr(j) = -1;
+                                    else
+                                        traj_distr(j) = 0;
+                                    end
                                 end
                             end
                         end
@@ -396,24 +434,38 @@ classdef trajectories < handle
                     end  
                     class_distr_traj = ones(nbins, nclasses)*-1;
                     unk = zeros(1, nbins);
+                    iseg = 0;
                 end
+                iseg = iseg + 1;
 
-                % first and last time window that this segment crosses  
-                ti = inst.items(i).start_time;
-                tf = inst.items(i).end_time;
+                if bins == -1
+                    wi = iseg;
+                    wf = iseg;
+                    xf = inst.items(i).offset + inst.items(i).compute_feature(features.LENGTH);
+                    for j = wi:inst.count
+                        if ~isequal(id, inst.items(j).data_identification) || inst.items(j).offset > xf
+                            wf = j;
+                            break;
+                        end
+                    end                    
+                else
+                    % first and last time window that this segment crosses  
+                    ti = inst.items(i).start_time;
+                    tf = inst.items(i).end_time;
 
-                wi = -1;
-                wf = -1;
-                for j = 1:nbins
-                    if ti >= tbins(j) && ti <= tbins(j + 1)
-                        wi = j;
-                    end
-                    if tf >= tbins(j) && tf <= tbins(j + 1)
-                        wf = j;
-                        break;
+                    wi = -1;
+                    wf = -1;
+                    for j = 1:nbins
+                        if ti >= tbins(j) && ti <= tbins(j + 1)
+                            wi = j;
+                        end
+                        if tf >= tbins(j) && tf <= tbins(j + 1)
+                            wf = j;
+                            break;
+                        end
                     end
                 end
-
+                
                 % for each one of them increment class count        
                 for j = wi:wf 
                     if results.class_map(i) > 0
@@ -446,10 +498,18 @@ classdef trajectories < handle
                     if val > 0
                         traj_distr(j) = pos;
                     else
-                        if inst.items(i - 1).end_time < tbins(j)
-                            traj_distr(j) = -1;
+                        if bins == -1
+                            if j > iseg
+                                traj_distr(j) = -1;
+                            else
+                                traj_distr(j) = 0;
+                            end
                         else
-                            traj_distr(j) = 0;
+                            if inst.items(i - 1).end_time < tbins(j)
+                                traj_distr(j) = -1;
+                            else
+                                traj_distr(j) = 0;
+                            end
                         end
                     end
                 end

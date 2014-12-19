@@ -303,18 +303,22 @@ classdef trajectory < handle
             end
         end    
         
-        function plot(traj)
-            axis off;
-            daspect([1 1 1]);                      
-            rectangle('Position',[g_config.CENTRE_X - g_config.ARENA_R, g_config.CENTRE_X - g_config.ARENA_R, g_config.ARENA_R*2, g_config.ARENA_R*2],...
-                'Curvature',[1,1], 'FaceColor',[1, 1, 1], 'edgecolor', [0.2, 0.2, 0.2], 'LineWidth', 3);
-            hold on;
-            axis square;
-            rectangle('Position',[g_config.PLATFORM_X - g_config.PLATFORM_R, g_config.PLATFORM_Y - g_config.PLATFORM_R, 2*g_config.PLATFORM_R, 2*g_config.PLATFORM_R],...
-                'Curvature',[1,1], 'FaceColor',[1, 1, 1], 'edgecolor', [0.2, 0.2, 0.2], 'LineWidth', 3);             
-            plot(traj.points(:,2), traj.points(:,3),'k', 'LineWidth', 2);
+        function plot(traj, varargin)
+            addpath(fullfile(fileparts(mfilename('fullpath')), '/extern'));
+            [clr, arn] = process_options(varargin, ...
+                'Color', [0 0 0], 'DrawArena', 1);
+            if arn
+                axis off;
+                daspect([1 1 1]);                      
+                rectangle('Position',[g_config.CENTRE_X - g_config.ARENA_R, g_config.CENTRE_X - g_config.ARENA_R, g_config.ARENA_R*2, g_config.ARENA_R*2],...
+                    'Curvature',[1,1], 'FaceColor',[1, 1, 1], 'edgecolor', [0.2, 0.2, 0.2], 'LineWidth', 3);
+                hold on;
+                axis square;
+                rectangle('Position',[g_config.PLATFORM_X - g_config.PLATFORM_R, g_config.PLATFORM_Y - g_config.PLATFORM_R, 2*g_config.PLATFORM_R, 2*g_config.PLATFORM_R],...
+                    'Curvature',[1,1], 'FaceColor',[1, 1, 1], 'edgecolor', [0.2, 0.2, 0.2], 'LineWidth', 3);             
+            end
+            plot(traj.points(:,2), traj.points(:,3),'k', 'LineWidth', 2, 'Color', clr);           
             set(gca, 'LooseInset', [0,0,0,0]);
-            hold off;
         end        
     end
     

@@ -99,14 +99,7 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
             end
         end
     end
-       
-    % the 'undefined' tag index
-    undef_tag_idx = -1;
-    matches = find(arrayfun( @(t) strcmp(t.abbreviation, g_config.UNDEFINED_TAG_ABBREVIATION), tags));
-    if ~isempty(matches)
-        undef_tag_idx = matches(1);
-    end
-    
+           
     % styles for plotting clusters
     pointtypes = {'+r', 'xg', 'db', '.c', 'om', 'xy', '+b', 'ok'};
 
@@ -180,7 +173,7 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
                     end
                     str = strcat(str, sprintf('%s: %.4f', features.feature_abbreviation(feat(j)), feat_values(traj_idx, j)));                    
                 end
-                % put also set ment identification
+                % put also segment identification
                 str = sprintf('%s  ||  %d/%d/%d+%dcm', str, traj.items(traj_idx).set, traj.items(traj_idx).track, traj.items(traj_idx).trial, round(traj.items(traj_idx).offset));
                 if ~isempty(classif_res)
                     str = sprintf('  ||  %s cluster #%d', str, classif_res.cluster_idx(traj_idx));

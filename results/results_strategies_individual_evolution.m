@@ -28,7 +28,7 @@ function results_strategies_individual_evolution
      %%     1, 1, 1];          
 %     cm = cm ./ repmat(255, size(cm, 1), size(cm, 2));
 %     
-    [strat_distr, full_strat_distr] = g_segments.classes_mapping_time(g_segments_classification, bins, 'Classes', classes, 'DiscardUnknown', 0);
+    [strat_distr, full_strat_distr] = g_segments.classes_mapping_ordered(g_segments_classification, bins, 'Classes', classes, 'DiscardUnknown', 0);
 
     % plot the distribution of strategies for each session and group of
     % animals

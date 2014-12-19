@@ -135,10 +135,11 @@ classdef clustering_results
         function [distr, ext_distr] = classes_distribution(inst, partitions, varargin)
             % neeed the process_options function
             addpath(fullfile(fileparts(mfilename('fullpath')), '/extern'));
-            [normalize, ext_vals, empty_class, max_seg, reverse] = process_options(varargin, ...
-                'Normalize', 0, 'ExternalValues', [], 'EmptyClass', 0, 'MaxSegments', 0, 'Reverse', 0 ...
+            [normalize, ext_vals, empty_class, max_seg, reverse, ovlp, slen] = process_options(varargin, ...
+                'Normalize', 0, 'ExternalValues', [], 'EmptyClass', 0, ... 
+                'MaxSegments', 0, 'Reverse', 0, 'Overlap', 0, 'SegmentLength', 0 ...
             );
-            
+                                
             distr = [];
             ext_distr = [];            
             % number of classes
@@ -152,11 +153,19 @@ classdef clustering_results
             next = inst.nexternal_labels;
             nt = 1; % trajectory number           
             ns = 0; % segment number 
+                
             distr = zeros(length(partitions), nc);
             if ~isempty(ext_vals)
                 ext_distr = zeros(length(partitions), nc);
             end    
             
+            if ovlp > 0
+                % both overlap and segment lenghts have to provided                
+                assert( slen > 0 ) ;
+                nbin = ceil(slen / ovlp);
+                distr_traj = zeros(1, nc);
+            end                
+                        
             if reverse
                 map = inst.class_map(end:-1:1);
                 partitions = partitions(end:-1:1);
@@ -175,16 +184,36 @@ classdef clustering_results
                         end
                         nt = nt + 1;
                         continue;
-                    end          
+                    else
+                        if ovlp > 0
+                            for j = 1:size(distr_traj, 1)
+                                v = max(distr_traj(j, :));                                    
+                                if v > 0
+                                    % allow for more than one maximum
+                                    p = find(distr_traj(j, :) == v);
+                                    distr(nt, p) = distr(nt, p) + 1 / length(p);
+                                end
+                            end                            
+                        end
+                    end
+                    if ovlp > 0
+                        distr_traj = zeros(1, nc);
+                    end
                     nt = nt + 1;
                 end
                 
                 if map(i) ~= 0
                     if max_seg == 0 || ns <= max_seg
-                        distr(nt, map(i)) = distr(nt, map(i)) + 1;
+                        if ovlp == 0                        
+                            distr(nt, map(i)) = distr(nt, map(i)) + 1;
                     
-                        if ~isempty(ext_vals)
-                            ext_distr(nt, map(i)) = ext_distr(nt, map(i)) + ext_vals(i);
+                            if ~isempty(ext_vals)
+                                ext_distr(nt, map(i)) = ext_distr(nt, map(i)) + ext_vals(i);
+                            end
+                        else                           
+                            for j = ns:(ns + nbin) 
+                                distr_traj(j, map(i)) = distr_traj(j, map(i)) + 1;
+                            end
                         end
                     end
                 end

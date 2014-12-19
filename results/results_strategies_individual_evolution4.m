@@ -19,7 +19,7 @@ function results_strategies_individual_evolution4
     bins = repmat(6, 1, 15);
     nbins = length(bins);
 
-    strat_distr = g_segments.classes_mapping_time(g_segments_classification, bins);
+    strat_distr = g_segments.classes_mapping_ordered(g_segments_classification, bins);
 
     tmp = zeros(length(g_partitions), nbins);
     tmp(g_partitions > 0, 1:nbins) = strat_distr;
