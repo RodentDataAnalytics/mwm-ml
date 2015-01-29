@@ -11,12 +11,12 @@ function results_confusion_matrix
         % initialize data
         cache_trajectory_segments;                    
 
-        folds = 10;
 
         % get classifier object
         classif = g_segments.classifier(g_config.DEFAULT_TAGS_PATH, g_config.DEFAULT_FEATURE_SET, g_config.TAG_TYPE_BEHAVIOUR_CLASS);
 
-        % perform a 10-fold cross-validation
+        % perform a N-fold cross-validation
+        folds = 10;
         res = classif.cluster_cross_validation(g_config.DEFAULT_NUMBER_OF_CLUSTERS, 'Folds', folds);
 
         % take the "total confusion matrix"    

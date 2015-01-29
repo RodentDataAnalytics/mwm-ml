@@ -1,18 +1,3 @@
-% legend
-    hdummy = figure;
-    dummyplot = barh(full_distr(1:2, :), 'Stack');
-    leg = arrayfun(@(t) t.description, tags(strat_ordering), 'UniformOutput', 0);
-    leg = [leg, 'direct finding'];
-    hleg = figure;
-    set(gcf, 'Color', 'w');
-    legendflex(dummyplot, leg, 'box', 'off', 'nrow', 3, 'ncol', 3, 'ref', hleg, 'fontsize', 8, 'anchor', {'n','n'});
-    close(hleg);
-    close(hdummy);
-    
-    % print(gcf, '-dpdf', '/tmp/detailed_strategies_legend');
-    export_fig(fullfile(g_config.OUTPUT_DIR, 'strategies_legend.eps');
-        
-
 function results_detailed_analysis
 %RESULTS_CONTROL_STRESS_ANALYSIS Summary of this function goes here
 %   Detailed explanation goes here

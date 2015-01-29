@@ -10,7 +10,6 @@ function results_friedman3
     global g_trajectories_group;          
     global g_segments;
     
-    
     % classify trajectories
     cache_trajectories_classification; 
         
@@ -19,7 +18,7 @@ function results_friedman3
     
     classes = g_config.REDUCED_BEHAVIOURAL_CLASSES;
     % classes = g_segments_classification.classes; 
-    [~, full_strat_distr] = g_segments.classes_mapping_time(g_segments_classification, bins, 'Classes', classes, 'DiscardUnknown', 0);
+    [~, full_strat_distr] = g_segments.classes_mapping_ordered(g_segments_classification, bins, 'Classes', classes, 'DiscardUnknown', 0);
     
     % count animals
     n = 27; % sum(g_trajectories_trial(g_long_trajectories_idx) == 1);

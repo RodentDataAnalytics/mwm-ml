@@ -150,7 +150,7 @@ function results_control_stress_speed_latency
                    
            % hip = kstest2(data(groups == 2*t - 1), data(groups == 2*t));
            % hip = AnDarksamtest(data_test, 0.05);                    
-            p = ranksum(data(groups == 2*t - 1), data(groups == 2*t));                    
+           p = ranksum(data(groups == 2*t - 1), data(groups == 2*t));                    
             
             if p < 0.05
                 if p < 0.01
@@ -170,8 +170,7 @@ function results_control_stress_speed_latency
 %                    alpha = 0.01;
 %                 end
 %               
-
-                h = sigstar( {[pos(2*t - 1), pos(t*2)]}, [alpha]);
+%                h = sigstar( {[pos(2*t - 1), pos(t*2)]}, [alpha]);
                 set(h(:, 1), 'LineWidth', 1.5);
                 set(h(:, 2), 'FontSize', 0.7*g_config.FONT_SIZE);
             end
