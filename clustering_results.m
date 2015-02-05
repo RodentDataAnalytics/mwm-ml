@@ -1,4 +1,4 @@
-classdef clustering_results
+classdef clustering_results < handle
     % CLUSTERING_RESULTS Stores results of the clustering
     
     properties(GetAccess = 'public', SetAccess = 'protected')    
@@ -36,9 +36,7 @@ classdef clustering_results
             inst.cluster_class_map = ccm;
             inst.nclusters = length(inst.cluster_class_map);            
             inst.centroids = ce;
-            if ~isempty(inst.class_map)
-                inst.punknown = sum(inst.class_map == 0) / length(inst.class_map);
-            end
+           
             if nargin > 10
                 inst.classes = cl;
             end
@@ -47,8 +45,18 @@ classdef clustering_results
             for i = 1:length(inst.input_labels)
                 tmp = inst.input_labels{i};
                 if tmp ~= -1
-                    inst.non_empty_labels_idx = [inst.non_empty_labels_idx, i];                    
+                    inst.non_empty_labels_idx = [inst.non_empty_labels_idx, i];     
+                    % in case that we have one label only, and the segment
+                    % could not be classified adopt the manual label
+                    if length(tmp) == 1 && tmp(1) > 0
+                        if inst.class_map(i) == 0
+                            inst.class_map(i) = tmp(1);
+                        end
+                    end
                 end
+            end
+            if ~isempty(inst.class_map)
+                inst.punknown = sum(inst.class_map == 0) / length(inst.class_map);
             end
             inst.nlabels = length(inst.non_empty_labels_idx); 
             

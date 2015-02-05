@@ -280,7 +280,7 @@ classdef trajectories < handle
             else
                 tag_map = 1:length(tags);
             end
-        end          
+        end                   
         
         function res = classifier(inst, labels_fn, feat, tags_type, hyper_tags)
             if nargin > 3
@@ -347,7 +347,172 @@ classdef trajectories < handle
             end
                                     
             res = semisupervised_clustering([extra_feat; inst.compute_features(feat)], [extra_lbl, labels], tags, length(extra_lbl));            
-        end                            
+        end        
+        
+        function [cov_rate, cov_flag] = segments_covering(inst, results)
+            id = [-1, -1, -1];
+            cov_flag = zeros(1, inst.count); 
+            % last _classified_ segment
+            last_idx = 0;
+            last_end = 0;           
+            for i = 1:inst.count
+                if ~isequal(id, inst.items(i).data_identification)
+                    id = inst.items(i).data_identification;
+                    % different trajectory
+                    last_idx = 0;
+                end
+
+                % do we have a classified segment ?
+                if results.class_map(i) > 0
+                    % this segment is classified
+                    off = inst.items(i).offset;
+                    seg_end = inst.items(i).compute_feature(features.LENGTH) + off;
+                    cov_flag(i) = 1;
+                    if last_idx > 0 && last_end >= off
+                        % mark every segment in between as covered
+                        for j = (last_idx + 1):i
+                            cov_flag(j) = 1;
+                        end
+                    end
+                    last_end = seg_end;
+                    last_idx = i;
+                end                
+            end
+            cov_rate = sum(cov_flag) / inst.count;
+        end
+        
+        % TODO: (tiago) remove this and replace by classes_mapping_ordered;
+        % The should do the same but somehow I broke the other function ...
+        % need to investigate
+        function [major_classes, full_distr] = classes_mapping_time(inst, results, bins, varargin)        
+            % compute the prefered strategy for a small time window for each
+            % trajectory
+            addpath(fullfile(fileparts(mfilename('fullpath')), '/extern'));
+            [classes, discard_unk] = process_options(varargin, ...
+                'Classes', [], 'DiscardUnknown', 1);
+          
+            if isvector(bins)
+                nbins = length(bins);
+            else
+                nbins = bins;
+                bins = repmat(constants.TRIAL_TIMEOUT / nbins, 1, nbins);
+            end
+            
+            if isempty(classes)
+                map = 1:results.nclasses;
+                nclasses = results.nclasses;
+            else
+                map = tag.mapping(classes, results.classes);
+                nclasses = length(classes);
+            end
+            
+            if nargout > 1
+                full_distr = {};
+            end
+            major_classes = [];
+                
+            tbins = [0, cumsum(bins)];
+    
+            id = [-1, -1, -1];
+            class_distr_traj = [];
+            unk = [];
+            for i = 1:inst.count    
+                if ~isequal(id, inst.items(i).data_identification)
+                    id = inst.items(i).data_identification;
+                    % different trajectory
+                    if ~isempty(class_distr_traj)
+                        if nargout > 1
+                            tmp = class_distr_traj;
+                            tmp(tmp(:) == -1) = 0;
+                            nrm = repmat(sum(tmp, 2) + 1e-6 + unk', 1, nclasses);
+                            nrm(class_distr_traj == -1) = 1;
+                            class_distr_traj = class_distr_traj ./ nrm;
+                            full_distr = [full_distr, class_distr_traj];
+                        end         
+                        % take only the most frequent class for each
+                        % bin and trajectory                            
+                        traj_distr = zeros(1, nbins);
+                        % for each window select the most common class
+                        for j = 1:nbins
+                            [val, pos] = max(class_distr_traj(j, :));                
+                            if val > 0
+                                if unk(j) > val && ~discard_unk
+                                    traj_distr(j) = 0;
+                                else
+                                    traj_distr(j) = pos;
+                                end
+                            else
+                                if inst.items(i - 1).end_time < tbins(j)
+                                    traj_distr(j) = -1;
+                                else
+                                    traj_distr(j) = 0;
+                                end
+                            end
+                        end
+                        major_classes = [major_classes; traj_distr];                        
+                    end  
+                    class_distr_traj = ones(nbins, nclasses)*-1;
+                    unk = zeros(1, nbins);
+                end
+
+                % first and last time window that this segment crosses  
+                ti = inst.items(i).start_time;
+                tf = inst.items(i).end_time;
+
+                wi = -1;
+                wf = -1;
+                for j = 1:nbins
+                    if ti >= tbins(j) && ti <= tbins(j + 1)
+                        wi = j;
+                    end
+                    if tf >= tbins(j) && tf <= tbins(j + 1)
+                        wf = j;
+                        break;
+                    end
+                end
+
+                % for each one of them increment class count        
+                for j = wi:wf 
+                    if results.class_map(i) > 0
+                        col = map(results.class_map(i));                    
+                        if class_distr_traj(j, col) == -1
+                            class_distr_traj(j, col) = 1;
+                        else
+                            class_distr_traj(j, col) = class_distr_traj(j, col) + 1;
+                        end
+                    elseif ~discard_unk
+                        unk(j) = unk(j) + 1;                        
+                    end                
+                end
+            end
+        
+            % final trajectory
+            if ~isempty(class_distr_traj)
+                if nargout > 1
+                    tmp = class_distr_traj;
+                    tmp(tmp(:) == -1) = 0;
+                    nrm = repmat(sum(tmp, 2) + 1e-6, 1, nclasses);
+                    nrm(class_distr_traj == -1) = 1;
+                    class_distr_traj = class_distr_traj ./ nrm;
+                    full_distr = [full_distr, class_distr_traj];                       
+                end
+                traj_distr = zeros(1, nbins);
+                % for each window select the most common class
+                for j = 1:nbins
+                    [val, pos] = max(class_distr_traj(j, :));    
+                    if val > 0
+                        traj_distr(j) = pos;
+                    else
+                        if inst.items(i - 1).end_time < tbins(j)
+                            traj_distr(j) = -1;
+                        else
+                            traj_distr(j) = 0;
+                        end
+                    end
+                end
+                major_classes = [major_classes; traj_distr];
+            end         
+        end
         
         function [major_classes, full_distr] = classes_mapping_ordered(inst, results, bins, varargin)        
             % compute the prefered strategy for a small time window for each
@@ -560,6 +725,7 @@ classdef trajectories < handle
                 end
             end
         end
+        
         
         function purge_cache
             fn = fullfile(fileparts(mfilename('fullpath')),'/cache/feature_values.mat');                

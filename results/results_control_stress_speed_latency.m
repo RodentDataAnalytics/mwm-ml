@@ -18,10 +18,9 @@ function results_control_stress_speed_latency
     names = {'latency', 'efficiency', 'speed', 'length'};
     ylabels = {'latency [s]', 'efficiency', 'speed [cm/s]', 'path length [m]'};
     log_y = [0, 1, 0, 0];
-    
-    figure(872);
+        
     for i = 1:size(vars, 1)
-        clf;
+        figure;
         values = vars(i, :);
         data = [];
         groups = [];
@@ -94,9 +93,10 @@ function results_control_stress_speed_latency
             end
             d = d + 0.15;
         end
-             
-%        pos = 0:0.3:(0.3*(2*g_config.TRIALS - 1));
-%        pos(2:2:(2*g_config.TRIALS)) = pos(2:2:(2*g_config.TRIALS)) - repmat(0.1, 1, g_config.TRIALS);
+        
+        % matrix for friedman's multifactor tests
+        n = 27;
+        fried = zeros(g_config.TRIALS*n, 2);                        
         for t = 1:g_config.TRIALS
             for g = 1:2            
                 map = g_animals_trajectories_map{g};
@@ -104,11 +104,12 @@ function results_control_stress_speed_latency
                 data = [data, tmp(:)'];
                 xpos = [xpos, repmat(pos(t*2 - 1 + g - 1), 1, length(tmp(:)))];             
                 groups = [groups, repmat(t*2 - 1 + g - 1, 1, length(tmp(:)))];             
-            
-            end
-            
+                for j = 1:n
+                    fried((t - 1)*n + j, g) = tmp(j);
+                end
+            end            
         end
-        
+                                                   
         boxplot(data, groups, 'positions', pos, 'colors', [0 0 0; .7 .7 .7]);
         set(gca, 'LineWidth', g_config.AXIS_LINE_WIDTH, 'FontSize', g_config.FONT_SIZE);
         
@@ -141,17 +142,10 @@ function results_control_stress_speed_latency
         for j=1:length(h)
             set(h(j), 'MarkerEdgeColor', [0 0 0]);
         end
-
+        
         % check significances
         for t = 1:g_config.TRIALS
-           % data_test = [data(groups == 2*t - 1)' ones(sum(groups == 2*t - 1), 1); ...
-           %              data(groups == 2*t)' 2*ones(sum(groups == 2*t), 1)];
-
-                   
-           % hip = kstest2(data(groups == 2*t - 1), data(groups == 2*t));
-           % hip = AnDarksamtest(data_test, 0.05);                    
-            p = ranksum(data(groups == 2*t - 1), data(groups == 2*t));                    
-            
+            p = ranksum(data(groups == 2*t - 1), data(groups == 2*t));                                
             if p < 0.05
                 if p < 0.01
                     if p < 0.001
@@ -162,25 +156,25 @@ function results_control_stress_speed_latency
                 else
                   alpha = 0.05;
                 end
-                
-                % alpha = 0.05;
-%                 hip = AnDarksamtest(data_test, 0.01);                    
-%             
-%                 if hip
-%                    alpha = 0.01;
-%                 end
-%               
-
-                h = sigstar( {[pos(2*t - 1), pos(t*2)]}, [alpha]);
-                set(h(:, 1), 'LineWidth', 1.5);
-                set(h(:, 2), 'FontSize', 0.7*g_config.FONT_SIZE);
+                 
+               % add significance stars
+               % h = sigstar( {[pos(2*t - 1), pos(t*2)]}, [alpha]);
+               % set(h(:, 1), 'LineWidth', 1.5);
+               % set(h(:, 2), 'FontSize', 0.7*g_config.FONT_SIZE);
             end
         end
                 
         set(gcf, 'Color', 'w');
         box off;        
         
+        set(gcf,'papersize',[8,8], 'paperposition',[0,0,8,8]);
+      
         export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('control_stress_trial_%s.eps', names{i})));
+        
+        % run friedman test            
+        p = friedman(fried, n);
+        str = sprintf('Friedman p-value (%s): %g', ylabels{i}, p);
+        disp(str);          
     end
     
     close;

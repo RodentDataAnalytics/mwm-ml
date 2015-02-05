@@ -1,4 +1,4 @@
-function results_friedman3
+function results_friedman
     addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/export_fig'));  
     addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/sigstar'));
     addpath(fullfile(fileparts(mfilename('fullpath')), '../'));
@@ -18,7 +18,7 @@ function results_friedman3
     
     classes = g_config.REDUCED_BEHAVIOURAL_CLASSES;
     % classes = g_segments_classification.classes; 
-    [~, full_strat_distr] = g_segments.classes_mapping_ordered(g_segments_classification, bins, 'Classes', classes, 'DiscardUnknown', 0);
+    [~, full_strat_distr] = g_segments.classes_mapping_time(g_segments_classification, bins, 'Classes', classes, 'DiscardUnknown', 0);
     
     % count animals
     n = 27; % sum(g_trajectories_trial(g_long_trajectories_idx) == 1);

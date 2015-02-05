@@ -10,7 +10,11 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
     f = figure('Visible','off', 'name', 'Trajectories tagging', ...
                'Position', [200, 200, 900, 800], 'Menubar', 'none', 'Toolbar', 'none');
     
-    % create controls
+    %%
+    %% Create controls
+    %%%
+    
+    % trajectories navigation
     uicontrol('Style', 'pushbutton', 'Units', 'normalized', 'String', '<- prev',...
         'Position', [0.25, 0.02, 0.07, 0.06], ...
         'Callback',{@previous_callback});
@@ -23,27 +27,38 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
     uicontrol('Style', 'pushbutton', 'Units', 'normalized', 'String', '->>',...
         'Position', [0.75, 0.02, 0.05, 0.06], ...
         'Callback',{@next2_callback});        
+    % status text (middle)
     hpos = uicontrol('Style', 'text', 'Units', 'normalized', 'String', '', ...
         'Position', [0.32, 0.01, 0.36, 0.08]);
     align([hpos], 'Center','Bottom');    
+    % clustering controls
     uicontrol('Style', 'text', 'Units', 'normalized', ...
         'String', '# of clusters:', ...
         'Position', [0.82, 0.06, 0.05, 0.02]);   
     vals = arrayfun( @(x) sprintf('%d', x), 1:500, 'UniformOutput', 0);
     hclusters = uicontrol('Style', 'popupmenu', 'Units', 'normalized', ...
         'String', vals, ...
-        'Position', [0.82, 0.01, 0.06, 0.04]);   
-    hfilter = [];
-    sortstr = {'** none **'};
-    sortstr = [sortstr, arrayfun( @(f) features.feature_name(f), feat, 'UniformOutput', 0)];
-    sortstr = [sortstr, '** combined **'];
-    hsort = uicontrol('Style', 'popupmenu', 'Units', 'normalized', 'String', sortstr, ...
-        'Position', [0.02, 0.04, 0.15, 0.02], 'Callback', {@combobox_sorting_callback});
-    hcv = uicontrol('Style', 'checkbox', 'Units', 'normalized', 'String', 'Enable cross-validation', ...
-        'Position', [0.02, 0.01, 0.15, 0.02]);
+        'Position', [0.82, 0.04, 0.06, 0.02]);   
+    hcv = uicontrol('Style', 'checkbox', 'Units', 'normalized', 'String', 'Enable CV', ...
+        'Position', [0.82, 0.01, 0.06, 0.02]);    
     uicontrol('Style', 'pushbutton', 'Units', 'normalized', 'String', 'Cluster', ...
-        'Position', [0.9, 0.02, 0.08, 0.06], 'Callback', {@cluster_callback});    
-    
+        'Position', [0.9, 0.02, 0.08, 0.06], 'Callback', {@cluster_callback});
+    % feature sorting control
+    hfilter = [];
+    sortstr = {'** none **', '** distance to centre (max) **', '** distance to centre (euclidean) **', '** combined **', '** random **' };
+    sortstr = [sortstr, arrayfun( @(f) features.feature_name(f), feat, 'UniformOutput', 0)];
+    hsort = uicontrol('Style', 'popupmenu', 'Units', 'normalized', 'String', sortstr, ...
+        'Position', [0.02, 0.02, 0.10, 0.02], 'Callback', {@sorting_callback});
+    hsort_reverse = uicontrol('Style', 'checkbox', 'Units', 'normalized', 'String', 'Rev', ...
+        'Position', [0.12, 0.02, 0.05, 0.02], 'Callback', {@sorting_callback});    
+    % cluster navigation and control (note: combo-box is created elsewhere
+    % since it is dynamic
+    hfilter_prev = uicontrol('Style', 'pushbutton', 'Units', 'normalized', 'String', '<-', ...
+        'Position', [0.02, 0.04, 0.075, 0.03], 'Callback', {@filter_prev_callback});    
+    hfilter_next = uicontrol('Style', 'pushbutton', 'Units', 'normalized', 'String', '->', ...
+        'Position', [0.095, 0.04, 0.075, 0.03], 'Callback', {@filter_next_callback});        
+    nitems_filter = 0;
+    % trajectories display
     ha = { axes('Parent', f, 'Units', 'normalized', 'Position', [0.02, 0.60, 0.4, 0.38]), ...
            axes('Parent', f, 'Units', 'normalized', 'Position', [0.02, 0.15, 0.4, 0.38]), ...
            axes('Parent', f, 'Units', 'normalized', 'Position', [0.5, 0.60, 0.4, 0.38]), ...
@@ -106,7 +121,7 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
     classif_res = [];
     draw_boundary = 0;
     distr_status = '';
-    cluster_centroids = [];
+    covering = [];
     feat_values = traj.compute_features(feat);
     
     update_filter_combo;
@@ -122,23 +137,31 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
             delete(hfilter);
             hfilter = [];
         end
-        strings = {'** all **', '** tagged only **', '** selection **', '** errors **'};
+        strings = {'** all **', '** tagged only **', '** isolated **', '** selection **', '** errors **'};
         if ~isempty(classif_res)
             strings = [strings, arrayfun( @(t) t.description, classif_res.classes, 'UniformOutput', 0)];
-        end        
+        end     
+            
         if ~isempty(classif_res)
+            % isolated/lonely segments            
+            isol = ~covering;
             for i = 1:max(classif_res.cluster_idx)
                 if classif_res.cluster_class_map(i) == 0
                     lbl = g_config.UNDEFINED_TAG_ABBREVIATION;
                 else
                     lbl = classif_res.classes(classif_res.cluster_class_map(i)).abbreviation;
                 end
-                strings = [strings, sprintf('Cluster #%d (''%s'', N=%d, L=%d)', ... 
-                                            i, lbl, sum(classif_res.cluster_idx == i), length(find(sum(labels_traj(classif_res.cluster_idx == i, :), 2) > 0)))];
+                nclus = sum(classif_res.cluster_idx == i);
+                strings = [strings, sprintf('Cluster #%d (''%s'', N=%d, L=%d, I=%d)', ... 
+                                            i, lbl, nclus, ...
+                                            length(find(sum(labels_traj(classif_res.cluster_idx == i, :), 2) > 0)), ...
+                                            sum(isol(classif_res.cluster_idx == i)))];
             end
         end
+        
         hfilter = uicontrol('Style', 'popupmenu', 'Units', 'normalized', 'String', strings, ...
         'Position', [0.02, 0.07, 0.15, 0.02], 'Callback', {@combobox_filter_callback});
+        nitems_filter = length(strings);
     
         combobox_filter_callback(0, 0);
     end
@@ -148,8 +171,16 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
             if cur + i < length(filter)
                 traj_idx = filter(sorting(cur + i - 1));
                 % plot the trajectory/segment
-                set(f, 'currentaxes', ha{i});                
-                traj.items(traj_idx).plot;
+                set(f, 'currentaxes', ha{i});                                
+                traj.items(traj_idx).plot;                
+                hold on;                
+                if ~isempty(covering)
+                    if covering(traj_idx)
+                        rectangle('Position', [80, 80, 10, 10], 'FaceColor', [0.5, 1, 0.5]);                    
+                    else
+                        rectangle('Position', [80, 80, 10, 10], 'FaceColor', [1, 0.5, 0.5]);
+                    end
+                end                                    
                 % draw surrounding ellipse?
                 if draw_boundary
                     hold on;                    
@@ -253,20 +284,13 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
             end
         end
         if ~isempty(classif_res)
-            str = strcat(str, sprintf('\nErrors: %d (%.1f%%) | Unknown: %.1f%%', classif_res.nerrors, classif_res.perrors*100, classif_res.punknown*100)); 
+            pcov = sum(covering) / traj.count;
+            str = strcat(str, sprintf('\nErrors: %d (%.1f%%) | Unknown: %.1f%% | Covering: %.1f%%', ...
+                classif_res.nerrors, classif_res.perrors*100, classif_res.punknown*100, pcov*100)); 
         end
         str = sprintf('%s\n%s', str, distr_status);        
         set(hpos, 'String', str);
     end
-
-%     function drawboundary_callback(source, eventdata)
-%         traj_idx = filter(sorting(cur));
-%         % plot the trajectory/segment        
-%         len = trajectory_length(traj.items(traj_idx).points);     
-%         f = trajectory_focus(traj.items(traj_idx).central_points(g_config.FOCUS_P))
-%         draw_boundary = get(hboundary, 'value');                    
-%         show_trajectories;
-%     end
     
     function checkbox_callback(source, eventdata)
         save_data;   
@@ -283,22 +307,28 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
                 % everyone labelled
                 filter = find(sum(labels_traj, 2) > 0);                            
             case 3
+                filter = find(covering == 0);
+            case 4
                 % user selection
                 filter = selection;
-            case 4                     
-                % mis-matched classifications                
-                filter = find(cluster_miss == 1);            
+            case 5                     
+                % mis-matched classifications      
+                if ~isempty(classif_res)
+                    filter = find(classif_res.errors == 1);            
+                else
+                    filter = 1:traj.count;
+                end
             otherwise
                 % classes
-                if val <= classif_res.nclasses + 4
-                    if classif_res.classes(val - 4).abbreviation == g_config.UNDEFINED_TAG_ABBREVIATION                                    
+                if val <= classif_res.nclasses + 5
+                    if classif_res.classes(val - 5).abbreviation == g_config.UNDEFINED_TAG_ABBREVIATION                                    
                         filter = find(classif_res.class_map == 0);
                     else
-                        filter = find(classif_res.class_map == (val - 4));                                    
+                        filter = find(classif_res.class_map == (val - 5));                                    
                     end
                 else
                    % clusters
-                   filter = find(classif_res.cluster_idx == (val - classif_res.nclasses - 4));
+                   filter = find(classif_res.cluster_idx == (val - classif_res.nclasses - 5));
                 end
         end
         % status text string
@@ -353,71 +383,115 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
                 % too many possible pairings
                 return;
             end
-            figure(27);        
-            clf;
-            n = 1;        
-            for i = 1:(length(feat) - 1)
-                for j = (i + 1):length(feat)               
-                    subplot(m, l, n);
-                    n = n + 1;
-                    % the "unknown" guys
-                    pos = find(classif_res.class_map(filter) == 0);
-                    plot(feat_values(filter(pos), i), feat_values(filter(pos), j), 'dk');
-                    hold on;                
-                    p = 1;
-                    for k = 1:classif_res.nclasses
-                        if ~strcmp(classif_res.classes(k).abbreviation, g_config.UNDEFINED_TAG_ABBREVIATION)
-                            pos = find(classif_res.class_map(filter) == k);      
-                            if ~isempty(pos)
-                                plot(feat_values(filter(pos), i), feat_values(filter(pos), j), pointtypes{p});
-                                p = p + 1;
-                            end
-                        end
-                    end         
-                    xlabel(features.feature_name(feat(i)));
-                    ylabel(features.feature_name(feat(j)));                                                     
-                    hold off;                                                
-                end
-            end
-
-            % plot legend in a separate sub-window
-            subplot(m, l, n);                
-            p = 1;
-            for k = 1:classif_res.nclasses
-                if strcmp(classif_res.classes(k).abbreviation, g_config.UNDEFINED_TAG_ABBREVIATION)
-                    plot(0, 0, 'dk');
-                else
-                    plot(0, 0, pointtypes{p});
-                    p = p + 1;
-                end
-                hold on;            
-            end
-            names = arrayfun( @(t) t.description, classif_res.classes, 'UniformOutput', 0);
-            hold off;
-            legend(names);                                    
+%             figure(27);        
+%             clf;
+%             n = 1;        
+%             for i = 1:(length(feat) - 1)
+%                 for j = (i + 1):length(feat)               
+%                     subplot(m, l, n);
+%                     n = n + 1;
+%                     % the "unknown" guys
+%                     pos = find(classif_res.class_map(filter) == 0);
+%                     plot(feat_values(filter(pos), i), feat_values(filter(pos), j), 'dk');
+%                     hold on;                
+%                     p = 1;
+%                     for k = 1:classif_res.nclasses
+%                         if ~strcmp(classif_res.classes(k).abbreviation, g_config.UNDEFINED_TAG_ABBREVIATION)
+%                             pos = find(classif_res.class_map(filter) == k);      
+%                             if ~isempty(pos)
+%                                 plot(feat_values(filter(pos), i), feat_values(filter(pos), j), pointtypes{p});
+%                                 p = p + 1;
+%                             end
+%                         end
+%                     end         
+%                     xlabel(features.feature_name(feat(i)));
+%                     ylabel(features.feature_name(feat(j)));                                                     
+%                     hold off;                                                
+%                 end
+%             end
+% 
+%             % plot legend in a separate sub-window
+%             subplot(m, l, n);                
+%             p = 1;
+%             for k = 1:classif_res.nclasses
+%                 if strcmp(classif_res.classes(k).abbreviation, g_config.UNDEFINED_TAG_ABBREVIATION)
+%                     plot(0, 0, 'dk');
+%                 else
+%                     plot(0, 0, pointtypes{p});
+%                     p = p + 1;
+%                 end
+%                 hold on;            
+%             end
+%             names = arrayfun( @(t) t.description, classif_res.classes, 'UniformOutput', 0);
+%             hold off;
+%             legend(names);                                    
         end
+        update_filter_navigation();
     end
 
     function update_sorting
         val = get(hsort, 'value');
+        rev = get(hsort_reverse, 'value');
         switch val
             case 1
                 sorting = 1:length(filter);              
-            case length(feat) + 2                        
+            case 2                
+                % distance to centre of clusters
+                middle = (min(feat_values(filter, :)) + max(feat_values(filter, :))) / 2;                
+                nz = all(feat_values(filter, :) ~= 0);
+                vals = (feat_values(filter, nz) - repmat( middle(nz), length(filter), 1)) ./ repmat( max(feat_values(filter, nz)) - min(feat_values(filter, nz)), length(filter), 1);                                
+                dist = max(abs(vals), [], 2);
+                % dist = (norm_feat_values(filter, :) - classif_res.centroids(:, classif_res.cluster_idx(filter), :)').^2;
+                [~, sorting] = sort(dist);                
+            case 3                
+                % distance to centre of clusters                
+                feat_norm = max(feat_values) - min(feat_values);
+                dist = ((feat_values(filter, :) - classif_res.centroids(:, classif_res.cluster_idx(filter), :)') / repmat(feat_norm, size(feat_values, 1), 1)).^2;
+                [~, sorting] = sort(dist);                            
+            case 4
                 % distance function
+                dist = sum((feat_values(filter, :) ./ repmat( max(feat_values(filter, :)) - min(feat_values(filter, :)), length(filter), 1)).^2, 2);                
+                [~, sorting] = sort(dist);                            
+            case 5
+                % random
+                sorting = randperm(length(filter));
+            otherwise                        
+                % sort by a single feature
                 featval = feat_values;
                 featval = featval(filter, :);
-                norm = featval ./ repmat(max(featval), length(filter), 1);
-                dist = sum(norm.^2, 2);                
-                [~, sorting] = sort(dist);            
-            otherwise
-                featval = feat_values;
-                featval = featval(filter, :);
-                [~, sorting] = sort(featval(:, val - 1));
+                [~, sorting] = sort(featval(:, val - 5));                                        
+        end
+        if rev
+            sorting = sorting(end:-1:1);
         end
     end
 
-    function combobox_sorting_callback(source, eventdata)
+    function update_filter_navigation()        
+        if get(hfilter, 'value') == nitems_filter
+            set(hfilter_next, 'Enable', 'off');
+        else
+            set(hfilter_next, 'Enable', 'on');
+        end
+        if get(hfilter, 'value') == 1
+            set(hfilter_prev, 'Enable', 'off');
+        else
+            set(hfilter_prev, 'Enable', 'on');
+        end
+    end
+        
+    function filter_next_callback(source, eventdata)
+        val = get(hfilter, 'value');        
+        set(hfilter, 'value', val + 1);
+        combobox_filter_callback(0, 0);
+    end
+
+    function filter_prev_callback(source, eventdata)
+        val = get(hfilter, 'value');        
+        set(hfilter, 'value', val - 1);
+        combobox_filter_callback(0, 0);
+    end    
+
+    function sorting_callback(source, eventdata)
         update_sorting;
         cur = 1;
         show_trajectories;
@@ -465,6 +539,7 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
         end
         classif = traj.classifier(labels_fn, feat, g_config.TAG_TYPE_BEHAVIOUR_CLASS);
         classif_res = classif.cluster(nclusters, test_p);                
+        [~, covering] = traj.segments_covering(classif_res);
         update_filter_combo;        
         set(gcf,'Pointer','arrow');                
         

@@ -194,7 +194,7 @@ classdef semisupervised_clustering < handle
             
             nconstr = length(constr);
             
-            %% cluster the data
+            %% 1st (main stage): cluster the data
             fprintf('Clustering... (total number of constraints: %d)', size(constr, 1));
             [cluster_idx, centroids] = mpckmeans(reordered_feat, constr, nclusters);
             cluster_idx = cluster_idx + 1; % mpck-means uses zero based indexes (it's Java after all) -> we want them to start at 1
