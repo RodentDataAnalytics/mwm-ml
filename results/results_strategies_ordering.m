@@ -16,7 +16,7 @@ function results_strategies_ordering
     %[strat_distr, full_strat_distr] = g_segments.classes_mapping_time(g_segments_classification, bins, 'Classes', classes);
     strat_distr = g_segments.classes_mapping_time(g_segments_classification, bins);
 
-    nbins_count = 3;
+    nbins_count = 6;
     
     counts = zeros(1, g_segments_classification.nclasses);
     for i = 1:size(strat_distr, 1)

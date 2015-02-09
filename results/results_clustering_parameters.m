@@ -13,6 +13,7 @@ function results_clustering_parameters
     res3 = [];
     nc = [];
     test_set = [];      
+    covering = [];
     
     for i = 1:12
         n = 10 + i*10;
@@ -43,10 +44,12 @@ function results_clustering_parameters
             load(fn);
         else            
             [res, res1st] = classif.cluster_cross_validation(n, 'Folds', 10, 'TestSet', test_set);
+            covering = 
             save(fn, 'res', 'res1st');
         end               
         res1 = [res1, res];
         res2 = [res2, res1st];
+        covering = [covering, g_segments.covering(res1)];
                 
         % ii) clustering using all the constraints
         % see if we already have the data

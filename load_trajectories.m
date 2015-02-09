@@ -54,7 +54,7 @@ function [ traj, cal_data ] = load_trajectories(sets, calibrate)
             pos = find(temp(:,1) == id); 
             group = temp(pos(1),2);
             % construct trajectory object and append it to list of trajectories
-            traj = traj.append(trajectory(pts, i, track, group, id, trial, -1, -1));
+            traj = traj.append(trajectory(pts, i, track, group, id, trial, -1, -1, 1));
         end                                  
     end        
     

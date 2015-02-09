@@ -17,9 +17,9 @@ function results_strategies_score_efficiency
     %% Plot strategies x efficiency - area plot
     %%
     distr = g_segments_classification.classes_distribution(g_partitions(g_long_trajectories_idx), 'Normalize', 1);
-    nbins = 20;
-    min_eff = log(min(g_trajectories_efficiency(g_long_trajectories_idx)));
-    max_eff = log(max(g_trajectories_efficiency(g_long_trajectories_idx)));
+    nbins = 8;
+    min_eff = log(0.01); log(min(g_trajectories_efficiency(g_long_trajectories_idx)));
+    max_eff = log(0.25); % log(max(g_trajectories_efficiency(g_long_trajectories_idx)));
     dt = (max_eff - min_eff) / nbins;
     
     % bin the data according to strategy x efficiency
@@ -56,20 +56,20 @@ function results_strategies_score_efficiency
     %%
     %% Plot strategy x efficiency for different groups of strategies
     %%
-    for ic = 1:length(g_config.REDUCED_BEHAVIOURAL_CLASSES)
-       % tags in indices of this group
-       idx = [];
-       for j = 1:g_segments_classification.nclasses
-           if g_config.REDUCED_BEHAVIOURAL_CLASSES(ic).matches(g_segments_classification.classes(j).abbreviation)
-               idx = [idx, j];               
-           end
-       end
-
-       % plot the values
-       figure;
-       plot(xvals, data(:, idx)); 
-       set (gca, 'Xscale', 'log');         
-    end
+%     for ic = 1:length(g_config.REDUCED_BEHAVIOURAL_CLASSES)
+%        % tags in indices of this group
+%        idx = [];
+%        for j = 1:g_segments_classification.nclasses
+%            if g_config.REDUCED_BEHAVIOURAL_CLASSES(ic).matches(g_segments_classification.classes(j).abbreviation)
+%                idx = [idx, j];               
+%            end
+%        end
+% 
+%        % plot the values
+%        figure;
+%        plot(xvals, data(:, idx)); 
+%        set (gca, 'Xscale', 'log');         
+%     end
     
     %%
     %% Compute strategy "scores" based on how the presence of a strategy

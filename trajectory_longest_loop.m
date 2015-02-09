@@ -25,22 +25,22 @@ function max_loop = trajectory_longest_loop( traj, ext )
                 elseif (i == 1 && u >= 0 && u<= 1)
                    % first segment would self-cross the trajectory if
                    % extended further; see how far                   
-                   e = abs(t*d(i));
+                   e = norm(d(i, :))*abs(t) + norm(d(j, :))*u;
                    if t < 0 && e <= ext
                        intersect = 1;
                    end                    
-                elseif (j == length(d) && t >=0 && t<= 1)
+                elseif (j == size(d, 1) && t >=0 && t<= 1)
                    % last segment, to the same check if we project if
-                   % further
-                   e = abs(t*d(j));
-                   if u > 0 && e <= ext
+                   % further                   
+                   e = norm(d(i, :))*(1 - t) + norm(d(j, :))*abs(u);
+                   if u > 0 && e < ext 
                        intersect = 1;
                    end
                 end
                 
                 if intersect
-                    l = sum(sqrt( d( (i + 1):(j - 1), 1).^2 + d( (i + 1):(j - 1), 2).^2 ));
-                    l = l + norm(d(i))*(1 - t) + norm(d(j))*u;
+                    l = sum(sqrt( d( (i + 1):(j - 1), 1).^2 + d( (i + 1):(j - 1), 2).^2 ));                    
+                    l = l + norm(d(i, :))*(1 - t) + norm(d(j, :))*u;
                     max_loop = max(l, max_loop);       
                     i = j;
                     break;

@@ -123,6 +123,7 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
     distr_status = '';
     covering = [];
     feat_values = traj.compute_features(feat);
+    segments_map = [];
     
     update_filter_combo;
     show_trajectories;
@@ -137,7 +138,7 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
             delete(hfilter);
             hfilter = [];
         end
-        strings = {'** all **', '** tagged only **', '** isolated **', '** selection **', '** errors **'};
+        strings = {'** all **', '** tagged only **', '** isolated **', '** suspicious **', '** selection **', '** errors **'};
         if ~isempty(classif_res)
             strings = [strings, arrayfun( @(t) t.description, classif_res.classes, 'UniformOutput', 0)];
         end     
@@ -309,26 +310,35 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
             case 3
                 filter = find(covering == 0);
             case 4
+                % "suspicious" guys 
+                if ~isempty(classif_res)
+                    if isempty(segments_map)
+                        [~, ~, segments_map] = traj.classes_mapping_ordered(classif_res, -1, 'MinSegments', 4);
+                    end
+                    
+                    filter = find(segments_map ~= classif_res.class_map & segments_map > 0 & classif_res.class_map > 0);                    
+                end
+            case 5
                 % user selection
                 filter = selection;
-            case 5                     
+            case 6                     
                 % mis-matched classifications      
                 if ~isempty(classif_res)
-                    filter = find(classif_res.errors == 1);            
+                    filter = classif_res.non_empty_labels_idx(classif_res.errors == 1);            
                 else
                     filter = 1:traj.count;
                 end
             otherwise
                 % classes
-                if val <= classif_res.nclasses + 5
-                    if classif_res.classes(val - 5).abbreviation == g_config.UNDEFINED_TAG_ABBREVIATION                                    
+                if val <= classif_res.nclasses + 6
+                    if classif_res.classes(val - 6).abbreviation == g_config.UNDEFINED_TAG_ABBREVIATION                                    
                         filter = find(classif_res.class_map == 0);
                     else
-                        filter = find(classif_res.class_map == (val - 5));                                    
+                        filter = find(classif_res.class_map == (val - 6));                                    
                     end
                 else
                    % clusters
-                   filter = find(classif_res.cluster_idx == (val - classif_res.nclasses - 5));
+                   filter = find(classif_res.cluster_idx == (val - classif_res.nclasses - 6));
                 end
         end
         % status text string
@@ -539,6 +549,7 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
         end
         classif = traj.classifier(labels_fn, feat, g_config.TAG_TYPE_BEHAVIOUR_CLASS);
         classif_res = classif.cluster(nclusters, test_p);                
+        segments_map = [];
         [~, covering] = traj.segments_covering(classif_res);
         update_filter_combo;        
         set(gcf,'Pointer','arrow');                

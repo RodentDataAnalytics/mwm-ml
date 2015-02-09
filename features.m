@@ -50,6 +50,7 @@ classdef features
         PLATFORM_PROXIMITY = 27;        
         PLATFORM_SURROUNDINGS = 28;
         LONGEST_LOOP = 29;
+        CENTRE_DISPLACEMENT = 30;;
     end
     
     methods(Static)
@@ -111,6 +112,8 @@ classdef features
                     name = 'Platform surroundings' ;                                 
                 case features.LONGEST_LOOP
                     name = 'Longest loop';
+                case features.CENTRE_DISPLACEMENT
+                    name = 'Centre displacement';                
                 otherwise
                     error('Ouch!');
             end
@@ -174,6 +177,8 @@ classdef features
                     name = 'S_plat';              
                 case features.LONGEST_LOOP
                     name = 'L_max';
+                case features.CENTRE_DISPLACEMENT
+                    name = 'D_ctr';
                 otherwise                    
                     error('Ouch!');
             end

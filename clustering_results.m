@@ -99,7 +99,7 @@ classdef clustering_results < handle
         end
         
         function res = confusion_matrix(inst)
-            res = confusion_matrix(inst.input_labels(inst.non_empty_labels_idx(inst.test_set)), inst.class_map(inst.non_empty_labels_idx(inst.test_set)), inst.nclasses);
+            res = confusion_matrix(inst.input_labels(inst.non_empty_labels_idx(inst.test_set == 1)), inst.class_map(inst.non_empty_labels_idx(inst.test_set == 1)), inst.nclasses);
         end   
         
         % Allows to perform a non-standard mapping from clusters to classes

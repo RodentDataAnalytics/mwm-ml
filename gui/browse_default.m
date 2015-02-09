@@ -12,3 +12,4 @@ end
 sel = sel(g_trajectories_latency < g_config.TRIAL_TIMEOUT);
 
 browse_trajectories(g_config.DEFAULT_TAGS_PATH, g_segments, g_config.TAGS, g_config.DEFAULT_FEATURE_SET, sel);
+%browse_trajectories(g_config.SEGMENTS_TAGS250_70_PATH, g_segments, g_config.TAGS, g_config.DEFAULT_FEATURE_SET, sel);

@@ -14,6 +14,7 @@ classdef trajectory < handle
         session = -1;
         start_time = -1;
         end_time = -1;
+        start_index = -1;
     end
     
     properties(GetAccess = 'protected', SetAccess = 'protected')        
@@ -31,7 +32,7 @@ classdef trajectory < handle
         riqr_ = -1;        
         loops_ = -1;
         spin_ = -1;
-        kiqr_ = -1;
+        kiqr_ = -1;        
         ri_ = -1;
         iqrri_ = -1;
         covang_ = -1;        
@@ -40,10 +41,11 @@ classdef trajectory < handle
     
     methods
         % constructor
-        function traj = trajectory(pts, set, track, group, id, trial, segment, off)   
+        function traj = trajectory(pts, set, track, group, id, trial, segment, off, starti)   
             traj.points = pts;                       
             traj.set = set;
             traj.track = track;
+            traj.start_index = starti;
             traj.group = group;
             traj.id = id;
             traj.trial = trial;
@@ -91,9 +93,13 @@ classdef trajectory < handle
             %SUB_SEGMENT returns a segment from the trajectory
             pts = [];
             dist = 0;
+            starti = 0;
             for i = 2:length(traj.points)
                dist = dist + norm( traj.points(i, 2:3) - traj.points(i - 1, 2:3) );
                if dist >= beg
+                   if starti == 0
+                       starti = i;
+                   end
                    if dist > beg + len
                        % done we are
                        break;
@@ -103,7 +109,7 @@ classdef trajectory < handle
                end
             end
              
-            segment = trajectory(pts, traj.set, traj.track, traj.group, traj.id, traj.trial, 0, beg);   
+            segment = trajectory(pts, traj.set, traj.track, traj.group, traj.id, traj.trial, 0, beg, starti);   
         end
         
         function C = centre(traj)           
@@ -152,6 +158,7 @@ classdef trajectory < handle
             segments = trajectories([]);
                                                     
             for seg = 0:(nseg - 1)
+                starti = 0;
                 seg_off = 0;
                 pts = [];
                 if nseg == 1
@@ -160,6 +167,9 @@ classdef trajectory < handle
                 else
                     for i = 1:n
                        if cumdist(i) >= seg*off                           
+                           if starti == 0
+                               starti = i;
+                           end
                            if cumdist(i) > (seg*off + lseg)
                                % done we are
                                break;
@@ -173,7 +183,7 @@ classdef trajectory < handle
                     end
                 end
 
-                segments = segments.append(trajectory(pts, traj.set, traj.track, traj.group, traj.id, traj.trial, seg + 1, seg_off));
+                segments = segments.append(trajectory(pts, traj.set, traj.track, traj.group, traj.id, traj.trial, seg + 1, seg_off, starti));
             end                        
         end
         
@@ -291,13 +301,16 @@ classdef trajectory < handle
                     v = traj.iqrri_;    
                 case features.CV_INNER_RADIUS
                     if traj.iqrri_ == -1
-                        % need the centre of the covering ellipe for this
+                        % need the centre of the covering ellipse for this
                         % traj.compute_boundary;                        
                         [traj.ri_, traj.iqrri_] = trajectory_radius(traj.centralpts_, traj.ecentre_(1), traj.ecentre_(2));
                     end       
                     v = traj.iqrri_ / traj.ri_;                    
                 case features.LONGEST_LOOP
-                    v= trajectory_longest_loop(traj.points, 10);
+                    v= trajectory_longest_loop(traj.points, 40);
+                case features.CENTRE_DISPLACEMENT
+                    traj.compute_boundary;
+                    v = sqrt( (traj.ecentre_(1))^2 + (traj.ecentre_(2))^2) / g_config.ARENA_R;                
                 otherwise
                     error('!!!');
             end
@@ -305,8 +318,8 @@ classdef trajectory < handle
         
         function plot(traj, varargin)
             addpath(fullfile(fileparts(mfilename('fullpath')), '/extern'));
-            [clr, arn] = process_options(varargin, ...
-                'Color', [0 0 0], 'DrawArena', 1);
+            [clr, arn, ls, lw] = process_options(varargin, ...
+                'Color', [0 0 0], 'DrawArena', 1, 'LineSpec', '-', 'LineWidth', 1);
             if arn
                 axis off;
                 daspect([1 1 1]);                      
@@ -317,7 +330,7 @@ classdef trajectory < handle
                 rectangle('Position',[g_config.PLATFORM_X - g_config.PLATFORM_R, g_config.PLATFORM_Y - g_config.PLATFORM_R, 2*g_config.PLATFORM_R, 2*g_config.PLATFORM_R],...
                     'Curvature',[1,1], 'FaceColor',[1, 1, 1], 'edgecolor', [0.2, 0.2, 0.2], 'LineWidth', 3);             
             end
-            plot(traj.points(:,2), traj.points(:,3),'k', 'LineWidth', 2, 'Color', clr);           
+            plot(traj.points(:,2), traj.points(:,3), ls, 'LineWidth', lw, 'Color', clr);           
             set(gca, 'LooseInset', [0,0,0,0]);
         end        
     end
