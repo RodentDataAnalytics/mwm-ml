@@ -6,10 +6,12 @@ function cache_trajectories_classification
     % load trajectories and segments
     global g_segments;        
     global g_partitions;    
+    global g_trajectories;
     cache_trajectory_segments;
     
     % segment classification
     global g_segments_classification;
+    global g_segments_base_classification;
     
     % classification of all trajectories (including short - single segment
     % - ones);
@@ -19,11 +21,27 @@ function cache_trajectories_classification
     global g_trajectories_punknown;
     
     if isempty(g_segments_classification)
+        % parameters of the most detailed set
+        param = g_config.TAGS_CONFIG{2};    
+               
         % get classifier object
-        classif = g_segments.classifier(g_config.DEFAULT_TAGS_PATH, g_config.DEFAULT_FEATURE_SET, g_config.TAG_TYPE_BEHAVIOUR_CLASS);
+        classif = g_segments.classifier(param{1}, g_config.DEFAULT_FEATURE_SET, g_config.TAG_TYPE_BEHAVIOUR_CLASS);
         
         % classify segments
-        g_segments_classification = classif.cluster(g_config.DEFAULT_NUMBER_OF_CLUSTERS, 0);    
+        g_segments_classification = classif.cluster(param{4}, 0);    
+        g_segments_base_classification = g_segments_classification;
+        
+        % do now the other classifications
+        for i = 3:length(g_config.TAGS_CONFIG)
+            param = g_config.TAGS_CONFIG{i};
+            segments = g_trajectories.divide_into_segments(param{2}, param{3}, 2);
+            % get classifier object
+            classif = segments.classifier(param{1}, g_config.DEFAULT_FEATURE_SET, g_config.TAG_TYPE_BEHAVIOUR_CLASS);        
+            % classify'em
+            res = classif.cluster(param{4}, 0);
+            % combine results
+            g_segments_classification = g_segments_classification.combine(res); 
+        end
         
         % trajectory classes - segment classes + "direct finding" class        
         df_pos = tag.tag_position(g_segments_classification.classes, 'DF'); 

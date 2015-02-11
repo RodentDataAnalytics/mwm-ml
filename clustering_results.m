@@ -2,6 +2,7 @@ classdef clustering_results < handle
     % CLUSTERING_RESULTS Stores results of the clustering
     
     properties(GetAccess = 'public', SetAccess = 'protected')    
+        segments = [];
         nclasses = 0;
         classes = []; % this is actually optional
         nconstraints = 0;
@@ -23,8 +24,14 @@ classdef clustering_results < handle
         punknown_test = 0;
     end
     
+    properties(GetAccess = 'protected', SetAccess = 'protected')        
+        cover_ = [];
+        cover_flag_ = [];
+    end
+    
     methods
-        function inst = clustering_results(nc, lbls, train_set, tst_set, next, cstr, cm, ci, ccm, ce, cl)
+        function inst = clustering_results(seg, nc, lbls, train_set, tst_set, next, cstr, cm, ci, ccm, ce, cl)
+            inst.segments = seg;
             inst.nclasses = nc;
             inst.input_labels = lbls;
             inst.training_set = train_set;
@@ -125,6 +132,7 @@ classdef clustering_results < handle
             end
                           
             res = clustering_results( ...
+                inst.segments, ...
                 inst.nclasses, ...
                 inst.input_labels, ...                
                 inst.training_set, ...
@@ -241,5 +249,466 @@ classdef clustering_results < handle
             end
         end
         
+        function [cover, cov_flag] = coverage(inst)
+            if isempty(inst.cover_)
+                id = [-1, -1, -1];
+                inst.cover_flag_ = zeros(1, inst.segments.count); 
+                % last _classified_ segment
+                last_idx = 0;
+                last_end = 0;           
+                for i = 1:inst.segments.count
+                    if ~isequal(id, inst.segments.items(i).data_identification)
+                        id = inst.segments.items(i).data_identification;
+                        % different trajectory
+                        last_idx = 0;
+                    end
+
+                    % do we have a classified segment ?
+                    if inst.class_map(i) > 0
+                        % this segment is classified
+                        off = inst.segments.items(i).offset;
+                        seg_end = inst.segments.items(i).compute_feature(features.LENGTH) + off;
+                        inst.cover_flag_(i) = 1;
+                        if last_idx > 0 && last_end >= off
+                            % mark every segment in between as covered
+                            for j = (last_idx + 1):i
+                                inst.cover_flag_(j) = 1;
+                            end
+                        end
+                        last_end = seg_end;
+                        last_idx = i;
+                    end                
+                end     
+                inst.cover_ = sum(inst.cover_flag_) / inst.segments.count;
+            end
+            cover = inst.cover_;
+            cov_flag = inst.cover_flag_;
+        end
+        
+        % TODO: (tiago) remove this and replace by classes_mapping_ordered;
+        % The should do the same but somehow I broke the other function ...
+        % need to investigate
+        function [major_classes, full_distr] = mapping_time(inst, bins, varargin)        
+            % compute the prefered strategy for a small time window for each
+            % trajectory
+            addpath(fullfile(fileparts(mfilename('fullpath')), '/extern'));
+            [classes, discard_unk] = process_options(varargin, ...
+                'Classes', [], 'DiscardUnknown', 1);
+          
+            if isvector(bins)
+                nbins = length(bins);
+            else
+                nbins = bins;
+                bins = repmat(constants.TRIAL_TIMEOUT / nbins, 1, nbins);
+            end
+            
+            if isempty(classes)
+                map = 1:inst.nclasses;
+                nclasses = inst.nclasses;
+            else
+                map = tag.mapping(classes, inst.classes);
+                nclasses = length(classes);
+            end
+            
+            if nargout > 1
+                full_distr = {};
+            end
+            major_classes = [];
+                
+            tbins = [0, cumsum(bins)];
+    
+            id = [-1, -1, -1];
+            class_distr_traj = [];
+            unk = [];
+            for i = 1:inst.segments.count    
+                if ~isequal(id, inst.segments.items(i).data_identification)
+                    id = inst.segments.items(i).data_identification;
+                    % different trajectory
+                    if ~isempty(class_distr_traj)
+                        if nargout > 1
+                            tmp = class_distr_traj;
+                            tmp(tmp(:) == -1) = 0;
+                            nrm = repmat(sum(tmp, 2) + 1e-6 + unk', 1, nclasses);
+                            nrm(class_distr_traj == -1) = 1;
+                            class_distr_traj = class_distr_traj ./ nrm;
+                            full_distr = [full_distr, class_distr_traj];
+                        end         
+                        % take only the most frequent class for each
+                        % bin and trajectory                            
+                        traj_distr = zeros(1, nbins);
+                        % for each window select the most common class
+                        for j = 1:nbins
+                            [val, pos] = max(class_distr_traj(j, :));                
+                            if val > 0
+                                if unk(j) > val && ~discard_unk
+                                    traj_distr(j) = 0;
+                                else
+                                    traj_distr(j) = pos;
+                                end
+                            else
+                                if inst.segments.items(i - 1).end_time < tbins(j)
+                                    traj_distr(j) = -1;
+                                else
+                                    traj_distr(j) = 0;
+                                end
+                            end
+                        end
+                        major_classes = [major_classes; traj_distr];                        
+                    end  
+                    class_distr_traj = ones(nbins, nclasses)*-1;
+                    unk = zeros(1, nbins);
+                end
+
+                % first and last time window that this segment crosses  
+                ti = inst.segments.items(i).start_time;
+                tf = inst.segments.items(i).end_time;
+
+                wi = -1;
+                wf = -1;
+                for j = 1:nbins
+                    if ti >= tbins(j) && ti <= tbins(j + 1)
+                        wi = j;
+                    end
+                    if tf >= tbins(j) && tf <= tbins(j + 1)
+                        wf = j;
+                        break;
+                    end
+                end
+
+                % for each one of them increment class count        
+                for j = wi:wf 
+                    if inst.class_map(i) > 0
+                        col = map(inst.class_map(i));                    
+                        if class_distr_traj(j, col) == -1
+                            class_distr_traj(j, col) = 1;
+                        else
+                            class_distr_traj(j, col) = class_distr_traj(j, col) + 1;
+                        end
+                    elseif ~discard_unk
+                        unk(j) = unk(j) + 1;                        
+                    end                
+                end
+            end
+        
+            % final trajectory
+            if ~isempty(class_distr_traj)
+                if nargout > 1
+                    tmp = class_distr_traj;
+                    tmp(tmp(:) == -1) = 0;
+                    nrm = repmat(sum(tmp, 2) + 1e-6, 1, nclasses);
+                    nrm(class_distr_traj == -1) = 1;
+                    class_distr_traj = class_distr_traj ./ nrm;
+                    full_distr = [full_distr, class_distr_traj];                       
+                end
+                traj_distr = zeros(1, nbins);
+                % for each window select the most common class
+                for j = 1:nbins
+                    [val, pos] = max(class_distr_traj(j, :));    
+                    if val > 0
+                        traj_distr(j) = pos;
+                    else
+                        if inst.segments.items(i - 1).end_time < tbins(j)
+                            traj_distr(j) = -1;
+                        else
+                            traj_distr(j) = 0;
+                        end
+                    end
+                end
+                major_classes = [major_classes; traj_distr];
+            end         
+        end
+        
+        function [major_classes, full_distr, seg_class] = mapping_ordered(inst, bins, varargin)        
+            % compute the prefered strategy for a small time window for each
+            % trajectory
+            addpath(fullfile(fileparts(mfilename('fullpath')), '/extern'));
+            [classes, discard_unk, class_w, min_seg] = process_options(varargin, ...
+                'Classes', [], 'DiscardUnknown', 1, 'ClassesWeights', [], 'MinSegments', 1);
+          
+            seg_class = zeros(1, length(inst.class_map));
+            if isvector(bins) && length(bins) > 1
+                nbins = length(bins);
+            else
+                if bins == -1
+                    % binning is done for each segment
+                    nbins = max(inst.segments.partitions);                   
+                else
+                    nbins = bins;
+                    bins = repmat(g_config.TRIAL_TIMEOUT / nbins, 1, nbins);
+                end                    
+            end
+            
+            if isempty(classes)
+                map = 1:inst.nclasses;
+                nclasses = inst.nclasses;
+                if isempty(class_w)                
+                    class_w = arrayfun( @(x) x.weight, inst.classes);
+                end            
+            else
+                map = tag.mapping(classes, inst.classes);
+                nclasses = length(classes);
+                if isempty(class_w)                
+                    class_w = arrayfun( @(x) x.weight, classes);
+                end            
+            end
+            
+            if nargout > 1
+                full_distr = {};
+            end
+            major_classes = [];
+                
+            if bins ~= -1
+                tbins = [0, cumsum(bins)];
+            end
+            
+            id = [-1, -1, -1];
+            part = inst.segments.partitions();
+            class_distr_traj = [];
+            unk = [];
+            iseg = 0;
+            for i = 1:inst.segments.count    
+                if ~isequal(id, inst.segments.items(i).data_identification)
+                    id = inst.segments.items(i).data_identification;
+                    % different trajectory
+                    if ~isempty(class_distr_traj)
+                        if nargout > 1
+                            tmp = class_distr_traj;
+                            tmp(tmp(:) == -1) = 0;
+                            nrm = repmat(sum(tmp, 2) + 1e-6 + unk', 1, nclasses);
+                            nrm(class_distr_traj == -1) = 1;
+                            class_distr_traj = class_distr_traj ./ nrm;
+                            full_distr = [full_distr, class_distr_traj];
+                        end         
+                        % take only the most frequent class for each
+                        % bin and trajectory                            
+                        traj_distr = zeros(1, nbins);
+                        % for each window select the most common class
+                        itraj = size(major_classes, 1) + 1;
+                        if itraj > 1
+                            i0 = sum(part(1:itraj - 1)) + 1;
+                        else
+                            i0 = 1;
+                        end
+                        for j = 1:nbins
+                            [val, pos] = max(class_distr_traj(j, :));                
+                            if val > 0
+                                if unk(j) > val && ~discard_unk
+                                    traj_distr(j) = 0;
+                                else
+                                    traj_distr(j) = pos;                                    
+                                end
+                            else
+                                if bins == -1
+                                    if j > iseg
+                                        traj_distr(j) = -1;
+                                    else
+                                        traj_distr(j) = 0;
+                                    end
+                                else
+                                    if inst.segments.items(i - 1).end_time < tbins(j)
+                                        traj_distr(j) = -1;
+                                    else
+                                        traj_distr(j) = 0;
+                                    end
+                                end
+                            end
+                            if part(itraj) >= j
+                                seg_class(i0 + j - 1) = traj_distr(j);
+                            end
+                        end
+                        major_classes = [major_classes; traj_distr];                        
+                    end  
+                    class_distr_traj = ones(nbins, nclasses)*-1;
+                    unk = zeros(1, nbins);
+                    iseg = 0;
+                end
+                iseg = iseg + 1;
+
+                wi = iseg;
+                wf = iseg;
+                xf = inst.segments.items(i).offset + inst.segments.items(i).compute_feature(features.LENGTH);
+                for j = (i + 1):inst.segments.count
+                    if ~isequal(id, inst.segments.items(j).data_identification) || inst.segments.items(j).offset > xf
+                        wf = iseg - 1 + j - i - 1;
+                        break;
+                    end
+                end                    
+                                
+                % for each one of them increment class count        
+                m = (wi + wf) / 2; % mid-point
+                 for j = wi:wf 
+                    if inst.class_map(i) > 0
+                        col = map(inst.class_map(i));                                            
+                        val = class_w(col)*exp(-(j - m)^2/(2*4));
+                        if class_distr_traj(j, col) == -1
+                            class_distr_traj(j, col) = val;
+                        else
+                            class_distr_traj(j, col) = class_distr_traj(j, col) + val;
+                        end
+                    elseif ~discard_unk
+                        unk(j) = unk(j) + 1;                        
+                    end                
+                end
+            end
+        
+            % final trajectory
+            if ~isempty(class_distr_traj)
+                if nargout > 1
+                    tmp = class_distr_traj;
+                    tmp(tmp(:) == -1) = 0;
+                    nrm = repmat(sum(tmp, 2) + 1e-6, 1, nclasses);
+                    nrm(class_distr_traj == -1) = 1;
+                    class_distr_traj = class_distr_traj ./ nrm;
+                    full_distr = [full_distr, class_distr_traj];                       
+                end
+                traj_distr = zeros(1, nbins);
+                itraj = size(major_classes, 1) + 1;
+                if itraj > 1
+                    i0 = sum(part(1:itraj - 1)) + 1;
+                else
+                    i0 = 1;
+                end
+                   
+                % for each window select the most common class
+                for j = 1:nbins
+                    [val, pos] = max(class_distr_traj(j, :));    
+                    if val > 0
+                        traj_distr(j) = pos;
+                    else
+                        if bins == -1
+                            if j > iseg
+                                traj_distr(j) = -1;
+                            else
+                                traj_distr(j) = 0;
+                            end
+                        else
+                            if inst.segments.items(i - 1).end_time < tbins(j)
+                                traj_distr(j) = -1;
+                            else
+                                traj_distr(j) = 0;
+                            end
+                        end
+                    end
+                    
+                    if part(itraj) >= j
+                        seg_class(i0 + j - 1) = traj_distr(j);
+                    end
+                end
+                major_classes = [major_classes; traj_distr];
+            end      
+            
+            % remove spurious segments (or "smooth" the data)
+            if min_seg > 1
+               for i = 1:size(major_classes, 1)
+                  j = 1;
+                  lastc = -1;
+                  lasti = 0;
+                  while(j <= size(major_classes, 2) && major_classes(i, j) ~= -1)
+                     if lastc == -1
+                        lastc = major_classes(i, j);
+                        lasti = j;
+                     elseif major_classes(i, j) ~= lastc
+                        if (j - lasti) < min_seg && lastc ~= 0
+                            % compute position in the linear list of
+                            % segmetns
+                            seg_off = sum(part(1:i - 1));
+                                                       
+                            if lasti > 1
+                                % find middle point
+                                m = floor( (j + lasti) / 2);
+                                major_classes(i, lasti:m) = major_classes(i, lasti - 1);
+                                seg_class(seg_off + lasti:seg_off + m) = major_classes(i, lasti - 1);
+                                major_classes(i, m + 1:j) = major_classes(i, j);
+                                seg_class(seg_off + m + 1:seg_off + j) = major_classes(i, j);                                
+                            else
+                           %     major_classes(i, 1:j) = major_classes(i, j);
+                           %     seg_class(seg_off + 1:seg_off + j) = major_classes(i, j);
+                            end
+                            
+                        end
+                        lastc = major_classes(i, j);
+                        lasti = j;
+                     end                     
+                     j = j + 1;
+                  end
+               %   if (j - lasti) < min_seg && lastc ~= 0
+               %     major_classes(i, lasti:(j - 1)) = major_classes(i, lasti - 1);
+               %     seg_off = sum(part(1:i - 1));                            
+               %     seg_class(seg_off + 1:seg_off + i - 1) = major_classes(i, lasti - 1);
+               %   end
+               end               
+            end
+        end
+        
+        function [diff_set] = difference(inst, other_results, varargin)
+            % current segment in the original set
+               % trajectory
+            addpath(fullfile(fileparts(mfilename('fullpath')), '/extern'));
+            [tolerance] = process_options(varargin, ...
+                'SegmentTolerance', 20);
+         
+            mapping = inst.segments.match_segments(other_results.segments, tolerance);
+            tag_mapping = tag.mapping(inst.classes, other_results.classes);
+            
+            diff_set = ones(1, inst.segments.count)*-1;
+            for k = 1:inst.segments.count          
+                if (mapping(k) > 0)
+                    if inst.class_map(k) > 0 && other_results.class_map(mapping(k)) > 0
+                        otherc = tag_mapping(other_results.class_map(mapping(k)));
+                        if inst.class_map(k) == otherc
+                            diff_set(k) = 0;
+                        else
+                            diff_set(k) = otherc;
+                        end
+                    elseif inst.class_map(k) == 0 && other_results.class_map(mapping(k)) == 0
+                        diff_set(k) = 0;
+                    end                    
+                end
+            end
+        end
+        
+        function [out] = combine(inst, other_results, varargin)
+            % current segment in the original set
+               % trajectory
+            addpath(fullfile(fileparts(mfilename('fullpath')), '/extern'));
+            [tolerance] = process_options(varargin, ...
+                'SegmentTolerance', 20);
+         
+            mapping = inst.segments.match_segments(other_results.segments, tolerance);
+            tag_mapping = tag.mapping(inst.classes, other_results.classes);
+            
+            new_map = inst.class_map;
+            for k = 1:inst.segments.count          
+                if mapping(k) > 0
+                    otherc = other_results.class_map(mapping(k));
+                    if otherc > 0                        
+                        if inst.class_map(k) > 0
+                            if inst.class_map(k) ~= tag_mapping(otherc)
+                                % invalidate this one
+                                new_map(k) = 0;
+                            end
+                        else
+                            % take the other classification's class
+                            new_map(k) = tag_mapping(otherc);
+                        end
+                    end
+                end
+            end           
+            
+            out = clustering_results( ...
+                inst.segments, ...
+                inst.nclasses, ...
+                [], ...                
+                [], ...
+                [], ...
+                [], ...            
+                [], ...
+                new_map, ...
+                [], ...
+                [], ...
+                0, ...
+                inst.classes);       
+             
+        end
     end    
 end

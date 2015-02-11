@@ -1,9 +1,16 @@
-function browse_trajectories(labels_fn, traj, tags, feat, selection)
+function browse_trajectories(labels_fn, traj, varargin)
 %BROWSE_TRAJECTORIES Summary of this function goes here                
     % no filter at first
+    addpath(fullfile(fileparts(mfilename('fullpath')), '../extern'));
+    
     filter = 1:traj.count;
     sorting = 1:traj.count;           
             
+    [tags, feat, selection, ref_set] = process_options(varargin, ...
+                'Tags', g_config.TAGS, 'Features', g_config.DEFAULT_FEATURE_SET, ...
+                'UserSelection', [], 'ReferenceClassification', [] ...
+    );
+    
     addpath(fullfile(fileparts(mfilename('fullpath')), '../extern'));
         
     % create main window
@@ -124,6 +131,7 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
     covering = [];
     feat_values = traj.compute_features(feat);
     segments_map = [];
+    diff_set = [];
     
     update_filter_combo;
     show_trajectories;
@@ -138,7 +146,7 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
             delete(hfilter);
             hfilter = [];
         end
-        strings = {'** all **', '** tagged only **', '** isolated **', '** suspicious **', '** selection **', '** errors **'};
+        strings = {'** all **', '** tagged only **', '** isolated **', '** suspicious **', '** selection **', '** compare **', '** errors **'};
         if ~isempty(classif_res)
             strings = [strings, arrayfun( @(t) t.description, classif_res.classes, 'UniformOutput', 0)];
         end     
@@ -217,6 +225,9 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
                 arrayfun(@(h,j) set(h, 'Value', labels_traj(traj_idx, j)), handles(1:(length(handles) - 1)), 1:(length(handles) - 1));  
     
                 for j = 1:(length(handles) - 1)
+                    % by default no color
+                    c = get(gcf,'DefaultUicontrolBackgroundCol');
+                                                                              
                     if ~isempty(classif_res) 
                         idx = -1;
                         if strcmp(tags(j).abbreviation, g_config.UNDEFINED_TAG_ABBREVIATION)                                                            
@@ -229,22 +240,25 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
                                 end
                             end                        
                         end
+  
+                         % see if we have a segment for comparison
+                        if ~isempty(ref_set) && diff_set(traj_idx) == idx
+                            c = [0.6 0.0 0.0];                            
+                        end
+                    
                         if idx ~= -1 && classif_res.class_map(traj_idx) == idx                            
                             if labels_traj(traj_idx, j)                                
-                                set(handles(j), 'BackgroundCol', [0.2, 1., 0.2]);                            
+                                c = [0.2, 1., 0.2];                            
                             else
                                 if ~isempty(find(labels_traj(traj_idx, :)))                              
-                                    set(handles(j), 'BackgroundCol', [1., 0.2, 0.2]);                            
+                                    c = [1., 0.2, 0.2];                            
                                 else
-                                    set(handles(j), 'BackgroundCol', [.5, 0.5, 0.9]);
+                                    c = [.5, 0.5, 0.9];
                                 end
-                            end
-                        else
-                            set(handles(j), 'BackgroundCol', get(gcf,'DefaultUicontrolBackgroundCol'));                            
+                            end                                                                               
                         end                                                
-                    else
-                        set(handles(j), 'BackgroundCol', get(gcf,'DefaultUicontrolBackgroundCol'));                            
                     end
+                    set(handles(j), 'BackgroundCol', c); 
                 end
                 
                 % "unknown" is treated separatedly
@@ -286,9 +300,15 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
         end
         if ~isempty(classif_res)
             pcov = sum(covering) / traj.count;
-            str = strcat(str, sprintf('\nErrors: %d (%.1f%%) | Unknown: %.1f%% | Covering: %.1f%%', ...
+            str = strcat(str, sprintf('\nErrors: %d (%.3f%%) | Unknown: %.1f%% | Coverage: %.1f%%', ...
                 classif_res.nerrors, classif_res.perrors*100, classif_res.punknown*100, pcov*100)); 
         end
+        if ~isempty(diff_set)            
+            str = strcat(str, sprintf(' | Agreement: %.1f%%', 100.* ...
+                sum(diff_set == 0) / sum(diff_set > -1) ...
+            ));
+        end
+        
         str = sprintf('%s\n%s', str, distr_status);        
         set(hpos, 'String', str);
     end
@@ -313,7 +333,7 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
                 % "suspicious" guys 
                 if ~isempty(classif_res)
                     if isempty(segments_map)
-                        [~, ~, segments_map] = traj.classes_mapping_ordered(classif_res, -1, 'MinSegments', 4);
+                        [~, ~, segments_map] = classif_res.mapping_ordered(-1, 'MinSegments', 4);
                     end
                     
                     filter = find(segments_map ~= classif_res.class_map & segments_map > 0 & classif_res.class_map > 0);                    
@@ -321,7 +341,12 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
             case 5
                 % user selection
                 filter = selection;
-            case 6                     
+            case 6
+                % reference classification
+                if ~isempty(diff_set)                    
+                    filter = find(diff_set > 0);
+                end
+            case 7                     
                 % mis-matched classifications      
                 if ~isempty(classif_res)
                     filter = classif_res.non_empty_labels_idx(classif_res.errors == 1);            
@@ -330,15 +355,15 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
                 end
             otherwise
                 % classes
-                if val <= classif_res.nclasses + 6
-                    if classif_res.classes(val - 6).abbreviation == g_config.UNDEFINED_TAG_ABBREVIATION                                    
+                if val <= classif_res.nclasses + 7
+                    if classif_res.classes(val - 7).abbreviation == g_config.UNDEFINED_TAG_ABBREVIATION                                    
                         filter = find(classif_res.class_map == 0);
                     else
-                        filter = find(classif_res.class_map == (val - 6));                                    
+                        filter = find(classif_res.class_map == (val - 7));                                    
                     end
                 else
                    % clusters
-                   filter = find(classif_res.cluster_idx == (val - classif_res.nclasses - 6));
+                   filter = find(classif_res.cluster_idx == (val - classif_res.nclasses - 7));
                 end
         end
         % status text string
@@ -548,9 +573,13 @@ function browse_trajectories(labels_fn, traj, tags, feat, selection)
             test_p = 0.;
         end
         classif = traj.classifier(labels_fn, feat, g_config.TAG_TYPE_BEHAVIOUR_CLASS);
-        classif_res = classif.cluster(nclusters, test_p);                
+        classif_res = classif.cluster(nclusters, test_p);          
+        if ~isempty(ref_set)
+            diff_set = classif_res.difference(ref_set);
+        end
         segments_map = [];
-        [~, covering] = traj.segments_covering(classif_res);
+        [~, covering] = classif_res.coverage();              
+        
         update_filter_combo;        
         set(gcf,'Pointer','arrow');                
         

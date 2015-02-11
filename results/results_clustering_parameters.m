@@ -14,13 +14,15 @@ function results_clustering_parameters
     nc = [];
     test_set = [];      
     covering = [];
-    
+    param = g_config.TAGS_CONFIG{2};    
+        
     for i = 1:12
         n = 10 + i*10;
         nc = [nc, n];
+               
         % get classifier object
-        classif = g_segments.classifier(g_config.DEFAULT_TAGS_PATH, g_config.DEFAULT_FEATURE_SET, g_config.TAG_TYPE_BEHAVIOUR_CLASS);
-        
+        classif = g_segments.classifier(param{1}, g_config.DEFAULT_FEATURE_SET, g_config.TAG_TYPE_BEHAVIOUR_CLASS);
+                
         if isempty(test_set)
             if ptest > 0          
                 fn = fullfile(g_config.OUTPUT_DIR, sprintf('test_set.mat', n));
@@ -33,7 +35,7 @@ function results_clustering_parameters
                     save(fn, 'test_set');
                 end
             else
-                test_set = ones(1, classif.nlabels);
+                test_set = [];
             end
         end
         
@@ -44,12 +46,10 @@ function results_clustering_parameters
             load(fn);
         else            
             [res, res1st] = classif.cluster_cross_validation(n, 'Folds', 10, 'TestSet', test_set);
-            covering = 
             save(fn, 'res', 'res1st');
         end               
         res1 = [res1, res];
         res2 = [res2, res1st];
-        covering = [covering, g_segments.covering(res1)];
                 
         % ii) clustering using all the constraints
         % see if we already have the data
@@ -61,7 +61,8 @@ function results_clustering_parameters
             res = classif.cluster(n);
             save(fn, 'res');
         end               
-        res3 = [res3, res];                
+        res3 = [res3, res];
+        covering = [covering, res.coverage];        
     end        
     
     % export data
@@ -72,10 +73,10 @@ function results_clustering_parameters
     res1bare = [];
     res2bare = [];    
     for i = 1:length(res1)
-        res1bare = [res1bare, res1(i).remap_clusters('DiscardMixed', 0, 'MinSamplesPercentage', 0.001, 'MinSamplesExponent', 3)];
+        res1bare = [res1bare, res1(i).remap_clusters('DiscardMixed', 0)];
     end
     for i = 1:length(res2)
-        res2bare = [res2bare, res2(i).remap_clusters('DiscardMixed', 0, 'MinSamplesPercentage', 0.001, 'MinSamplesExponent', 3)];
+        res2bare = [res2bare, res2(i).remap_clusters('DiscardMixed', 0)];
     end
  
     % classification errors (cross-validation)    
@@ -119,5 +120,16 @@ function results_clustering_parameters
     h3 = gca;
     box off;
     export_fig(fullfile(g_config.OUTPUT_DIR, 'clusters_dep_deltan.eps'));        
-        
+
+    % covering
+    figure(80);
+    ci_fac = 1.96/sqrt(length(nc));
+    plot( nc, covering*100,  'k-', 'LineWidth', g_config.LINE_WIDTH);                       
+    xlabel('N_{clus}', 'FontSize', g_config.FONT_SIZE);
+    ylabel('% coverage', 'FontSize', g_config.FONT_SIZE);            
+    set(gcf, 'Color', 'w');
+    set(gca, 'FontSize', g_config.FONT_SIZE, 'LineWidth', g_config.AXIS_LINE_WIDTH);
+    h1 = gca;
+    box off;
+    export_fig(fullfile(g_config.OUTPUT_DIR, 'clusters_dep_coverage.eps'));
 end

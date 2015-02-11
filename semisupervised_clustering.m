@@ -20,6 +20,7 @@ classdef semisupervised_clustering < handle
         % optional -> just to map the labels to classes
         classes = [];
         nclasses = 0;
+        segments = [];
     end
         
     properties(GetAccess = 'public', SetAccess = 'public')
@@ -42,8 +43,9 @@ classdef semisupervised_clustering < handle
     end
     
     methods        
-        function inst = semisupervised_clustering(feat, lbls, classes_in, next)
-         % Constructor         
+        function inst = semisupervised_clustering(seg, feat, lbls, classes_in, next)            
+            % Constructor         
+            inst.segments = seg;
             if nargin > 2
                 inst.classes = classes_in;
                 inst.nclasses = length(classes_in);
@@ -315,7 +317,7 @@ classdef semisupervised_clustering < handle
                     end
                 end
 
-                res1st = clustering_results(length(inst.classes), inst.labels, training_set, test_set, inst.nexternal_labels, nconstr, class_idx, cluster_idx, cluster_map, centroids, inst.classes);             
+                res1st = clustering_results(inst.segments, length(inst.classes), inst.labels, training_set, test_set, inst.nexternal_labels, nconstr, class_idx, cluster_idx, cluster_map, centroids, inst.classes);             
             end
                         
             cluster_idx = new_cluster_idx;
@@ -331,7 +333,7 @@ classdef semisupervised_clustering < handle
             end
                                     
             % create return object
-            res = clustering_results(length(inst.classes), inst.labels, training_set, test_set, inst.nexternal_labels, [nconstr, nconstr2], class_idx, cluster_idx, cluster_map, centroids, inst.classes);             
+            res = clustering_results(inst.segments, length(inst.classes), inst.labels, training_set, test_set, inst.nexternal_labels, [nconstr, nconstr2], class_idx, cluster_idx, cluster_map, centroids, inst.classes);             
         end    
     end
 end
