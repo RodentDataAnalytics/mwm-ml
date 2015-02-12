@@ -52,12 +52,12 @@ function plot_distribution_strategies(distributions, varargin)
         nclasses = max(un);
     end
         
-    l = 0.92;
-    b = 0.05;
+    l = 0.96;
+    b = 0.025;
     if ~isempty(row_labels) && length(row_labels{1}) > 1
-        ib = 0.05;
+        ib = 0.025;
     else
-        ib = 0.02;
+        ib = 0.01;
     end    
     w = (l - 2*b - (ncol - 1)*ib)/ncol;
     h = l - 2*b - avgh; 
@@ -121,9 +121,9 @@ function plot_distribution_strategies(distributions, varargin)
                 P = findobj(gca, 'type', 'patch');
                 for l = 1:nbins                    
                     if vals(k, l) > 0                     
-                        set(P(nbins - l + 1), 'facecolor', cm(vals(k, l), :));
+                        set(P(nbins - l + 1), 'edgecolor', cm(vals(k, l), :), 'facecolor', cm(vals(k, l), :));
                     elseif vals(k, l) == 0                     
-                        set(P(nbins - l + 1), 'facecolor', [1, 1, 1]);
+                        set(P(nbins - l + 1), 'edgecolor', [1, 1, 1], 'facecolor', [1, 1, 1]);
                     end
                 end
                 hold on;
@@ -140,7 +140,7 @@ function plot_distribution_strategies(distributions, varargin)
             set(gca, 'XTick', ticks);
         end
         if ~isempty(ticks_labels)
-            set(gca, 'XTickLabel', ticks_labels, 'FontSize', 8);
+            set(gca, 'XTickLabel', ticks_labels, 'FontSize', 6);
         end
         if ~isempty(row_labels)                            
             if i == 1 || iscell(row_labels{1})

@@ -211,7 +211,9 @@ islegin = false(size(varargin));
 
 % Look for handle array
 
-handlepassed = isnumeric(varargin{1}) & all(ishandle(varargin{1}));
+% handlepassed = isnumeric(varargin{1}) & all(ishandle(varargin{1}));
+handlepassed = all(ishandle(varargin{1})); % for HG1/HG2 
+
 
 if handlepassed
     legin = varargin(1:2);
@@ -237,12 +239,13 @@ p = inputParser;
 p.addParamValue('xscale',     1,         @(x) validateattributes(x, {'numeric'}, {'nonnegative','scalar'}));
 p.addParamValue('ncol',       NaN,       @(x) validateattributes(x, {'numeric'}, {'scalar', 'integer'}));
 p.addParamValue('nrow',       NaN,       @(x) validateattributes(x, {'numeric'}, {'scalar', 'integer'}));
-p.addParamValue('ref',        NaN,       @(x) validateattributes(x, {'numeric'}, {'scalar'}));
+p.addParamValue('ref',        NaN,       @(x) validateattributes(x, {'numeric','handle'}, {'scalar'}));
 p.addParamValue('anchor',     [3 3],     @(x) validateattributes(x, {'numeric','cell'}, {'size', [1 2]}));
 p.addParamValue('buffer',     [-10 -10], @(x) validateattributes(x, {'numeric'}, {'size', [1 2]}));
 p.addParamValue('bufferunit', 'pixels',  @(x) validateattributes(x, {'char'}, {}));
 p.addParamValue('box',        'on',      @(x) validateattributes(x, {'char'}, {}));
 p.addParamValue('title',      '',        @(x) validateattributes(x, {'char','cell'}, {}));
+p.addParamValue('padding',    [2 1 1],   @(x) validateattributes(x, {'numeric'}, {'nonnegative', 'size', [1 3]}));
 
 p.KeepUnmatched = true;
 
@@ -373,7 +376,7 @@ symbolWidthNm = textExtent(1,1);
 % Calculate column width needed for 2px-symbol-1px-text-1px
 
 colWidth = zeros(Opt.ncol*Opt.nrow,1);
-colWidth(1:nobj) = textWidthPx + symbolWidthPx + 4;
+colWidth(1:nobj) = textWidthPx + symbolWidthPx + sum(Opt.padding);
 colWidth = reshape(colWidth, Opt.nrow, Opt.ncol);
 colWidth = max(colWidth,[],1);
 
@@ -400,13 +403,13 @@ end
 
 % Locate bottom left corner of each legend symbol, text box, and title
 
-xsymbnew = [0 cumsum(colWidth(1:end-1))]+2;
+xsymbnew = [0 cumsum(colWidth(1:end-1))] + Opt.padding(1);
 ysymbnew = (rowHeight*Opt.nrow + vmarginPx)-(1:Opt.nrow)*rowHeight;
 [xsymbnew, ysymbnew] = meshgrid(xsymbnew, ysymbnew);
 xsymbnew = xsymbnew(1:nobj);
 ysymbnew = ysymbnew(1:nobj);
 
-xtext = xsymbnew + 1 + symbolWidthPx;
+xtext = xsymbnew + Opt.padding(2) + symbolWidthPx;
 ytext = ysymbnew;% + 1;
 
 xsymbold = zeros(nobj,1);

@@ -181,13 +181,12 @@ classdef clustering_results < handle
                 nbin = ceil(slen / ovlp);
                 distr_traj = zeros(1, nc);
             end                
-                        
+                      
+            map = inst.mapping_ordered;
             if reverse
-                map = inst.class_map(end:-1:1);
+                map = map(end:-1:1);
                 partitions = partitions(end:-1:1);
                 ext_vals = ext_vals(end:-1:1);
-            else
-                map = inst.class_map;
             end
             
             for i = (next + 1):length(map)
@@ -292,15 +291,13 @@ classdef clustering_results < handle
             % compute the prefered strategy for a small time window for each
             % trajectory
             addpath(fullfile(fileparts(mfilename('fullpath')), '/extern'));
-            [classes, discard_unk] = process_options(varargin, ...
-                'Classes', [], 'DiscardUnknown', 1);
+            
+            [classes, discard_unk, class_w, min_seg] = process_options(varargin, ...
+                'Classes', [], 'DiscardUnknown', 1, 'ClassesWeights', [], 'MinSegments', 1);
           
-            if isvector(bins)
-                nbins = length(bins);
-            else
-                nbins = bins;
-                bins = repmat(constants.TRIAL_TIMEOUT / nbins, 1, nbins);
-            end
+            [~, ~, seg_class] = inst.mapping_ordered('Classes', classes, 'DiscardUnknown', discard_unk, 'ClassesWeights', class_w, 'MinSegments', min_seg);
+            
+            nbins = length(bins);
             
             if isempty(classes)
                 map = 1:inst.nclasses;
@@ -377,8 +374,8 @@ classdef clustering_results < handle
 
                 % for each one of them increment class count        
                 for j = wi:wf 
-                    if inst.class_map(i) > 0
-                        col = map(inst.class_map(i));                    
+                    if seg_class(i) > 0
+                        col = map(seg_class(i));                    
                         if class_distr_traj(j, col) == -1
                             class_distr_traj(j, col) = 1;
                         else
@@ -418,7 +415,7 @@ classdef clustering_results < handle
             end         
         end
         
-        function [major_classes, full_distr, seg_class] = mapping_ordered(inst, bins, varargin)        
+        function [major_classes, full_distr, seg_class] = mapping_ordered(inst, varargin)        
             % compute the prefered strategy for a small time window for each
             % trajectory
             addpath(fullfile(fileparts(mfilename('fullpath')), '/extern'));
@@ -426,17 +423,8 @@ classdef clustering_results < handle
                 'Classes', [], 'DiscardUnknown', 1, 'ClassesWeights', [], 'MinSegments', 1);
           
             seg_class = zeros(1, length(inst.class_map));
-            if isvector(bins) && length(bins) > 1
-                nbins = length(bins);
-            else
-                if bins == -1
-                    % binning is done for each segment
-                    nbins = max(inst.segments.partitions);                   
-                else
-                    nbins = bins;
-                    bins = repmat(g_config.TRIAL_TIMEOUT / nbins, 1, nbins);
-                end                    
-            end
+            % binning is done for each segment
+            nbins = max(inst.segments.partitions);                   
             
             if isempty(classes)
                 map = 1:inst.nclasses;
@@ -456,13 +444,8 @@ classdef clustering_results < handle
                 full_distr = {};
             end
             major_classes = [];
-                
-            if bins ~= -1
-                tbins = [0, cumsum(bins)];
-            end
-            
+                            
             id = [-1, -1, -1];
-            part = inst.segments.partitions();
             class_distr_traj = [];
             unk = [];
             iseg = 0;
@@ -482,13 +465,6 @@ classdef clustering_results < handle
                         % take only the most frequent class for each
                         % bin and trajectory                            
                         traj_distr = zeros(1, nbins);
-                        % for each window select the most common class
-                        itraj = size(major_classes, 1) + 1;
-                        if itraj > 1
-                            i0 = sum(part(1:itraj - 1)) + 1;
-                        else
-                            i0 = 1;
-                        end
                         for j = 1:nbins
                             [val, pos] = max(class_distr_traj(j, :));                
                             if val > 0
@@ -498,22 +474,11 @@ classdef clustering_results < handle
                                     traj_distr(j) = pos;                                    
                                 end
                             else
-                                if bins == -1
-                                    if j > iseg
-                                        traj_distr(j) = -1;
-                                    else
-                                        traj_distr(j) = 0;
-                                    end
+                                if j > iseg
+                                    traj_distr(j) = -1;
                                 else
-                                    if inst.segments.items(i - 1).end_time < tbins(j)
-                                        traj_distr(j) = -1;
-                                    else
-                                        traj_distr(j) = 0;
-                                    end
-                                end
-                            end
-                            if part(itraj) >= j
-                                seg_class(i0 + j - 1) = traj_distr(j);
+                                    traj_distr(j) = 0;
+                                end                                
                             end
                         end
                         major_classes = [major_classes; traj_distr];                        
@@ -562,12 +527,6 @@ classdef clustering_results < handle
                     full_distr = [full_distr, class_distr_traj];                       
                 end
                 traj_distr = zeros(1, nbins);
-                itraj = size(major_classes, 1) + 1;
-                if itraj > 1
-                    i0 = sum(part(1:itraj - 1)) + 1;
-                else
-                    i0 = 1;
-                end
                    
                 % for each window select the most common class
                 for j = 1:nbins
@@ -575,24 +534,12 @@ classdef clustering_results < handle
                     if val > 0
                         traj_distr(j) = pos;
                     else
-                        if bins == -1
-                            if j > iseg
-                                traj_distr(j) = -1;
-                            else
-                                traj_distr(j) = 0;
-                            end
+                        if j > iseg
+                            traj_distr(j) = -1;
                         else
-                            if inst.segments.items(i - 1).end_time < tbins(j)
-                                traj_distr(j) = -1;
-                            else
-                                traj_distr(j) = 0;
-                            end
-                        end
-                    end
-                    
-                    if part(itraj) >= j
-                        seg_class(i0 + j - 1) = traj_distr(j);
-                    end
+                            traj_distr(j) = 0;
+                        end                        
+                    end                    
                 end
                 major_classes = [major_classes; traj_distr];
             end      
@@ -608,18 +555,12 @@ classdef clustering_results < handle
                         lastc = major_classes(i, j);
                         lasti = j;
                      elseif major_classes(i, j) ~= lastc
-                        if (j - lasti) < min_seg && lastc ~= 0
-                            % compute position in the linear list of
-                            % segmetns
-                            seg_off = sum(part(1:i - 1));
-                                                       
+                        if (j - lasti) < min_seg && lastc ~= 0                                                       
                             if lasti > 1
                                 % find middle point
                                 m = floor( (j + lasti) / 2);
-                                major_classes(i, lasti:m) = major_classes(i, lasti - 1);
-                                seg_class(seg_off + lasti:seg_off + m) = major_classes(i, lasti - 1);
-                                major_classes(i, m + 1:j) = major_classes(i, j);
-                                seg_class(seg_off + m + 1:seg_off + j) = major_classes(i, j);                                
+                                major_classes(i, lasti:m) = major_classes(i, lasti - 1);                                
+                                major_classes(i, m + 1:j) = major_classes(i, j);                                
                             else
                            %     major_classes(i, 1:j) = major_classes(i, j);
                            %     seg_class(seg_off + 1:seg_off + j) = major_classes(i, j);
@@ -637,6 +578,18 @@ classdef clustering_results < handle
                %     seg_class(seg_off + 1:seg_off + i - 1) = major_classes(i, lasti - 1);
                %   end
                end               
+            end
+            
+            % re-map distribution to the flat list of segments
+            off = 1;
+            traj_off = 1;
+            part = inst.segments.partitions;
+            part = part(part > 0);
+            for i = 1:length(part)
+                if part(i) > 0                    
+                    seg_class(off:off + part(i) - 1) = major_classes(i, 1:part(i));                    
+                end
+                off = off + part(i);
             end
         end
         
@@ -701,8 +654,8 @@ classdef clustering_results < handle
                 [], ...                
                 [], ...
                 [], ...
-                [], ...            
-                [], ...
+                0, ...            
+                0, ...
                 new_map, ...
                 [], ...
                 [], ...
