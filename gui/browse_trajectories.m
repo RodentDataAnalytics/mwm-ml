@@ -146,7 +146,7 @@ function browse_trajectories(labels_fn, traj, varargin)
             delete(hfilter);
             hfilter = [];
         end
-        strings = {'** all **', '** tagged only **', '** isolated **', '** suspicious **', '** selection **', '** compare **', '** errors **'};
+        strings = {'** all **', '** tagged **', '** untagged **', '** isolated **', '** suspicious **', '** selection **', '** compare **', '** errors **'};
         if ~isempty(classif_res)
             strings = [strings, arrayfun( @(t) t.description, classif_res.classes, 'UniformOutput', 0)];
         end     
@@ -327,9 +327,12 @@ function browse_trajectories(labels_fn, traj, varargin)
             case 2                        
                 % everyone labelled
                 filter = find(sum(labels_traj, 2) > 0);                            
-            case 3
-                filter = find(covering == 0);
+            case 3                        
+                % everyone not labelled
+                filter = find(sum(labels_traj, 2) == 0);                                        
             case 4
+                filter = find(covering == 0);
+            case 5
                 % "suspicious" guys 
                 if ~isempty(classif_res)
                     if isempty(segments_map)
@@ -338,10 +341,10 @@ function browse_trajectories(labels_fn, traj, varargin)
                     
                     filter = find(segments_map ~= classif_res.class_map & segments_map > 0 & classif_res.class_map > 0);                    
                 end
-            case 5
+            case 6
                 % user selection
                 filter = selection;
-            case 6
+            case 7
                 % reference classification
                 if ~isempty(diff_set)                    
                     filter = find(diff_set > 0);
@@ -355,15 +358,15 @@ function browse_trajectories(labels_fn, traj, varargin)
                 end
             otherwise
                 % classes
-                if val <= classif_res.nclasses + 7
-                    if classif_res.classes(val - 7).abbreviation == g_config.UNDEFINED_TAG_ABBREVIATION                                    
+                if val <= classif_res.nclasses + 8
+                    if classif_res.classes(val - 8).abbreviation == g_config.UNDEFINED_TAG_ABBREVIATION                                    
                         filter = find(classif_res.class_map == 0);
                     else
-                        filter = find(classif_res.class_map == (val - 7));                                    
+                        filter = find(classif_res.class_map == (val - 8));                                    
                     end
                 else
                    % clusters
-                   filter = find(classif_res.cluster_idx == (val - classif_res.nclasses - 7));
+                   filter = find(classif_res.cluster_idx == (val - classif_res.nclasses - 8));
                 end
         end
         % status text string

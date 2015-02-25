@@ -14,6 +14,12 @@ classdef clustering_cv_results < handle
             inst.count = length(res);
         end
         
+        function compress(inst)            
+            for i = 1:length(inst.results)
+                inst.results(i).compress;
+            end            
+        end        
+        
         function res = remap_clusters(inst, varargin)
             tmp = [];
             for i = 1:inst.count

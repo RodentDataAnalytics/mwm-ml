@@ -6,10 +6,10 @@ function results_strategies_individual_evolution5
 
     % global data initialized elsewhere
     global g_segments_classification;
-    global g_segments;
     global g_partitions;
     global g_animals_ids;
     global g_animals_trajectories_map;
+    global g_trajectories_length;    
     
     % classify trajectories
     cache_trajectories_classification; 
@@ -59,10 +59,24 @@ function results_strategies_individual_evolution5
             end   
             row_labels = row_labels(end:-1:1);
 
+%             plot_distribution_strategies(distr, 'Ordered', 1, 'Widths', bins, ...
+%                        'ColumnLabels', col_labels, ... %'RowLabels', row_labels, ...
+%                        'Ticks', [10, 50, 90], 'TicksLabels', {'10s', '50s', '90s'}, 'BarHeight', 0.25, 'AverageBarsHeight', 0);
+%             export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('individual_strategies_g%d_s%d.eps', g, s)));        
+%         
+%             clf;
+            
+            % plot also a smaller plot with only the longest 12 animals
+            avg_len = mean(g_trajectories_length(map(1:6, :)), 1);
+            [~, ord] = sort(avg_len); 
+            for t = 1:length(sel_trials)
+                tmp = distr{t};
+                distr{t} = tmp(ord(1:12), :);                                
+            end            
             plot_distribution_strategies(distr, 'Ordered', 1, 'Widths', bins, ...
                        'ColumnLabels', col_labels, ... %'RowLabels', row_labels, ...
-                       'Ticks', [10, 50, 90], 'TicksLabels', {'10s', '50s', '90s'}, 'BarHeight', 0.25, 'AverageBarsHeight', 0);
-            export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('individual_strategies_g%d_s%d.eps', g, s)));        
+                       'Ticks', [10, 50, 90], 'TicksLabels', {'10s', '50s', '90s'}, 'BarHeight', 0.8, 'AverageBarsHeight', 0, 'AspectRatio', 0.5);
+            export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('individual_strategies_partial_g%d_s%d.eps', g, s)));        
         end
     end
 end

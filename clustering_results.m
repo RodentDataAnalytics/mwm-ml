@@ -29,7 +29,7 @@ classdef clustering_results < handle
         cover_flag_ = [];
     end
     
-    methods
+    methods        
         function inst = clustering_results(seg, nc, lbls, train_set, tst_set, next, cstr, cm, ci, ccm, ce, cl)
             inst.segments = seg;
             inst.nclasses = nc;
@@ -107,7 +107,11 @@ classdef clustering_results < handle
         
         function res = confusion_matrix(inst)
             res = confusion_matrix(inst.input_labels(inst.non_empty_labels_idx(inst.test_set == 1)), inst.class_map(inst.non_empty_labels_idx(inst.test_set == 1)), inst.nclasses);
-        end   
+        end
+        
+        function compress(inst)
+            inst.segments = [];
+        end        
         
         % Allows to perform a non-standard mapping from clusters to classes
         % (e.g. for testing purposes). See global function custer_to_class
@@ -600,7 +604,7 @@ classdef clustering_results < handle
             [tolerance] = process_options(varargin, ...
                 'SegmentTolerance', 20);
          
-            mapping = inst.segments.match_segments(other_results.segments, tolerance);
+            mapping = inst.segments.match_segments(other_results.segments, 'Tolerance', tolerance);
             tag_mapping = tag.mapping(inst.classes, other_results.classes);
             
             diff_set = ones(1, inst.segments.count)*-1;
@@ -627,7 +631,7 @@ classdef clustering_results < handle
             [tolerance] = process_options(varargin, ...
                 'SegmentTolerance', 20);
          
-            mapping = inst.segments.match_segments(other_results.segments, tolerance);
+            mapping = inst.segments.match_segments(other_results.segments, 'Tolerance', tolerance);
             tag_mapping = tag.mapping(inst.classes, other_results.classes);
             
             new_map = inst.class_map;

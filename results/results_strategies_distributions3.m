@@ -1,7 +1,6 @@
-function results_strategies_distributions2
+function results_strategies_distributions3
     addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/export_fig'));  
     addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/sigstar'));
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/AnDarksamtest'));
     addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/cm_and_cb_utilities'));
     addpath(fullfile(fileparts(mfilename('fullpath')), '../'));
 
@@ -9,7 +8,6 @@ function results_strategies_distributions2
     global g_segments_classification;
     global g_trajectories_trial;    
     global g_trajectories_group;          
-    global g_segments;    
     global g_long_trajectories_map;        
     
     % classify trajectories

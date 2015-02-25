@@ -13,11 +13,11 @@ function results_clustering_parameters
     res3 = [];
     nc = [];
     test_set = [];      
-    covering = [];
+    covering = [];4
     param = g_config.TAGS_CONFIG{2};    
         
-    for i = 1:12
-        n = 10 + i*10;
+    for i = 1:10
+        n = 20 + i*10;
         nc = [nc, n];
                
         % get classifier object
@@ -47,7 +47,10 @@ function results_clustering_parameters
         else            
             [res, res1st] = classif.cluster_cross_validation(n, 'Folds', 10, 'TestSet', test_set);
             save(fn, 'res', 'res1st');
-        end               
+        end 
+        res.compress;
+        res1st.compress;
+        
         res1 = [res1, res];
         res2 = [res2, res1st];
                 
@@ -60,7 +63,7 @@ function results_clustering_parameters
         else            
             res = classif.cluster(n);
             save(fn, 'res');
-        end               
+        end        
         res3 = [res3, res];
         covering = [covering, res.coverage];        
     end        
@@ -128,7 +131,7 @@ function results_clustering_parameters
     xlabel('N_{clus}', 'FontSize', g_config.FONT_SIZE);
     ylabel('% coverage', 'FontSize', g_config.FONT_SIZE);            
     set(gcf, 'Color', 'w');
-    set(gca, 'FontSize', g_config.FONT_SIZE, 'LineWidth', g_config.AXIS_LINE_WIDTH);
+    set(gca, 'FontSize', g_config.FONT_SIZE, 'LineWidth', g_config.AXIS_LINE_WIDTH, 'YLim', [80, 100]);
     h1 = gca;
     box off;
     export_fig(fullfile(g_config.OUTPUT_DIR, 'clusters_dep_coverage.eps'));

@@ -4,12 +4,12 @@ function plot_distribution_strategies(distributions, varargin)
     addpath(fullfile(fileparts(mfilename('fullpath')), './extern/cm_and_cb_utilities'));
     addpath(fullfile(fileparts(mfilename('fullpath')), './extern/'));
     
-    [mean_row, mean_col, row_labels, col_labels, ticks, ticks_labels, markers, ordered, widths, cm, bh, avgh] = ...
+    [mean_row, mean_col, row_labels, col_labels, ticks, ticks_labels, markers, ordered, widths, cm, bh, avgh, ar] = ...
         process_options(varargin, ...
             'MeanRow', 0, 'MeanColumn', 0, 'RowLabels', {}, 'ColumnLabels', {}, ...
             'Ticks', [], 'TicksLabels', {}, 'Markers', {}, 'Ordered', 0, ...
             'Widths', [], 'ColorMap', g_config.CLASSES_COLORMAP, 'BarHeight', 0.8, ...
-            'AverageBarsHeight', 0);
+            'AverageBarsHeight', 0, 'AspectRatio', 1);
     
     ncol = length(distributions) + mean_col;    
     % sanity checks
@@ -60,7 +60,7 @@ function plot_distribution_strategies(distributions, varargin)
         ib = 0.01;
     end    
     w = (l - 2*b - (ncol - 1)*ib)/ncol;
-    h = l - 2*b - avgh; 
+    h = (l - 2*b - avgh)*ar; 
     
     % need to compute the "total" distribution for the mean column
     tot = [];   
@@ -69,6 +69,7 @@ function plot_distribution_strategies(distributions, varargin)
     set(gcf, 'visible','on','Color','w', 'PaperPosition', [0.1 0 12 8],...
         'PaperSize', [12 8],'PaperUnits', 'centimeters'); %Position plot at left hand corner with width 14cm and height 7cm.
     axes('Position',[b b l l]);  % "parent" axes            
+        
     axis off;            
     for i = 1:ncol               
         is_mean_col = i == ncol && mean_col;
@@ -87,7 +88,7 @@ function plot_distribution_strategies(distributions, varargin)
         
         % create an axes inside the parent axes for the ii-the barh           
         sa = axes('Position', [b + w*(i - 1) + ib*(i - 1), b + 0.05 + avgh, w, h]); % position the ii-th barh
-        
+            
         if mean_row
             % one additional row for the mean
             vals = zeros(size(distr, 1) + 1, size(distr, 2));
@@ -116,7 +117,7 @@ function plot_distribution_strategies(distributions, varargin)
             for k = 1:nbars   
                 tmp = nan(1, nbins);
                 tmp(vals(k, :) >= 0) = wbin(vals(k, :) >= 0);
-                barh([k, k + 1], [tmp; zeros(1, nbins)], 'Stacked');
+                barh([k, k + 1], [tmp; zeros(1, nbins)], bh, 'Stacked');
                 % color the patches
                 P = findobj(gca, 'type', 'patch');
                 for l = 1:nbins                    
@@ -130,7 +131,7 @@ function plot_distribution_strategies(distributions, varargin)
             end   
         else
             vals(vals(:) <= 0) = nan; 
-            barh(1:n, vals, bh, 'Stack', 'Parent', sa);               
+            barh(1:n, vals, bh, 'Stacked', 'Parent', sa);               
             colormap(cm);
         end
         

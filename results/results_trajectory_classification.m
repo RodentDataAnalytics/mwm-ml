@@ -52,16 +52,7 @@ function results_trajectory_classification
                     break;
             end            
         end
-                        
-%         for j = 1:g_segments_classification.nclasses
-%             p = (sum(strat_distr(idx, :) == j) / nbins);
-%             if p > 0
-%                 fprintf('%s: %f%% ', g_segments_classification.classes(j).abbreviation, p*100);
-%             end
-%         end    
-        
-        % fprintf('UNK: %f%%', g_trajectories_punknown(idx));
-                
+                                       
         % segments
         nseg = g_partitions(idx);
         seg0 = 1;
@@ -76,8 +67,7 @@ function results_trajectory_classification
         
         vals = g_segments_classification.class_map(seg0:seg0 + nseg);
         
-        % plot trajectory
-        
+        % plot trajectory        
         figure;            
         % draw arena
         axis off;
