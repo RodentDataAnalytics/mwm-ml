@@ -1,5 +1,6 @@
 function [ traj, cal_data ] = load_trajectories(sets, calibrate)
 %LOAD_TRAJECTORIES Loads a set of trajectories from a given folder
+    global g_config;
     addpath(fullfile(fileparts(mfilename('fullpath')), '/calibration'));
       
     % contruct object to hold trajectories

@@ -1,11 +1,11 @@
 function results_strategies_distributions_length
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/export_fig'));  
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/sigstar'));
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/AnDarksamtest'));
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/cm_and_cb_utilities'));
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../'));
+    addpath(fullfile(fileparts(mfilename('fullpath')), '../../extern/export_fig'));  
+    addpath(fullfile(fileparts(mfilename('fullpath')), '../../extern/sigstar'));    
+    addpath(fullfile(fileparts(mfilename('fullpath')), '../../extern/cm_and_cb_utilities'));
+    addpath(fullfile(fileparts(mfilename('fullpath')), '../../'));
 
     % global data initialized elsewhere
+    global g_config;
     global g_segments_classification;
     global g_animals_trajectories_map;
     global g_long_trajectories_map;        

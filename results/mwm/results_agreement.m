@@ -1,5 +1,6 @@
 function results_agreement
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/export_fig'));      
+    addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/export_fig'));          
+    global g_config;
     
     %%  load all trajectories and compute feature values if necessary (data is then cached)
     global g_trajectories;    

@@ -1,4 +1,4 @@
-function MM=robustcsvread(filename)
+function MM=robustcsvread(filename, varargin)
 % ROBUSTCSVREAD reads in CSV files with
 % different number of columns on different
 % lines
@@ -12,14 +12,21 @@ function MM=robustcsvread(filename)
 % robbins@bloomberg.net
 % michael.robbins@us.cibc.com
 
+% Tiago Gehring, Mar/2015: added delimiter options, started messing the
+% code. Figured why not?
+[line_delim, delim] = process_options(varargin, ...
+            'LineDelimiter', '\n', 'Delimiter', ',' ...
+          );            
+
 fid=fopen(filename,'r');
 slurp=fscanf(fid,'%c');
+slurp=regexprep(slurp,'\t',',');
 fclose(fid);
-M=strread(slurp,'%s','delimiter','\n');
+
+M = strread(slurp,'%s','delimiter', line_delim);
 for i=1:length(M)
-    temp=strread(M{i},'%s','delimiter',',');
+    temp=strread(M{i},'%s','delimiter', delim);
     for j=1:length(temp)
         MM{i,j}=temp{j};
-    end;
-end;
-
+    end
+end

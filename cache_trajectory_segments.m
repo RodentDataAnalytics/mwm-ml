@@ -2,7 +2,7 @@ function cache_trajectory_segments
 % CACHE_TRAJECTORY_SEGMENTS
 %   Loads trajectories if not already loaded and segment them using the
 %   default segmentation parameters as defined in the global constants
-
+    global g_config;
     % load trajectories
     global g_trajectories;        
         

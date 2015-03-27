@@ -3,6 +3,7 @@ function results_major_minor_classes
     
     %%  load all trajectories and compute feature values if necessary (data is then cached)
     global g_segments_base_classification;
+    global g_config;
     
     cache_trajectories_classification;
     

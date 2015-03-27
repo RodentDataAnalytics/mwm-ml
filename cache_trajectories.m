@@ -1,6 +1,7 @@
 function cache_trajectories
 % CACHE_TRAJECTORIES 
 %   Loads the trajectories if not already loaded
+    global g_config;
     global g_trajectories;
     % also load a bunch of other useful properties about the trajectories
     global g_trajectories_group;    
@@ -16,8 +17,8 @@ function cache_trajectories
     % matrix of trajectory indices for each trial and group of animals
     global g_animals_trajectories_map;
         
-    if isempty(g_trajectories)
-        g_trajectories = load_trajectories(1:3, 1);
+    if isempty(g_trajectories)        
+        g_trajectories = g_config.load_data();
     
         % select only groups 1 and 2
         g_trajectories_group = arrayfun( @(t) t.group, g_trajectories.items);                 
@@ -30,8 +31,7 @@ function cache_trajectories
         g_trajectories_length = arrayfun( @(t) t.compute_feature(features.LENGTH), g_trajectories.items);
         g_trajectories_latency = arrayfun( @(t) t.compute_feature(features.LATENCY), g_trajectories.items);      
         g_trajectories_speed = arrayfun( @(t) t.compute_feature(features.AVERAGE_SPEED), g_trajectories.items);
-        g_trajectories_efficiency = arrayfun( @(t) t.compute_feature(features.EFFICIENCY), g_trajectories.items);
-                        
+                          
         g_animals_count = [sum(g_trajectories_group == 1 & g_trajectories_trial == 1), sum(g_trajectories_group == 2 & g_trajectories_trial == 1)];
         
         g_animals_ids = {};

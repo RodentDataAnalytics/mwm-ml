@@ -1,4 +1,5 @@
 function browse_set(set_num, set_comp)
+    global g_config;
     global g_trajectories;
     cache_trajectories;
 

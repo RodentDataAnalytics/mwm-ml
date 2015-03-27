@@ -5,6 +5,7 @@ function cache_trajectories_classification
 
     % load trajectories and segments
     global g_segments;        
+    global g_config;
     global g_partitions;    
     global g_trajectories;
     cache_trajectory_segments;

@@ -419,6 +419,45 @@ classdef clustering_results < handle
             end         
         end
         
+        function w = classes_weights(inst)
+            % do a mapping with constant weights
+            strat_distr = inst.mapping_ordered('DiscardUnknown', 1, 'MinSegments', 1, 'ClassesWeights', ones(1, inst.nclasses));
+                    
+            max_len = zeros(1, inst.nclasses); 
+            
+            % do now the other classifications
+            
+             for i = 1:size(strat_distr, 1)
+                c = strat_distr(i, 1);
+                ci = 1;
+                for j = 2:size(strat_distr, 2)
+                    cc = strat_distr(i, j);
+                    if cc ~= c                
+                        if c <= 0
+                            c = cc;
+                            ci = j;
+                        elseif cc == -1
+                            % last probably
+                            if j - ci > 1   
+                                max_len(c) = max(max_len(c), j - ci - 1);                                                   
+                            end
+                            break;
+                        elseif cc > 0 && c > 0
+                            % real change
+                            if j - ci > 1                                
+                                max_len(c) = max(max_len(c), j - ci - 1);                                
+                            end
+                            c = cc;
+                            ci = j;
+                        end
+                    end
+                end
+            end
+            % this is the maximum of the maximum classs length
+            max_max_len = max(max_len);
+            w = repmat(max_max_len, 1, inst.nclasses) ./ max_len;
+        end
+        
         function [major_classes, full_distr, seg_class] = mapping_ordered(inst, varargin)        
             % compute the prefered strategy for a small time window for each
             % trajectory
@@ -434,13 +473,13 @@ classdef clustering_results < handle
                 map = 1:inst.nclasses;
                 nclasses = inst.nclasses;
                 if isempty(class_w)                
-                    class_w = arrayfun( @(x) x.weight, inst.classes);
+                    class_w = inst.classes_weights();
                 end            
             else
                 map = tag.mapping(classes, inst.classes);
                 nclasses = length(classes);
                 if isempty(class_w)                
-                    class_w = arrayfun( @(x) x.weight, classes);
+                    class_w = ones(1, length(classes));                    
                 end            
             end
             

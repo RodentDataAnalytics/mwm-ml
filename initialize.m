@@ -5,7 +5,21 @@
 addpath(fullfile(fileparts(mfilename('fullpath')),'/extern/weka'));
 weka_init;
 disp('Weka library now initialized. Cheers.');
+% need to add this first
+addpath(fullfile(fileparts(mfilename('fullpath')),'/features'));
+
+% select configuration
+addpath(fullfile(fileparts(mfilename('fullpath')),'/config'));
+global g_config;
+%% Change for desired configuration
+%g_config = config_place_avoidance(config_place_avoidance.REFERENCE_FRAME_ARENA, config_place_avoidance.SECTION_T1); 
+g_config = config_mwm; 
+
+fprintf('Configuration selected: %s\n', g_config.DESCRIPTION);
+addpath(fullfile(fileparts(mfilename('fullpath')), g_config.RESULTS_DIR)); 
+
 % add also some other folders to the path
-addpath(fullfile(fileparts(mfilename('fullpath')),'/results'));
-addpath(fullfile(fileparts(mfilename('fullpath')),'/gui'));
-addpath(fullfile(fileparts(mfilename('fullpath')),'/utility'));
+addpath(fullfile(fileparts(mfilename('fullpath')), '/extern')); 
+addpath(fullfile(fileparts(mfilename('fullpath')), '/results'));
+addpath(fullfile(fileparts(mfilename('fullpath')), '/gui'));
+addpath(fullfile(fileparts(mfilename('fullpath')), '/utility'));

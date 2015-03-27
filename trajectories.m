@@ -250,6 +250,10 @@ classdef trajectories < handle
             for i = 1:size(labels, 1)
                 % see if we have this trajectory/segment
                 id = labels{i, 1};
+                if isempty(id)
+                    continue;
+                end
+
                 pos = obj.index_of(id(1), id(2), id(3), id(4), id(5));
                 if pos ~= -1
                     idx(i) = pos;
@@ -283,6 +287,7 @@ classdef trajectories < handle
         end                   
         
         function res = classifier(inst, labels_fn, feat, tags_type, hyper_tags)
+            global g_config;
             if nargin > 3
                 [labels_data, tags] = trajectories.read_tags(labels_fn, tags_type);            
             else
@@ -472,6 +477,7 @@ classdef trajectories < handle
         end            
             
         function [map, tags] = read_tags(fn, tag_type)
+            global g_config;
             % READ_TAGS(FN, TAG_TYPE)
             %   Reads tags from file FN filtering by tags of type TAG_TYPE only
             %   Tags are sorted according to their score value (if available)
@@ -484,6 +490,9 @@ classdef trajectories < handle
             labels = robustcsvread(fn);
             map = cell([size(labels, 1), 2]);            
             for i = 1:size(labels, 1)
+                if isempty(labels{i, 1})
+                    continue;
+                end
                 % set and track numbers
                 set = sscanf(labels{i, 1}, '%d');
                 day = sscanf(labels{i, 2}, '%d');

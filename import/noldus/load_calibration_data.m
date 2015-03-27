@@ -2,6 +2,8 @@ function [ cal_data ] = load_calibration_data(sets)
 %LOAD_CALIBRATION_DATA Summary of this function goes here
 %   Detailed explanation goes here
     addpath(fullfile(fileparts(mfilename('fullpath')), '/calibration'));
+    
+    global g_config;
             
     cache_fn = fullfile(g_config.OUTPUT_DIR, ['calibration_data_' arrayfun( @(x) num2str(x), sets) '.mat']);
     if exist(cache_fn ,'file')

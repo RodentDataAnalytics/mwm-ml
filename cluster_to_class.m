@@ -1,5 +1,6 @@
 function mapping = cluster_to_class( sz_clusters, class_idx, cluster_idx, varargin )
 %CLUSTER_TO_CLASS Maps clusters to classes    
+    global g_config;    
     addpath(fullfile(fileparts(mfilename('fullpath')), './extern/'));
     
     [min_samples_p, min_samples_exp, discard_mixed] = process_options(varargin, ...

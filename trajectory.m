@@ -42,6 +42,7 @@ classdef trajectory < handle
     methods
         % constructor
         function traj = trajectory(pts, set, track, group, id, trial, segment, off, starti)   
+            global g_config;
             traj.points = pts;                       
             traj.set = set;
             traj.track = track;
@@ -80,6 +81,7 @@ classdef trajectory < handle
         end                              
         
         function [ eff ] = efficiency(traj)
+            global g_config;
             min_path = norm( traj.points(1,2) - g_config.PLATFORM_X, traj.points(1,3) - g_config.PLATFORM_Y);
             len = traj.compute_feature(features.LENGTH);
             if len ~= 0
@@ -199,6 +201,7 @@ classdef trajectory < handle
         end            
         
         function [ v ] = compute_feature(traj, f)
+            global g_config;
             switch(f)
                 case features.LATENCY                    
                     [~, v] = trajectory_length(traj.points);
@@ -317,6 +320,7 @@ classdef trajectory < handle
         end    
         
         function plot(traj, varargin)
+            global g_config;
             addpath(fullfile(fileparts(mfilename('fullpath')), '/extern'));
             [clr, arn, ls, lw] = process_options(varargin, ...
                 'Color', [0 0 0], 'DrawArena', 1, 'LineSpec', '-', 'LineWidth', 1);
@@ -327,8 +331,11 @@ classdef trajectory < handle
                     'Curvature',[1,1], 'FaceColor',[1, 1, 1], 'edgecolor', [0.2, 0.2, 0.2], 'LineWidth', 3);
                 hold on;
                 axis square;
-                rectangle('Position',[g_config.PLATFORM_X - g_config.PLATFORM_R, g_config.PLATFORM_Y - g_config.PLATFORM_R, 2*g_config.PLATFORM_R, 2*g_config.PLATFORM_R],...
-                    'Curvature',[1,1], 'FaceColor',[1, 1, 1], 'edgecolor', [0.2, 0.2, 0.2], 'LineWidth', 3);             
+                % see if we have a platform to draw
+                if exist('g_config.PLATFORM_X')
+                    rectangle('Position',[g_config.PLATFORM_X - g_config.PLATFORM_R, g_config.PLATFORM_Y - g_config.PLATFORM_R, 2*g_config.PLATFORM_R, 2*g_config.PLATFORM_R],...
+                        'Curvature',[1,1], 'FaceColor',[1, 1, 1], 'edgecolor', [0.2, 0.2, 0.2], 'LineWidth', 3);             
+                end
             end
             plot(traj.points(:,2), traj.points(:,3), ls, 'LineWidth', lw, 'Color', clr);           
             set(gca, 'LooseInset', [0,0,0,0]);
@@ -352,7 +359,7 @@ classdef trajectory < handle
         function compute_boundary(traj)
             if traj.focus_ == -1                
                 if isempty(traj.centralpts_)
-                    traj.centralpts_ = traj.central_points(g_config.FOCUS_P);
+                    traj.centralpts_ = traj.central_points(1.);
                 end
                 [traj.focus_, traj.ecentre_, traj.a_, traj.b_, traj.inc_] = trajectory_focus(traj.centralpts_, traj.compute_feature(features.LENGTH));
             end
