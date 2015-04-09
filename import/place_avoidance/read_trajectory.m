@@ -25,10 +25,10 @@ function [ id, trial, pts ] = read_trajectory( fn )
                t = sscanf(data{i, 2}, '%f');
                x = sscanf(data{i, 3}, '%f');
                y = sscanf(data{i, 4}, '%f');
-               stat = sscanf(data{i, 5}, '%f'); % point status
+               stat = sscanf(data{i, 6}, '%f'); % point status
                % discard missing smaples
-               if ~isempty(t) && ~isempty(x) && ~isempty(y) && ~isempty(stat) && stat ~= 5 % 5 == bad point
-                   pts = [pts; t x y stat];         
+               if ~isempty(t) && ~isempty(x) && ~isempty(y) && ~isempty(stat) && stat ~= config_place_avoidance.POINT_STATE_BAD
+                   pts = [pts; t x y stat];
                end
            end
        end

@@ -7,14 +7,15 @@ function results_control_stress_speed_latency
     % global data initialized elsewhere
     global g_trajectories_speed;        
     global g_trajectories_length;        
-    global g_trajectories_latency;
     global g_trajectories_efficiency;
     global g_animals_trajectories_map;
+
+    trajectories_latency = arrayfun( @(t) t.compute_feature(features.LATENCY), g_trajectories.items);      
     
     cache_trajectories;
     eff = g_trajectories_efficiency;
     eff = eff + ones(1, length(eff))*3e-3;
-    vars = [g_trajectories_latency; eff; g_trajectories_speed; g_trajectories_length/100];
+    vars = [trajectories_latency; eff; g_trajectories_speed; g_trajectories_length/100];
     names = {'latency', 'efficiency', 'speed', 'length'};
     ylabels = {'latency [s]', 'efficiency', 'speed [cm/s]', 'path length [m]'};
     log_y = [0, 1, 0, 0];

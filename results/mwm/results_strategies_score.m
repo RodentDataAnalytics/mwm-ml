@@ -8,18 +8,20 @@ function results_strategies_score
     global g_segments_classification;
     global g_long_trajectories_idx;
     global g_partitions;
-    global g_trajectories_latency;
     global g_trajectories_session;
     global g_trajectories_group;
     global g_animals_trajectories_map;   
-        
+
+    cache_animals;
+    trajectories_latency = arrayfun( @(t) t.compute_feature(features.LATENCY), g_trajectories.items);      
+
     % classify trajectories
     cache_trajectories_classification; 
 
     distr = g_segments_classification.classes_distribution(g_partitions(g_long_trajectories_idx), 'Normalize', 1);
     % plot distribution for different trajectory lengths    
     nbins = 9;
-    min_len = min(g_trajectories_latency(g_long_trajectories_idx));
+    min_len = min(trajectories_latency(g_long_trajectories_idx));
     dt = (g_config.TRIAL_TIMEOUT - min_len) / nbins;
     
     xvals = zeros(1, nbins);
@@ -28,7 +30,7 @@ function results_strategies_score
         ti = (i - 1)*dt + min_len;
         tf = i*dt + min_len;
         xvals(nbins - i + 1) = (ti + tf) / 2;          
-        data(nbins - i + 1, :) = sum(distr(g_trajectories_latency(g_long_trajectories_idx) > ti & g_trajectories_latency(g_long_trajectories_idx) <= tf, :));        
+        data(nbins - i + 1, :) = sum(distr(trajectories_latency(g_long_trajectories_idx) > ti & g_trajectories_latency(g_long_trajectories_idx) <= tf, :));        
     end     
     
     % normalize the data
@@ -62,7 +64,7 @@ function results_strategies_score
     %% look at strategies that led to the platform
     distr = g_segments_classification.classes_distribution(g_partitions(g_long_trajectories_idx), 'MaxSegments', 10, 'Reverse', 1);
     % plot distribution for different trajectory lengths        
-    data = sum(distr(g_trajectories_latency(g_long_trajectories_idx) < g_config.TRIAL_TIMEOUT, :));
+    data = sum(distr(trajectories_latency(g_long_trajectories_idx) < g_config.TRIAL_TIMEOUT, :));
     
     % normalize the data
     data = 100*data / sum(data);

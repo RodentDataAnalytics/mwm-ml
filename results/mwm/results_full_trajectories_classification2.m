@@ -7,6 +7,7 @@ function results_full_trajectories_classification2
     global g_trajectories; 
     global g_long_trajectories_map;
     global g_animals_trajectories_map;    
+    cache_animals;
     cache_trajectory_segments;
        
     % load trajectory tags -> these are the tags assigned to the full

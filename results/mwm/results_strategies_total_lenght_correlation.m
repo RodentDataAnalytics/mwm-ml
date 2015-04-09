@@ -1,37 +1,49 @@
-function results_strategies_score_efficiency
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/export_fig'));    
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/sigstar'));
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../'));
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/AnDarksamtest'));
+function results_strategies_total_length_correlation
+    addpath(fullfile(fileparts(mfilename('fullpath')), '../../extern/export_fig'));        
+    addpath(fullfile(fileparts(mfilename('fullpath')), '../../'));
     
     % global data initialized elsewhere
     global g_segments_classification;
-    global g_long_trajectories_idx;
-    global g_partitions;    
-    global g_trajectories_efficiency;
-        
+    global g_config;
+    global g_partitions;
+    global g_trajectories_length;    
+    global g_animals_trajectories_map;    
+    
     % classify trajectories
-    cache_animals;
     cache_trajectories_classification; 
 
     %%
-    %% Plot strategies x efficiency - area plot
-    %%
-    distr = g_segments_classification.classes_distribution(g_partitions(g_long_trajectories_idx), 'Normalize', 1);
-    nbins = 8;
-    min_eff = log(0.01); log(min(g_trajectories_efficiency(g_long_trajectories_idx)));
-    max_eff = log(0.25); % log(max(g_trajectories_efficiency(g_long_trajectories_idx)));
-    dt = (max_eff - min_eff) / nbins;
+    %% Plot strategies x total length - area plot
+    %%        
+    distr = g_segments_classification.classes_distribution(g_partitions, 'Normalize', 0);
+    
+    % group per animal
+    distr_animal = [];
+    total_lenght = [];
+    for g = 1:1
+        map = g_animals_trajectories_map{g};
+        for idx = 1:size(map, 2);
+            % add the distributions of all the trials together
+            distr_animal = [distr_animal; sum(distr(map(:, idx), :))];
+            total_lenght = [total_lenght, sum(g_trajectories_length(map(:, idx)))];
+        end
+    end
+    distr_animal = distr_animal ./ repmat(sum(distr_animal, 2) + (sum(distr_animal, 2) == 0)*1e-5, 1, g_segments_classification.nclasses);
+    
+    nbins = 5;
+    min_len = min(total_lenght);%log(0.01); log(min(g_trajectories_efficiency(g_long_trajectories_idx)));
+    max_len = max(total_lenght); %log(0.25); % log(max(g_trajectories_efficiency(g_long_trajectories_idx)));
+    dt = (max_len - min_len) / nbins;
     
     % bin the data according to strategy x efficiency
     xvals = [];
     data = [];        
     for i = 1:nbins
-        ei = (i - 1)*dt + min_eff;
-        ef = i*dt + min_eff;
-        idx = find(log(g_trajectories_efficiency(g_long_trajectories_idx)) > ei & log(g_trajectories_efficiency(g_long_trajectories_idx)) <= ef);
+        ei = (i - 1)*dt + min_len;
+        ef = i*dt + min_len + 1e-5;
+        idx = find(total_lenght >= ei & total_lenght < ef);
         if length(idx) > 3
-            xvals = [xvals, exp((ei + ef) / 2)];          
+            xvals = [xvals, (ei + ef) / 2];          
             data = [data; sum(distr(idx, :))];        
         end
     end     
@@ -43,51 +55,17 @@ function results_strategies_score_efficiency
     figure(321);
     area(xvals, data); 
     set (gca, 'Xscale', 'log')
- %   set(gca,'XDir','reverse');
+    set(gca,'XDir','reverse');
     set(gca, 'XTick', [0.01, 0.05, 0.1, 0.2, 0.3]);
-    colormap(g_config.CLASSES_COLORMAP);
+    colormap(g_config.CLASSES_COLORMAP());
     
     xlabel('path efficiency', 'FontSize', 0.8*g_config.FONT_SIZE);
     ylabel('normalized distribution', 'FontSize', 0.8*g_config.FONT_SIZE);    
     set(gcf, 'Color', 'w');
 
-    box off;
-    export_fig(fullfile(g_config.OUTPUT_DIR, 'strategy_score_efficiency.eps')); 
+    %box off;
+    %export_fig(fullfile(g_config.OUTPUT_DIR, 'strategy_score_efficiency.eps')); 
     
-    %%
-    %% Plot strategy x efficiency for different groups of strategies
-    %%
-%     for ic = 1:length(g_config.REDUCED_BEHAVIOURAL_CLASSES)
-%        % tags in indices of this group
-%        idx = [];
-%        for j = 1:g_segments_classification.nclasses
-%            if g_config.REDUCED_BEHAVIOURAL_CLASSES(ic).matches(g_segments_classification.classes(j).abbreviation)
-%                idx = [idx, j];               
-%            end
-%        end
-% 
-%        % plot the values
-%        figure;
-%        plot(xvals, data(:, idx)); 
-%        set (gca, 'Xscale', 'log');         
-%     end
-    
-    %%
-    %% Compute strategy "scores" based on how the presence of a strategy
-    %% impacts efficiency
-    %%
-    data = data(:, 1:size(data, 2) - 1);
-    % calculate weights based on first and last bins
-    w = data(end, :) ./ data(1, :);
-    
-    msg = 'COMPUTED STRATEGY SCORES: \n';
-    for i = 1:g_segments_classification.nclasses
-        msg = [msg g_segments_classification.classes(i).description ' = ' num2str(w(i)) '\n'];
-    end    
-    fprintf(msg);
-    f = fopen(fullfile(g_config.OUTPUT_DIR, 'scores.txt'), 'w');        
-    fprintf(f, msg);
-    fclose(f);            
     
     %%
     %% Compute the Spearman correlation coefficient for each strategy x efficiency

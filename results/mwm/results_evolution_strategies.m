@@ -9,7 +9,7 @@ function results_evolution_strategies
     global g_segments_classification;
     global g_long_trajectories_idx;
     global g_partitions;
-    global g_trajectories_latency;
+    trajectories_latency = arrayfun( @(t) t.compute_feature(features.LATENCY), g_trajectories.items);      
     
     % classify trajectories
     cache_trajectories_classification; 
@@ -43,7 +43,7 @@ function results_evolution_strategies
     for t = 1:g_config.TRIALS
         data = [data, ...
             arrayfun( @(c) sum(distr(g_trajectories_trial(g_long_trajectories_idx) == t ...
-                             & g_trajectories_latency(g_long_trajectories_idx) > 80, c)), ...
+                             & trajectories_latency(g_long_trajectories_idx) > 80, c)), ...
                 1:g_segments_classification.nclasses...
             )']; 
                          

@@ -11,6 +11,7 @@ function results_strategies_distributions_length
     global g_long_trajectories_map;        
     
     % classify trajectories
+    cache_animals;
     cache_trajectories_classification; 
                                   
     strat_distr = g_segments_classification.mapping_ordered();

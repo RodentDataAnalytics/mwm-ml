@@ -12,7 +12,7 @@ addpath(fullfile(fileparts(mfilename('fullpath')),'/features'));
 addpath(fullfile(fileparts(mfilename('fullpath')),'/config'));
 global g_config;
 %% Change for desired configuration
-%g_config = config_place_avoidance(config_place_avoidance.REFERENCE_FRAME_ARENA, config_place_avoidance.SECTION_T1); 
+% g_config = config_place_avoidance(config_place_avoidance.SECTION_AVOID); 
 g_config = config_mwm; 
 
 fprintf('Configuration selected: %s\n', g_config.DESCRIPTION);

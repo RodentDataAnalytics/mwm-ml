@@ -1,13 +1,13 @@
-classdef config_place_avoidance        
+classdef config_place_avoidance < base_config
     % config_mwm Global constants
     properties(Constant)
-        DESCRIPTION = 'Place avoidance task (Room frame, t < T1)';
         RESULTS_DIR = 'results/place_avoidance_t1';
         
         TRIALS_PER_SESSION = 1;
-        SESSIONS = 3;
-        TRIALS = config_mwm.TRIALS_PER_SESSION*config_mwm.SESSIONS;
+        SESSIONS = 5;
+        TRIALS = config_place_avoidance.TRIALS_PER_SESSION*config_place_avoidance.SESSIONS;
         TRIAL_TIMEOUT = 1200; % seconds
+        GROUPS = 2;
         % centre point of arena in cm        
         CENTRE_X = 127.5;
         CENTRE_Y = 127.5;
@@ -18,7 +18,8 @@ classdef config_place_avoidance
             '/home/tiago/neuroscience/place_avoidance/data1' ...
         }; 
         	
-        NDISCARD = 0;
+        REGULARIZE_GROUPS = 0;
+        NDISCARD = 0;        
     
         % relation between animal ids and groups (1 = control, 2 = test)
         TRAJECTORY_GROUPS = {...
@@ -41,42 +42,24 @@ classdef config_place_avoidance
                  1108, 1; ...                 
                 ] ...
          };        
-        
-        % tag types
-        TAG_TYPE_ALL = 0;
-        TAG_TYPE_BEHAVIOUR_CLASS = 1;
-        TAG_TYPE_TRAJECTORY_ATTRIBUTE = 2;
-        
-        % major/minor classes weights
-        CLASS_WEIGHT_MINOR = 10;
-        CLASS_WEIGHT_MAJOR = 1;
-        
+               
         % default tags               
-        TAGS = [ tag('UD', 'undefined', config_mwm.TAG_TYPE_BEHAVIOUR_CLASS), ...
-                 tag('TT', 'thigmotaxis', config_mwm.TAG_TYPE_BEHAVIOUR_CLASS, 1, [], config_mwm.CLASS_WEIGHT_MAJOR), ...
-                 tag('IC', 'incursion', config_mwm.TAG_TYPE_BEHAVIOUR_CLASS, 2, [], config_mwm.CLASS_WEIGHT_MAJOR), ...
-                 tag('SS', 'scanning-surroundings', config_mwm.TAG_TYPE_BEHAVIOUR_CLASS, 7, [], config_mwm.CLASS_WEIGHT_MAJOR), ...                 
-                 tag('SC', 'scanning', config_mwm.TAG_TYPE_BEHAVIOUR_CLASS, 3, [], config_mwm.CLASS_WEIGHT_MAJOR), ...
-                 tag('FS', 'focused search', config_mwm.TAG_TYPE_BEHAVIOUR_CLASS, 4, [], config_mwm.CLASS_WEIGHT_MINOR), ...                                  
-                 tag('SO', 'self orienting', config_mwm.TAG_TYPE_BEHAVIOUR_CLASS, 6, [], config_mwm.CLASS_WEIGHT_MINOR), ...
-                 tag('CR', 'chaining response', config_mwm.TAG_TYPE_BEHAVIOUR_CLASS, 5, [], config_mwm.CLASS_WEIGHT_MINOR), ...
-                 tag('ST', 'target scanning', config_mwm.TAG_TYPE_BEHAVIOUR_CLASS, 8, [], config_mwm.CLASS_WEIGHT_MINOR), ...
-                 tag('TS', 'target sweep', config_mwm.TAG_TYPE_BEHAVIOUR_CLASS, 3), ...             
-                 tag('DF', 'direct finding', config_mwm.TAG_TYPE_BEHAVIOUR_CLASS), ...
-                 tag('AT', 'approaching_target', config_mwm.TAG_TYPE_BEHAVIOUR_CLASS), ...                              
-                 tag('CI', 'circling', config_mwm.TAG_TYPE_BEHAVIOUR_CLASS, 8), ...                                   
-                 tag('CP', 'close pass', config_mwm.TAG_TYPE_TRAJECTORY_ATTRIBUTE), ...
-                 tag('S1', 'selected 1', config_mwm.TAG_TYPE_TRAJECTORY_ATTRIBUTE)];
-   
-        REDUCED_BEHAVIOURAL_CLASSES = [ ...
-            tag.combine_tags( [config_mwm.TAGS(tag.tag_position(config_mwm.TAGS, 'TT')), config_mwm.TAGS(tag.tag_position(config_mwm.TAGS, 'IC'))]), ...
-            config_mwm.TAGS(tag.tag_position(config_mwm.TAGS, 'FS')), ...
-            config_mwm.TAGS(tag.tag_position(config_mwm.TAGS, 'SC')), ...
-            config_mwm.TAGS(tag.tag_position(config_mwm.TAGS, 'SS')), ...
-            config_mwm.TAGS(tag.tag_position(config_mwm.TAGS, 'CR')), ...
-            tag.combine_tags( [config_mwm.TAGS(tag.tag_position(config_mwm.TAGS, 'SO')), config_mwm.TAGS(tag.tag_position(config_mwm.TAGS, 'ST'))])  ...                          
-        ];
-    
+        TAGS = [ base_config.TAGS, ...
+                 tag('TT', 'thigmotaxis', base_config.TAG_TYPE_BEHAVIOUR_CLASS, 1, []), ...
+                 tag('IC', 'incursion', base_config.TAG_TYPE_BEHAVIOUR_CLASS, 2, []), ...
+                 tag('SS', 'scanning-surroundings', base_config.TAG_TYPE_BEHAVIOUR_CLASS, 7, []), ...                 
+                 tag('SC', 'scanning', base_config.TAG_TYPE_BEHAVIOUR_CLASS, 3, []), ...
+                 tag('FS', 'focused search', base_config.TAG_TYPE_BEHAVIOUR_CLASS, 4, []), ...                                  
+                 tag('SO', 'self orienting', base_config.TAG_TYPE_BEHAVIOUR_CLASS, 6, []), ...
+                 tag('CR', 'chaining response', base_config.TAG_TYPE_BEHAVIOUR_CLASS, 5, []), ...
+                 tag('ST', 'target scanning', base_config.TAG_TYPE_BEHAVIOUR_CLASS, 8, []), ...
+                 tag('TS', 'target sweep', base_config.TAG_TYPE_BEHAVIOUR_CLASS, 3), ...             
+                 tag('DF', 'direct finding', base_config.TAG_TYPE_BEHAVIOUR_CLASS), ...
+                 tag('AT', 'approaching_target', base_config.TAG_TYPE_BEHAVIOUR_CLASS), ...                              
+                 tag('CI', 'circling', base_config.TAG_TYPE_BEHAVIOUR_CLASS, 8), ...                                   
+                 tag('CP', 'close pass', base_config.TAG_TYPE_TRAJECTORY_ATTRIBUTE), ...
+                 tag('S1', 'selected 1', base_config.TAG_TYPE_TRAJECTORY_ATTRIBUTE)];
+             
         % trajectory sample status
         POINT_STATE_OUTSIDE = 0;
         POINT_STATE_ENTRANCE_LATENCY = 1;
@@ -84,9 +67,6 @@ classdef config_place_avoidance
         POINT_STATE_INTERSHOCK_LATENCY = 3;
         POINT_STATE_OUTSIDE_LATENCY = 4;
         POINT_STATE_BAD = 5;
-
-        UNDEFINED_TAG_ABBREVIATION = 'UD'; 
-        UNDEFINED_TAG_INDEX = 1;        
                                     
         CLUSTER_CLASS_MINIMUM_SAMPLES_P = 0.01; % 2% o
         CLUSTER_CLASS_MINIMUM_SAMPLES_EXP = 0.75;
@@ -109,29 +89,42 @@ classdef config_place_avoidance
         };
                 
         % plot properties
-        AXIS_LINE_WIDTH = 1.5;    % AxesLineWidth
-        FONT_SIZE = 20;      % Fontsize
-        LINE_WIDTH = 1.4;      
         OUTPUT_DIR = '/home/tiago/results/'; % where to put all the graphics and other generated output
-        CLASSES_COLORMAP = jet;   
-        
-        
-        REFERENCE_FRAME_ROOM = 1;
-        REFERENCE_FRAME_ARENA = 0;        
-        
-        SECTION_T1 = 1;
-        SECTION_ALL = 0;
+        CLASSES_COLORMAP = @jet;   
+                 
+        % which part of the trajectories are to be taken
+        SECTION_T1 = 1; % segment until first entrance to the shock area
+        SECTION_TMAX = 2; % longest segment between shocks
+        SECTION_AVOID = 3; % segments between shocks
+        SECTION_FULL = 0; % complete trajectories
     end   
     
     properties(GetAccess = 'public', SetAccess = 'protected')
         ref_frame_ = 0;
-        section_ = config_place_avoidance.SECTION_ALL;
+        section_ = config_place_avoidance.SECTION_FULL;
     end
     
-    methods
-        function inst = config_place_avoidance(ref_frame, sec)
+    methods        
+        function inst = config_place_avoidance(sec)
+            switch sec
+                case config_place_avoidance.T1
+                    desc = 't < T1';                    
+                case config_place_avoidance.TMAX
+                    desc = 't < Tmax';
+                case config_place_avoidance.AVOID
+                    desc = 'Ti < t < Ti+1';
+                case config_place_avoidance.FULL
+                    desc = 'full trajectories';
+            end
+            inst@base_config(sprintf('Place avoidance task (%s)', desc));
             inst.ref_frame_ = ref_frame;
             inst.section_ = sec;
+        end
+        
+        function val = hash(inst)
+            val = hash_combine( ...
+                hash_combine(hash@base_config(), inst.ref_frame_), ...
+                inst.section_);
         end
         
         % Imports trajectories from Noldus data file's

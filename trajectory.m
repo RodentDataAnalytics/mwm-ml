@@ -15,6 +15,7 @@ classdef trajectory < handle
         start_time = -1;
         end_time = -1;
         start_index = -1;
+        
     end
     
     properties(GetAccess = 'protected', SetAccess = 'protected')        
@@ -340,6 +341,14 @@ classdef trajectory < handle
             plot(traj.points(:,2), traj.points(:,3), ls, 'LineWidth', lw, 'Color', clr);           
             set(gca, 'LooseInset', [0,0,0,0]);
         end        
+        
+        function pts = data_representation(inst, idx)
+            assert(idx <= length(g_config.DATA_REPRESENTATION));
+            % dispatch the call to the function registered globally
+            name = g_config.DATA_REPRESENTATION{idx};
+            f = str2fun(name(2));
+            pts = f(inst);
+        end
     end
     
     methods(Static)

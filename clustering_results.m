@@ -186,7 +186,7 @@ classdef clustering_results < handle
                 distr_traj = zeros(1, nc);
             end                
                       
-            map = inst.mapping_ordered;
+            [~, ~, map] = inst.mapping_ordered;
             if reverse
                 map = map(end:-1:1);
                 partitions = partitions(end:-1:1);
@@ -458,7 +458,7 @@ classdef clustering_results < handle
             w = repmat(max_max_len, 1, inst.nclasses) ./ max_len;
         end
         
-        function [major_classes, full_distr, seg_class] = mapping_ordered(inst, varargin)        
+        function [major_classes, full_distr, seg_class, class_w] = mapping_ordered(inst, varargin)        
             % compute the prefered strategy for a small time window for each
             % trajectory
             addpath(fullfile(fileparts(mfilename('fullpath')), '/extern'));

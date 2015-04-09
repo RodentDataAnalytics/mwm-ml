@@ -1,5 +1,5 @@
-function results_major_minor_classes
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/export_fig'));      
+function results_class_weights
+    addpath(fullfile(fileparts(mfilename('fullpath')), '../../extern/export_fig'));      
     
     %%  load all trajectories and compute feature values if necessary (data is then cached)
     global g_segments_base_classification;
@@ -14,7 +14,7 @@ function results_major_minor_classes
         if iter == 1
             strat_distr = g_segments_base_classification.mapping_ordered('DiscardUnknown', 1, 'MinSegments', 1, 'ClassesWeights', w);
         else
-            strat_distr = g_segments_base_classification.mapping_ordered('DiscardUnknown', 1, 'MinSegments', 1);
+            [strat_distr, ~, ~, w] = g_segments_base_classification.mapping_ordered('DiscardUnknown', 1, 'MinSegments', 1);
         end
         
         vals = arrayfun( @(x) [], 1:g_segments_base_classification.nclasses, 'UniformOutput', 0);
@@ -49,7 +49,7 @@ function results_major_minor_classes
         fac = g_config.DEFAULT_SEGMENT_LENGTH*(1 - g_config.DEFAULT_SEGMENT_OVERLAP);
         % show'em, will ya?
         for i = 1:g_segments_base_classification.nclasses
-            fprintf('\n%s: %.2f (max: %d)', g_segments_base_classification.classes(i).description, fac*mean(vals{i}), fac*max(vals{i}));        
+            fprintf('\n%s: %.2f (max: %d) == WEIGHT: %.2f', g_segments_base_classification.classes(i).description, fac*mean(vals{i}), fac*max(vals{i}), w(i));
         end
     end
 end

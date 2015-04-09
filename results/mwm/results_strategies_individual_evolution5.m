@@ -11,7 +11,8 @@ function results_strategies_individual_evolution5
     global g_animals_trajectories_map;
     global g_trajectories_length;    
     
-    % classify trajectories
+    % classify trajectories    
+    cache_animals;
     cache_trajectories_classification; 
     
     figure;
