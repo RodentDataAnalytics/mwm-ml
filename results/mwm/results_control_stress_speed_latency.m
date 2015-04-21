@@ -12,7 +12,7 @@ function results_control_stress_speed_latency
 
     trajectories_latency = arrayfun( @(t) t.compute_feature(features.LATENCY), g_trajectories.items);      
     
-    cache_trajectories;
+    cache_animals;
     eff = g_trajectories_efficiency;
     eff = eff + ones(1, length(eff))*3e-3;
     vars = [trajectories_latency; eff; g_trajectories_speed; g_trajectories_length/100];

@@ -10,6 +10,7 @@ function results_strategies_total_length_correlation
     global g_animals_trajectories_map;    
     
     % classify trajectories
+    cache_animals;
     cache_trajectories_classification; 
 
     %%

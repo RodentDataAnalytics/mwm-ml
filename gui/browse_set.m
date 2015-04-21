@@ -1,4 +1,4 @@
-function browse_set(set_num, set_comp)
+function browse_set(set_num, set_comp, varargin)
     global g_config;
     global g_trajectories;
     cache_trajectories;
@@ -28,4 +28,4 @@ function browse_set(set_num, set_comp)
 %     end
 %     sel = sel(g_trajectories_latency < g_config.TRIAL_TIMEOUT);
     
-    browse_trajectories(param{1}, segments, 'ReferenceClassification', ref_res);    
+    browse_trajectories(param{1}, segments, 'ReferenceClassification', ref_res, varargin{:});    

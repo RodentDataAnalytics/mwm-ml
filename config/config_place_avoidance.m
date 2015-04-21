@@ -42,24 +42,7 @@ classdef config_place_avoidance < base_config
                  1108, 1; ...                 
                 ] ...
          };        
-               
-        % default tags               
-        TAGS = [ base_config.TAGS, ...
-                 tag('TT', 'thigmotaxis', base_config.TAG_TYPE_BEHAVIOUR_CLASS, 1, []), ...
-                 tag('IC', 'incursion', base_config.TAG_TYPE_BEHAVIOUR_CLASS, 2, []), ...
-                 tag('SS', 'scanning-surroundings', base_config.TAG_TYPE_BEHAVIOUR_CLASS, 7, []), ...                 
-                 tag('SC', 'scanning', base_config.TAG_TYPE_BEHAVIOUR_CLASS, 3, []), ...
-                 tag('FS', 'focused search', base_config.TAG_TYPE_BEHAVIOUR_CLASS, 4, []), ...                                  
-                 tag('SO', 'self orienting', base_config.TAG_TYPE_BEHAVIOUR_CLASS, 6, []), ...
-                 tag('CR', 'chaining response', base_config.TAG_TYPE_BEHAVIOUR_CLASS, 5, []), ...
-                 tag('ST', 'target scanning', base_config.TAG_TYPE_BEHAVIOUR_CLASS, 8, []), ...
-                 tag('TS', 'target sweep', base_config.TAG_TYPE_BEHAVIOUR_CLASS, 3), ...             
-                 tag('DF', 'direct finding', base_config.TAG_TYPE_BEHAVIOUR_CLASS), ...
-                 tag('AT', 'approaching_target', base_config.TAG_TYPE_BEHAVIOUR_CLASS), ...                              
-                 tag('CI', 'circling', base_config.TAG_TYPE_BEHAVIOUR_CLASS, 8), ...                                   
-                 tag('CP', 'close pass', base_config.TAG_TYPE_TRAJECTORY_ATTRIBUTE), ...
-                 tag('S1', 'selected 1', base_config.TAG_TYPE_TRAJECTORY_ATTRIBUTE)];
-             
+                    
         % trajectory sample status
         POINT_STATE_OUTSIDE = 0;
         POINT_STATE_ENTRANCE_LATENCY = 1;
@@ -100,31 +83,34 @@ classdef config_place_avoidance < base_config
     end   
     
     properties(GetAccess = 'public', SetAccess = 'protected')
-        ref_frame_ = 0;
         section_ = config_place_avoidance.SECTION_FULL;
     end
     
     methods        
         function inst = config_place_avoidance(sec)
             switch sec
-                case config_place_avoidance.T1
+                case config_place_avoidance.SECTION_T1
                     desc = 't < T1';                    
-                case config_place_avoidance.TMAX
+                case config_place_avoidance.SECTION_TMAX
                     desc = 't < Tmax';
-                case config_place_avoidance.AVOID
+                case config_place_avoidance.SECTION_AVOID
                     desc = 'Ti < t < Ti+1';
-                case config_place_avoidance.FULL
+                case config_place_avoidance.SECTION_FULL
                     desc = 'full trajectories';
             end
-            inst@base_config(sprintf('Place avoidance task (%s)', desc));
-            inst.ref_frame_ = ref_frame;
+            inst@base_config(sprintf('Place avoidance task (%s)', desc), ...                
+               [ tag('TT', 'thigmotaxis', base_config.TAG_TYPE_BEHAVIOUR_CLASS, 1), ... % default tags
+                 tag('IC', 'incursion', base_config.TAG_TYPE_BEHAVIOUR_CLASS, 2), ...
+                 tag('SS', 'scanning-surroundings', base_config.TAG_TYPE_BEHAVIOUR_CLASS, 7), ...                 
+                 tag('CP', 'close pass', base_config.TAG_TYPE_TRAJECTORY_ATTRIBUTE), ...
+                 tag('S1', 'selected 1', base_config.TAG_TYPE_TRAJECTORY_ATTRIBUTE) ], ...
+               [] ...% no additional data representation
+            );   
             inst.section_ = sec;
         end
         
         function val = hash(inst)
-            val = hash_combine( ...
-                hash_combine(hash@base_config(), inst.ref_frame_), ...
-                inst.section_);
+            val = hash_combine(hash@base_config(inst), inst.section_);
         end
         
         % Imports trajectories from Noldus data file's
@@ -132,7 +118,7 @@ classdef config_place_avoidance < base_config
             addpath(fullfile(fileparts(mfilename('fullpath')),'../import/place_avoidance'));
             % load only paths in the room reference frame and up to the
             % point of first entrance in the shock area
-            traj = load_trajectories(1, inst.ref_frame_, inst.section_);
+            traj = load_trajectories(1, 1, inst.section_);
         end        
     end
 end

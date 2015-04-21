@@ -158,8 +158,8 @@ function results_trajectory_classification
     leg = arrayfun(@(t) t.description, g_segments_base_classification.classes, 'UniformOutput', 0);
     hleg = figure;
     set(gcf, 'Color', 'w');
-    legendflex(handles, leg, 'box', 'off', 'nrow', 3, 'ncol', 3, 'ref', hleg, 'fontsize', 8, 'anchor', {'n','n'});
-    export_fig(fullfile(g_config.OUTPUT_DIR, 'strategies_line_legend.eps'));
+    legendflex(handles, leg, 'box', 'off', 'nrow', 8, 'ncol', 1, 'ref', hleg, 'fontsize', 8, 'anchor', {'n','n'});
+    export_fig(fullfile(g_config.OUTPUT_DIR, 'strategies_line_legend_vert.eps'));
 
     close(hleg);
     close(hdummy);      
