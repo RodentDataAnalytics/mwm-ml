@@ -328,7 +328,7 @@ classdef trajectory < handle
             if arn
                 axis off;
                 daspect([1 1 1]);                      
-                rectangle('Position',[g_config.CENTRE_X - g_config.ARENA_R, g_config.CENTRE_X - g_config.ARENA_R, g_config.ARENA_R*2, g_config.ARENA_R*2],...
+                rectangle('Position',[g_config.CENTRE_X - g_config.ARENA_R, g_config.CENTRE_Y - g_config.ARENA_R, g_config.ARENA_R*2, g_config.ARENA_R*2],...
                     'Curvature',[1,1], 'FaceColor',[1, 1, 1], 'edgecolor', [0.2, 0.2, 0.2], 'LineWidth', 3);
                 hold on;
                 axis square;

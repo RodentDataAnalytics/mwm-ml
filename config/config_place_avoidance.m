@@ -80,14 +80,19 @@ classdef config_place_avoidance < base_config
         SECTION_TMAX = 2; % longest segment between shocks
         SECTION_AVOID = 3; % segments between shocks
         SECTION_FULL = 0; % complete trajectories
+        
+        DATA_REPRESENTATION_ARENA_COORD = base_config.DATA_REPRESENTATION_LAST + 1;
     end   
     
     properties(GetAccess = 'public', SetAccess = 'protected')
-        section_ = config_place_avoidance.SECTION_FULL;
+        section = config_place_avoidance.SECTION_FULL;
+        rotation_frequency = 1;
     end
     
     methods        
         function inst = config_place_avoidance(sec)
+            addpath(fullfile(fileparts(mfilename('fullpath')), 'place_avoidance'));    
+   
             switch sec
                 case config_place_avoidance.SECTION_T1
                     desc = 't < T1';                    
@@ -104,13 +109,13 @@ classdef config_place_avoidance < base_config
                  tag('SS', 'scanning-surroundings', base_config.TAG_TYPE_BEHAVIOUR_CLASS, 7), ...                 
                  tag('CP', 'close pass', base_config.TAG_TYPE_TRAJECTORY_ATTRIBUTE), ...
                  tag('S1', 'selected 1', base_config.TAG_TYPE_TRAJECTORY_ATTRIBUTE) ], ...
-               [] ...% no additional data representation
+               { {'Arena coordinates', 'trajectory_arena_coord' } } ...
             );   
-            inst.section_ = sec;
+            inst.section = sec;
         end
         
         function val = hash(inst)
-            val = hash_combine(hash@base_config(inst), inst.section_);
+            val = hash_combine(hash@base_config(inst), inst.section);
         end
         
         % Imports trajectories from Noldus data file's

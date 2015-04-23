@@ -4,142 +4,127 @@ function browse_trajectories(labels_fn, traj, varargin)
     global g_config;
     addpath(fullfile(fileparts(mfilename('fullpath')), '../extern'));    
     addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/GUILayout'));
+    addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/GUILayout/Patch'));
+    addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/cm_and_cb_utilities'));
     
     filter = 1:traj.count;
     sorting = 1:traj.count;           
             
-    [tags, feat, selection, ref_set, n_hor, n_ver, mini_views] = process_options(varargin, ...
+    [tags, feat, selection, ref_set, n_hor, n_ver] = process_options(varargin, ...
                 'Tags', g_config.TAGS, 'Features', g_config.DEFAULT_FEATURE_SET, ...
                 'UserSelection', [], 'ReferenceClassification', [], ...
-                'ItemsHor', 2, 'ItemsVer', 2, 'MiniViews', 0 ...
+                'ItemsHor', 2, 'ItemsVer', 2 ...
     );
     
     addpath(fullfile(fileparts(mfilename('fullpath')), '../extern'));
         
     % create main window
-    f = figure('Visible','off', 'name', 'Trajectories tagging', ...
-               'Position', [200, 200, 900, 800], 'Menubar', 'none', 'Toolbar', 'none', 'resize', 'on');
+    f = figure('Visible','on', 'name', 'Trajectories tagging', ...
+        'Position', [200, 200, 900, 800], 'Menubar', 'none', 'Toolbar', 'none', 'resize', 'on');
     
+    % base layout
+    bg_box = uiextras.VBox('Parent', f);           
+           
     %%
     %% Create controls
     %%%
+    % control buttons box
+    views_box = uiextras.VBox('Parent', bg_box);
+    ctrl_box = uiextras.HBox('Parent', bg_box);
+    set(bg_box, 'Sizes', [-1 100] );
+    % box with additional controls on the left    
+    filter_panel = uiextras.BoxPanel('Parent', ctrl_box, 'Title', 'Filter/Sort');
+    filter_box = uiextras.VBox('Parent', filter_panel);
+    % box with left navigation controls
+    lnav_box = uiextras.VBox('Parent', ctrl_box);
+    % middle status box
+    stat_box = uiextras.VBox('Parent', ctrl_box);
+    % box with right navigation controls
+    rnav_box = uiextras.VBox('Parent', ctrl_box);
+    % box with additional controls on the right       
+    clus_panel = uiextras.BoxPanel('Parent', ctrl_box, 'Title', 'Clustering');
+    clus_box = uiextras.VBox('Parent', clus_panel);
+    % and another one
+    layout_panel = uiextras.BoxPanel('Parent', ctrl_box, 'Title', 'Layout');
+    layout_box = uiextras.VBox('Parent', layout_panel);
     
+    set(ctrl_box, 'Sizes', [200 100 -1 100 200 200]);
     % trajectories navigation
-    uicontrol('Style', 'pushbutton', 'Units', 'normalized', 'String', '<- prev',...
-        'Position', [0.25, 0.02, 0.07, 0.06], ...
-        'Callback',{@previous_callback});
-    uicontrol('Style', 'pushbutton', 'Units', 'normalized', 'String', '-> next',...
-        'Position', [0.68, 0.02, 0.07, 0.06], ...
-        'Callback',{@next_callback});    
-    uicontrol('Style', 'pushbutton', 'Units', 'normalized', 'String', '<<-',...
-        'Position', [0.20, 0.02, 0.05, 0.06], ...
-        'Callback',{@previous2_callback});
-    uicontrol('Style', 'pushbutton', 'Units', 'normalized', 'String', '->>',...
-        'Position', [0.75, 0.02, 0.05, 0.06], ...
-        'Callback',{@next2_callback});        
+    uicontrol('Parent', lnav_box, 'Style', 'pushbutton', 'Units', 'normalized', 'String', '<-', 'Callback', {@previous_callback});
+    uicontrol('Parent', rnav_box, 'Style', 'pushbutton', 'Units', 'normalized', 'String', '->', 'Callback',{@next_callback});    
+    uicontrol('Parent', lnav_box, 'Style', 'pushbutton', 'Units', 'normalized', 'String', '<<-', 'Callback',{@previous2_callback});
+    uicontrol('Parent', rnav_box, 'Style', 'pushbutton', 'Units', 'normalized', 'String', '->>', 'Callback',{@next2_callback});
+    uicontrol('Parent', lnav_box, 'Style', 'pushbutton', 'Units', 'normalized', 'String', '<<<-', 'Callback',{@previous3_callback});
+    uicontrol('Parent', rnav_box, 'Style', 'pushbutton', 'Units', 'normalized', 'String', '->>>', 'Callback',{@next3_callback});
+    
     % status text (middle)
-    hpos = uicontrol('Style', 'text', 'Units', 'normalized', 'String', '', ...
-        'Position', [0.32, 0.01, 0.36, 0.08]);
-    align([hpos], 'Center','Bottom');    
-    % clustering controls
-    uicontrol('Style', 'text', 'Units', 'normalized', ...
-        'String', '# of clusters:', ...
-        'Position', [0.82, 0.06, 0.05, 0.02]);   
+    status_handle = uicontrol('Parent', stat_box, 'Style', 'text', 'String', '');  
+    % clustering controls        
+    uicontrol('Parent', clus_box, 'Style', 'text', 'String', '# of clusters:');        
     vals = arrayfun( @(x) sprintf('%d', x), 1:500, 'UniformOutput', 0);
-    hclusters = uicontrol('Style', 'popupmenu', 'Units', 'normalized', ...
-        'String', vals, ...
-        'Position', [0.82, 0.04, 0.06, 0.02]);   
-    hcv = uicontrol('Style', 'checkbox', 'Units', 'normalized', 'String', 'Enable CV', ...
-        'Position', [0.82, 0.01, 0.06, 0.02]);    
-    uicontrol('Style', 'pushbutton', 'Units', 'normalized', 'String', 'Cluster', ...
-        'Position', [0.9, 0.02, 0.08, 0.06], 'Callback', {@cluster_callback});
+    hclusters = uicontrol('Parent', clus_box, 'Style', 'popupmenu', 'String', vals);         
+    hcv = uicontrol('Parent', clus_box, 'Style', 'checkbox', 'String', 'Enable CV');    
+    uicontrol('Parent', clus_box, 'Style', 'pushbutton', 'String', 'Cluster', 'Callback', {@cluster_callback});
     % feature sorting control
     hfilter = [];
     sortstr = {'** none **', '** distance to centre (max) **', '** distance to centre (euclidean) **', '** combined **', '** random **' };
     sortstr = [sortstr, arrayfun( @(f) features.feature_name(f), feat, 'UniformOutput', 0)];
-    hsort = uicontrol('Style', 'popupmenu', 'Units', 'normalized', 'String', sortstr, ...
-        'Position', [0.02, 0.02, 0.10, 0.02], 'Callback', {@sorting_callback});
-    hsort_reverse = uicontrol('Style', 'checkbox', 'Units', 'normalized', 'String', 'Rev', ...
-        'Position', [0.12, 0.02, 0.05, 0.02], 'Callback', {@sorting_callback});    
+    sort_box = uiextras.HBox('Parent', filter_box);
+    hsort = uicontrol('Parent', sort_box, 'Style', 'popupmenu', 'String', sortstr, 'Callback', {@sorting_callback});
+    hsort_reverse = uicontrol('Parent', sort_box, 'Style', 'checkbox', 'String', 'Rev', 'Callback', {@sorting_callback});       
     % cluster navigation and control (note: combo-box is created elsewhere
     % since it is dynamic
-    hfilter_prev = uicontrol('Style', 'pushbutton', 'Units', 'normalized', 'String', '<-', ...
-        'Position', [0.02, 0.04, 0.075, 0.03], 'Callback', {@filter_prev_callback});    
-    hfilter_next = uicontrol('Style', 'pushbutton', 'Units', 'normalized', 'String', '->', ...
-        'Position', [0.095, 0.04, 0.075, 0.03], 'Callback', {@filter_next_callback});        
+    filter_box = uiextras.HBox('Parent', filter_box);
+    filter_nav_box = uiextras.HButtonBox('Parent', filter_box);
+    hfilter_prev = uicontrol('Parent', filter_nav_box, 'Style', 'pushbutton', 'String', '<-', 'Callback', {@filter_prev_callback});    
+    hfilter_next = uicontrol('Parent', filter_nav_box, 'Style', 'pushbutton', 'String', '->', 'Callback', {@filter_next_callback});
     nitems_filter = 0;
-    % create views for the trajectories
-    hctrl = 0.1;  % height of controls
-    hdesc = 0.04; % description height    
-    wcb = 0.05; % check box width
-    hm = 0.02; % horizontal margin
-    hmcb = 0.03; % check boxes margin
-    vmdesc = 0.02;
-    ha = {};
-    hs = {};
-    hcb = {};
-    ntags = length(tags);  
-        
-    for j =1:n_ver             
-        for i = 1:n_hor
-            % main view height
-            h = (1 - hctrl)/n_ver - hdesc;
-            if i == 1
-                x = hm;
-            else
-                x = (i - 1)*1/n_hor;                
-            end    
-            % description width
-            wdesc = 1/n_hor - wcb - hmcb;
-            if mini_views
-                % main view width
-                w = wdesc - h/mini_views;
-            else               
-                % main view width
-                w = wdesc;
-            end
-            
-            % trajectory display
-            ha = [ha, axes('Parent', f, 'Units', 'normalized', 'Position', ...
-                    [ x, ...
-                      hctrl + hdesc + vmdesc + (j - 1)*(1 - hctrl)/n_ver, ...
-                      w, ...
-                      h ...
-                 ])];             
-            % trajectory description            
-            hs = [hs, uicontrol('Style', 'text', 'Units', 'normalized', 'Position', ...
-                    [ x, ...
-                      hctrl + (j - 1)*(1 - hctrl)/n_ver, ...
-                      wdesc, ...
-                      hdesc ...
-                 ])];             
-            % check boxes with tags
-            hcb_new = [];
-            for k = 1:ntags
-                txt = tags(k).abbreviation;
-                hcb_new = [hcb_new, ...
-                              uicontrol('Style','checkbox', 'Units', 'normalized', 'String', txt, 'Position', ...
-                              [ x + 1/n_hor - wcb - hmcb, ...
-                              hctrl + j*(1 - hctrl)/n_ver - 0.03*k, ...
-                              wcb, ...
-                              0.03 ], 'Callback', {@checkbox_callback} ...
-                          )];
-            end
-            hcb = [hcb, hcb_new];
-            % mini-views
-            hmv = [];
-            tmp = [];
-            for k = 1:mini_views
-                tmp = [tmp, axes('Parent', f, 'Units', 'normalized', 'Position', ...
-                    [ x + w, ...
-                      hctrl + hdesc + vmdesc + (j - 1)*(1 - hctrl)/n_ver + (k - 1)*h/mini_views, ...
-                      wdesc - w, ...
-                      h/mini_views ...
-                 ])];
-            end
-            hmv = [hmv; tmp];
-        end
+    % layout controls
+    box = uiextras.HBox('Parent', layout_box);
+    uicontrol('Parent', box, 'Style', 'text', 'String', 'NX:');
+    xviews_handle = uicontrol('Parent', box, 'Style', 'popupmenu', 'String', {'1', '2', '3', '4', '5', '6'}, 'Callback', {@layout_change_callback});
+    set(xviews_handle, 'value', n_ver);
+    uicontrol('Parent', box, 'Style', 'text', 'String', 'NY:');
+    yviews_handle = uicontrol('Parent', box, 'Style', 'popupmenu', 'String', {'1', '2', '3', '4', '5', '6'}, 'Callback', {@layout_change_callback});    
+    set(yviews_handle, 'value', n_hor);
+   
+    % build a list with all the possible data representations
+    strs = {};
+    for i = 1:length(g_config.DATA_REPRESENTATION)
+        tmp = g_config.DATA_REPRESENTATION{i};
+        strs = [strs, tmp{1}];
     end
+    % 1st combo: main view
+    box = uiextras.HBox('Parent', layout_box);
+    uicontrol('Parent', box, 'Style', 'text', 'String', 'Main:');
+    main_view_combo = uicontrol('Parent', box, 'Style', 'popupmenu', 'String', strs, 'Callback', {@layout_change_callback});        
+    set(box, 'Sizes', [50, -1]);
+    % 2nd combo: secondary view 1
+    strs = ['None', strs];
+    box = uiextras.HBox('Parent', layout_box);    
+    uicontrol('Parent', box, 'Style', 'text', 'String', 'Sec. 1:');
+    sec_view_combos = [uicontrol('Parent', box, 'Style', 'popupmenu', 'String', strs, 'Callback', {@layout_change_callback})];  
+    set(box, 'Sizes', [50, -1]);    
+    % 3rd combo: secondary view 2
+    box = uiextras.HBox('Parent', layout_box);    
+    uicontrol('Parent', box, 'Style', 'text', 'String', 'Sec. 2:');
+    sec_view_combos = [ sec_view_combos, ...
+                        uicontrol('Parent', box, 'Style', 'popupmenu', 'String', strs, 'Callback', {@layout_change_callback}) ...
+                      ];  
+    set(box, 'Sizes', [50, -1]);
+    
+    sec_view_handles = [];
+    
+    views_grid = [];    
+    views_panels = [];
+    axis_handles = [];
+    desc_handles = [];
+    view_panels = [];
+    cb_handles = [];
+    
+    ntags = length(tags);  
+  
+    create_views();
                 
     cur = 1; %current index
     % read labels if we already have something
@@ -173,7 +158,7 @@ function browse_trajectories(labels_fn, traj, varargin)
     feat_values = traj.compute_features(feat);
     segments_map = [];
     diff_set = [];
-    
+     
     update_filter_combo;
     show_trajectories;
     set(f,'Visible','on');            
@@ -181,6 +166,77 @@ function browse_trajectories(labels_fn, traj, varargin)
     %%
     %% nested functions
     %%
+    function [nx, ny] = number_of_views()
+        nx = get(xviews_handle, 'value');
+        ny = get(yviews_handle, 'value');
+    end
+
+    function create_views()
+        % create base grid
+        if ~isempty(views_grid)
+            delete(views_grid);
+        end
+        views_grid = uiextras.Grid('Parent', views_box);
+        views_panels = [];
+        axis_handles = [];
+        view_panels = [];
+        desc_handles = [];
+        cb_handles = [];
+        sec_view_handles = [];
+        
+        [nx, ny] = number_of_views();
+        sec1 = get(sec_view_combos(1), 'value');
+        sec2 = get(sec_view_combos(2), 'value');
+        sec = (sec1 > 1 || sec2 > 1);
+        
+        for j =1:nx
+            for i = 1:ny
+                view_panels = [view_panels, uiextras.BoxPanel('Parent', views_grid)];
+                % boxes for the view (a vertical one for the checkboxes)
+                view_hbox = uiextras.HBox('Parent', view_panels(end));
+                                                
+                % trajectory display
+                view_vbox = uiextras.VBox('Parent', view_hbox);
+                % do we have any secondary views ?
+                if (sec)                                
+                    hbox = uiextras.HBox('Parent', view_vbox);                    
+                    axis_handles = [axis_handles, axes('Parent', hbox)];
+                    % create another box for the secondary views
+                    vbox = uiextras.VBox('Parent', hbox);
+                    if (sec1 > 1)
+                        sec_view_handles = [sec_view_handles , axes('Parent', vbox)];
+                    else
+                        sec_view_handles = [sec_view_handles, uicontrol('Parent', vbox, 'Style', 'text', 'String', 'None')];
+                    end
+                    if (sec2 > 1)
+                        sec_view_handles = [sec_view_handles, axes('Parent', vbox)];
+                    else
+                        sec_view_handles = [sec_view_handles, uicontrol('Parent', vbox, 'Style', 'text', 'String', 'None')];        
+                    end
+                else                    
+                    axis_handles = [axis_handles, axes('Parent', view_vbox)];
+                end
+                % trajectory description            
+                desc_handles = [desc_handles, uicontrol('Parent', view_vbox, 'Style', 'text')];
+                set(view_vbox, 'Sizes', [-1, 25]);
+                
+                % check boxes with tags
+                % yet another box
+                cb_box = uiextras.VButtonBox('Parent', view_hbox);
+                set(view_hbox, 'Sizes', [-1, 50]);       
+                hcb_new = [];
+                for k = 1:ntags
+                    txt = tags(k).abbreviation;
+                    hcb_new = [ hcb_new, ...
+                                  uicontrol('Parent', cb_box, 'Style', 'checkbox', 'String', txt, 'Callback', {@checkbox_callback}) ...
+                              ];
+                end
+                cb_handles = [cb_handles; hcb_new];
+            end
+        end
+        
+        set(views_grid, 'RowSizes', -1*ones(1, ny), 'ColumnSizes', -1*ones(1, nx));
+    end  
     
     function update_filter_combo
         if ~isempty(hfilter)
@@ -209,20 +265,79 @@ function browse_trajectories(labels_fn, traj, varargin)
             end
         end
         
-        hfilter = uicontrol('Style', 'popupmenu', 'Units', 'normalized', 'String', strings, ...
-        'Position', [0.02, 0.07, 0.15, 0.02], 'Callback', {@combobox_filter_callback});
+        hfilter = uicontrol('Parent', filter_box, 'Style', 'popupmenu', 'Units', 'normalized', 'String', strings, 'Callback', {@combobox_filter_callback});
         nitems_filter = length(strings);
     
         combobox_filter_callback(0, 0);
     end
         
+    function plot_trajectory(pts)
+        axis off;
+        daspect([1 1 1]);                      
+        rectangle('Position',[g_config.CENTRE_X - g_config.ARENA_R, g_config.CENTRE_X - g_config.ARENA_R, g_config.ARENA_R*2, g_config.ARENA_R*2],...
+            'Curvature',[1,1], 'FaceColor',[1, 1, 1], 'edgecolor', [0.2, 0.2, 0.2], 'LineWidth', 3);
+        hold on;
+        axis square;
+        % see if we have a platform to draw
+        if exist('g_config.PLATFORM_X')
+            rectangle('Position',[g_config.PLATFORM_X - g_config.PLATFORM_R, g_config.PLATFORM_Y - g_config.PLATFORM_R, 2*g_config.PLATFORM_R, 2*g_config.PLATFORM_R],...
+                'Curvature',[1,1], 'FaceColor',[1, 1, 1], 'edgecolor', [0.2, 0.2, 0.2], 'LineWidth', 3);             
+        end
+        
+        if size(pts, 2) == 3            
+            plot(pts(:,2), pts(:,3), '-', 'LineWidth', 1.1, 'Color', [0 0 0]);
+        elseif size(pts, 2) == 4
+            cm = jet;
+            n = 20;
+            cm = cmapping(20, cm);
+            lb = min(pts(:, 4));
+            up = max(pts(:, 4));
+            fac = (up - lb)/(n - 1);
+            
+            for k = 2:size(pts, 1)
+                clr = cm(floor((pts(k, 4) - lb) / fac + 1), :);                
+                plot(pts(k - 1:k, 2), pts(k - 1:k, 3), '-', 'LineWidth', 2.5, 'Color', clr); 
+            end
+            
+%             pos = get(gca, 'pos');
+%             pos = [pos(1) + pos(3)*.9, pos(2), pos(4)*.1, pos(4)];
+%             colorbar('eastoutside', 'position', pos);                        
+        end
+        
+        set(gca, 'LooseInset', [0,0,0,0]);
+    end
+
     function show_trajectories                
-        for i = 1:n_ver*n_hor
+        [nx, ny] = number_of_views();
+        for i = 1:nx*ny
             if cur + i < length(filter)
                 traj_idx = filter(sorting(cur + i - 1));
                 % plot the trajectory/segment
-                set(f, 'currentaxes', ha{i});                                
-                traj.items(traj_idx).plot;                
+                set(f, 'currentaxes', axis_handles(i));                                
+                
+                % plot main view
+                idx = get(main_view_combo, 'value');
+                tmp = g_config.DATA_REPRESENTATION{idx};
+                func = str2func(tmp{2});
+                vals = func(traj.items(traj_idx));
+                
+                % plot values
+                plot_trajectory(vals);
+                
+                % secondary views
+                for k = 1:2
+                    idx = get(sec_view_combos(k), 'value');
+                    if idx > 1
+                        tmp = g_config.DATA_REPRESENTATION{idx - 1};
+                        func = str2func(tmp{2});
+                        vals = func(traj.items(traj_idx));
+
+                        set(f, 'currentaxes', sec_view_handles((i - 1)*2 + k));
+                        % plot values
+                        plot_trajectory(vals);
+                    end
+                end
+                
                 hold on;                
                 if ~isempty(covering)
                     if covering(traj_idx)
@@ -254,15 +369,17 @@ function browse_trajectories(labels_fn, traj, varargin)
                     end
                     str = strcat(str, sprintf('%s: %.4f', features.feature_abbreviation(feat(j)), feat_values(traj_idx, j)));                    
                 end
-                % put also segment identification
-                str = sprintf('%s  ||  %d/%d/%d+%dcm', str, traj.items(traj_idx).set, traj.items(traj_idx).track, traj.items(traj_idx).trial, round(traj.items(traj_idx).offset));
+                set(desc_handles(i), 'String', str);
+                
+                % put segment identification in the title
+                str = sprintf('%d/%d/%d+%dcm', traj.items(traj_idx).set, traj.items(traj_idx).track, traj.items(traj_idx).trial, round(traj.items(traj_idx).offset));
                 if ~isempty(classif_res)
                     str = sprintf('  ||  %s cluster #%d', str, classif_res.cluster_idx(traj_idx));
-                end
-                set(hs{i}, 'String', str);
-                                
+                end               
+                set(view_panels(i), 'Title', str);
+                
                 % update checkboxes
-                handles = hcb{i};
+                handles = cb_handles(i, :);
                 arrayfun(@(h,j) set(h, 'Value', labels_traj(traj_idx, j)), handles(1:(length(handles) - 1)), 1:(length(handles) - 1));  
     
                 for j = 1:(length(handles) - 1)
@@ -317,7 +434,7 @@ function browse_trajectories(labels_fn, traj, varargin)
         % save values from screen
         for i = 0:3            
             if length(filter) >= cur + i
-                vals = arrayfun(@(h) get(h, 'Value'), hcb{i + 1});                
+                vals = arrayfun(@(h) get(h, 'Value'), cb_handles{i + 1});                
                 labels_traj(filter(sorting(cur + i)), :) = vals;
             end
         end
@@ -326,7 +443,8 @@ function browse_trajectories(labels_fn, traj, varargin)
     end
 
     function update_status
-        str = sprintf('%d to %d from %d\n\n', cur, cur + 3, length(filter));
+        [nx, ny] = number_of_views;
+        str = sprintf('%d to %d from %d\n\n', cur, cur + nx*ny - 1, length(filter));
         first = 1;
         for i = 1:length(tags)
             n = sum(labels_traj(filter, i));            
@@ -351,7 +469,7 @@ function browse_trajectories(labels_fn, traj, varargin)
         end
         
         str = sprintf('%s\n%s', str, distr_status);        
-        set(hpos, 'String', str);
+        set(status_handle, 'String', str);
     end
     
     function checkbox_callback(source, eventdata)
@@ -366,7 +484,8 @@ function browse_trajectories(labels_fn, traj, varargin)
                 % everyone
                 filter = 1:traj.count;
             case 2                        
-                % everyone labelled
+                % everyone labelled                filter = find(sum(labels_traj, 2) > 0);                            
+
                 filter = find(sum(labels_traj, 2) > 0);                            
             case 3                        
                 % everyone not labelled
@@ -570,6 +689,11 @@ function browse_trajectories(labels_fn, traj, varargin)
         combobox_filter_callback(0, 0);
     end    
 
+    function layout_change_callback(source, eventdata)
+        create_views;
+        show_trajectories;
+    end
+
     function sorting_callback(source, eventdata)
         update_sorting;
         cur = 1;
@@ -592,7 +716,7 @@ function browse_trajectories(labels_fn, traj, varargin)
     end
 
     function previous2_callback(source, eventdata)
-        cur = cur - floor(0.04*length(filter));
+        cur = cur - floor(0.01*length(filter));
         if cur < 1
             cur = 1;
         end
@@ -600,7 +724,23 @@ function browse_trajectories(labels_fn, traj, varargin)
     end
    
     function next2_callback(source, eventdata)        
-        cur = cur + floor(0.04*length(filter));
+        cur = cur + floor(0.01*length(filter));
+        if cur > (length(filter) - 3)
+            cur = length(filter) - 3;                        
+        end        
+        show_trajectories;
+    end
+
+    function previous3_callback(source, eventdata)
+        cur = cur - floor(0.05*length(filter));
+        if cur < 1
+            cur = 1;
+        end
+        show_trajectories;        
+    end
+   
+    function next3_callback(source, eventdata)        
+        cur = cur + floor(0.05*length(filter));
         if cur > (length(filter) - 3)
             cur = length(filter) - 3;                        
         end        
