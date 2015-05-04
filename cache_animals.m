@@ -2,6 +2,8 @@ function cache_animals
     global g_trajectories;    
     global g_trajectories_group;
     global g_trajectories_trial;
+    global g_config;
+    global g_trajectories_speed;
     cache_trajectories;
         
     global g_animals_count;
@@ -21,14 +23,17 @@ function cache_animals
             ids = arrayfun( @(x) x.id, g_trajectories.items(map));
             for t = 2:g_config.TRIALS
                 trial_idx = find(g_trajectories_group == g & g_trajectories_trial == t);
-                if ~isempty(trial_idx)
-                    trial_ids = arrayfun( @(x) x.id, g_trajectories.items(trial_idx));
-                    map = [map; arrayfun( @(x) trial_idx(trial_ids == x), ids)];
+                ids2 = arrayfun( @(x) x.id, g_trajectories.items(trial_idx));                                
+                for tmp = 1:length(trial_idx)
+                    pos = find(ids == ids2(tmp));
+                    if ~isempty(pos)
+                        map(t, pos) = trial_idx(tmp);
+                    end                   
                 end
             end
-            avg_speed = mean(g_trajectories_speed(map));
-            [~, ord] = sort(avg_speed);            
             if g_config.REGULARIZE_GROUPS && g_config.GROUPS == 2 % TODO: generalize this for more than 2 groups; or maybe not              
+                avg_speed = mean(g_trajectories_speed(map));
+                [~, ord] = sort(avg_speed);                        
                 if g == 1
                     nd = g_animals_count(1) - g_animals_count(2);
                     if nd > 0

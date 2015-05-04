@@ -34,7 +34,7 @@ function cache_trajectories
         g_trajectories_group = arrayfun( @(t) t.group, g_trajectories.items);          
         g_trajectories_session = arrayfun( @(t) t.session, g_trajectories.items);
         g_trajectories_trial = arrayfun( @(t) t.trial, g_trajectories.items);
-        g_trajectories_length = arrayfun( @(t) t.compute_feature(features.LENGTH), g_trajectories.items);
-        g_trajectories_speed = arrayfun( @(t) t.compute_feature(features.AVERAGE_SPEED), g_trajectories.items);                                 
+        g_trajectories_length = arrayfun( @(t) t.compute_feature(g_config.FEATURE_LENGTH), g_trajectories.items);
+        g_trajectories_speed = arrayfun( @(t) t.compute_feature(g_config.FEATURE_AVERAGE_SPEED), g_trajectories.items);                                 
     end    
 end

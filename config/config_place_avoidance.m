@@ -58,7 +58,7 @@ classdef config_place_avoidance < base_config
         DEFAULT_SEGMENT_OVERLAP = 0.90;        
         DEFAULT_NUMBER_OF_CLUSTERS = 120;
                 
-        DEFAULT_FEATURE_SET = [features.MEDIAN_RADIUS, features.IQR_RADIUS, features.FOCUS, features.BOUNDARY_ECCENTRICITY];
+        DEFAULT_FEATURE_SET = [g_config.FEATURE_MEDIAN_RADIUS, g_config.FEATURE_IQR_RADIUS, g_config.FEATURE_FOCUS, g_config.FEATURE_BOUNDARY_ECCENTRICITY];
                                                           
         %%
         %% Tags sets - number/indices have to match the list below        
@@ -67,8 +67,8 @@ classdef config_place_avoidance < base_config
         TAGS500_70 = 2; % Important: go from "more detailed" to less detailed ones
         
         TAGS_CONFIG = { ... % values are: file that stores the tags, segment length, overlap, default number of clusters
-            { '/home/tiago/neuroscience/place_avoidance/labels_full.csv', 0, 0, 0}, ...
-            { '/home/tiago/neuroscience/place_avoidance/labels_t1_500_70.csv', 500, 0.70, 50} ...             
+            { '/home/tiago/neuroscience/place_avoidance/labels_full.csv', 0, 0, 0, 0}, ...
+            { '/home/tiago/neuroscience/place_avoidance/labels_t1_500_70.csv', 500, 0.70, 2, 50} ...             
         };
                 
         % plot properties

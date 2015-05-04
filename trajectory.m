@@ -19,25 +19,8 @@ classdef trajectory < handle
     end
     
     properties(GetAccess = 'protected', SetAccess = 'protected')        
-        centre_ = [];
-        % boundary ellipse parameters and related values
-        ecentre_ = [];
-        focus_ = -1;
-        a_ = -1;
-        b_ = -1;
-        inc_ = -1;
-        % other cached values
+        feat_val_ = [];    
         hash_ = -1;
-        len_ = -1;
-        r12_ = -1;
-        riqr_ = -1;        
-        loops_ = -1;
-        spin_ = -1;
-        kiqr_ = -1;        
-        ri_ = -1;
-        iqrri_ = -1;
-        covang_ = -1;        
-        centralpts_ = [];
     end
     
     methods
@@ -51,9 +34,17 @@ classdef trajectory < handle
             traj.group = group;
             traj.id = id;
             traj.trial = trial;
+            assert(~isempty(segment));
             traj.segment = segment;
             traj.offset = off;            
-            traj.session = floor(((traj.trial - 1) / g_config.TRIALS_PER_SESSION) + 1);        
+            tot = 0;
+            for i = 1:length(g_config.TRIALS_PER_SESSION)
+                tot = tot + g_config.TRIALS_PER_SESSION(i);
+                if trial <= tot
+                    traj.session = i;
+                    break;
+                end
+            end
             traj.start_time = pts(1, 1);
             traj.end_time = pts(end, 1);
         end
@@ -63,13 +54,25 @@ classdef trajectory < handle
             ident = [traj.group, traj.id, traj.trial, traj.segment];
         end
         
-        function out = hash_value(traj)            
+        function cache_feature_value(inst, feat, val)
+            if isempty(inst.feat_val_)
+                inst.feat_val_ = containers.Map('KeyType', 'uint32', 'ValueType', 'any');
+            end                   
+            inst.feat_val_(feat) = val;            
+        end
+        
+        function ret = has_feature_value(inst, feat)
+            ret = ~isempty(inst.feat_val_) && inst.feat_val_.isKey(feat);
+        end
+        
+        function out = hash_value(traj)       
+            global g_config;
             if traj.hash_ == -1                                          
                 % compute hash
                 len = 0;
                 if traj.offset ~= -1
                     % length taken only into account when offset is used
-                    len = traj.compute_feature(features.LENGTH);
+                    len = traj.compute_feature(g_config.FEATURE_LENGTH);
                 end
                 traj.hash_ = trajectory.compute_hash(traj.set, traj.session, traj.track, traj.offset, len);
             end
@@ -80,18 +83,7 @@ classdef trajectory < handle
         function [ ident ] = data_identification(traj)
             ident = [traj.set, traj.session, traj.track];
         end                              
-        
-        function [ eff ] = efficiency(traj)
-            global g_config;
-            min_path = norm( traj.points(1,2) - g_config.PLATFORM_X, traj.points(1,3) - g_config.PLATFORM_Y);
-            len = traj.compute_feature(features.LENGTH);
-            if len ~= 0
-                eff = min_path / len;
-            else
-                eff = 0.;
-            end
-        end
-                
+                        
         function [ segment ] = sub_segment(traj, beg, len)
             %SUB_SEGMENT returns a segment from the trajectory
             pts = [];
@@ -140,7 +132,7 @@ classdef trajectory < handle
             %SEGMENT_TRAJECTORY Splits the trajectory in segments of length
             % lseg with an overlap of ovlp %
             % Returns an array of instances of the same trajectory class (now repesenting segments)
-            n = length(traj.points);
+            n = size(traj.points, 1);
     
             % compute cumulative distance vector
             cumdist = zeros(1, n);    
@@ -201,123 +193,37 @@ classdef trajectory < handle
             end
         end            
         
-        function [ v ] = compute_feature(traj, f)
+        function val = compute_feature(inst, feat)
             global g_config;
-            switch(f)
-                case features.LATENCY                    
-                    [~, v] = trajectory_length(traj.points);
-                    if v > 89.5
-                        v = g_config.TRIAL_TIMEOUT;
-                    end                  
-                case features.LENGTH 
-                    % this is used so often that we cache it
-                    if traj.len_ == -1
-                        traj.len_ = trajectory_length(traj.points);
-                    end
-                    v = traj.len_;
-                case features.EFFICIENCY
-                    v = traj.efficiency();
-                case features.MEDIAN_RADIUS
-                    if traj.r12_ == -1
-                        [traj.r12_, traj.riqr_] = trajectory_radius(traj.points, g_config.CENTRE_X, g_config.CENTRE_Y);
-                    end
-                    v = traj.r12_; 
-                case features.IQR_RADIUS
-                    if traj.riqr_ == -1
-                        [traj.r12_, traj.riqr_] = trajectory_radius(traj.points, g_config.CENTRE_X, g_config.CENTRE_Y);
-                    end
-                    v = traj.riqr_;                                    
-                case features.FOCUS                    
-                    % cache this since computation can take some time                                        
-                    traj.compute_boundary;
-                    v = traj.focus_;                    
-                case features.BOUNDARY_CENTRE_RADIUS                
-                    traj.compute_boundary;
-                    v = sqrt( (traj.ecentre_(1) - g_config.CENTRE_X)^2 + (traj.ecentre_(2) - g_config.CENTRE_Y)^2);
-                case features.BOUNDARY_CENTRE_ANGLE 
-                    traj.compute_boundary;
-                    v = atan2(traj.ecentre_(2) - g_config.CENTRE_Y, traj.ecentre_(1) - g_config.CENTRE_X);
-                case features.BOUNDARY_CENTRE_DISTANCE_PLATFORM
-                    traj.compute_boundary;
-                    v = sqrt( (traj.ecentre_(1) - g_config.PLATFORM_X)^2 + (traj.ecentre_(2) - g_config.PLATFORM_Y)^2) / g_config.ARENA_R;
-                case features.BOUNDARY_MINOR_RADIUS
-                    traj.compute_boundary;
-                    v = traj.a_;
-                case features.BOUNDARY_MAJOR_RADIUS
-                    traj.compute_boundary;
-                    v = traj.b_;
-                case features.BOUNDARY_INCLINATION
-                    traj.compute_boundary;
-                    v = traj.inc_;
-                case features.BOUNDARY_ECCENTRICITY                    
-                    traj.compute_boundary;
-                    v = sqrt(1 - (traj.a_^2)/(traj.b_^2));
-                %case features.PLATFORM_CENTRALITY
-                 %   traj.compute_boundary;
-                  %  v = sqrt( (traj.ecentre_(1) - g_config.PLATFORM_X)^2 + (traj.ecentre_(2) - g_config.PLATFORM_Y)^2);
-                    
-                case features.ANGULAR_DISTANCE_PLATFORM
-                    v = trajectory_angular_distance(traj.points, g_config.CENTRE_X, g_config.CENTRE_Y, g_config.PLATFORM_X, g_config.PLATFORM_Y);
-                case features.MEDIAN_DISTANCE_PLATFORM
-                    v = trajectory_distance_platform(traj.points, g_config.PLATFORM_X, g_config.PLATFORM_Y);
-                case features.MINIMUM_DISTANCE_PLATFORM
-                    [~, ~, v] = trajectory_distance_platform(traj.points, g_config.PLATFORM_X, g_config.PLATFORM_Y) / g_config.ARENA_R;
-                case features.PLATFORM_PROXIMITY
-                    v = trajectory_platform_proximity(traj.points, g_config.PLATFORM_X, g_config.PLATFORM_Y, g_config.PLATFORM_R*3);                    
-                case features.PLATFORM_SURROUNDINGS
-                    v = trajectory_platform_proximity(traj.points, g_config.PLATFORM_X, g_config.PLATFORM_Y, g_config.PLATFORM_R*6);                    
-                case features.IQR_DISTANCE_PLATFORM
-                    [~, v] = trajectory_distance_platform(traj.points, g_config.PLATFORM_X, g_config.PLATFORM_Y);
-                case features.LOOPS
-                    if traj.loops_ == -1
-                        [traj.loops_, traj.spin_, traj.kiqr_] = trajectory_loops_spin(traj.points);
-                    end
-                    v = traj.loops_;
-                case features.SPIN
-                    if traj.spin_ == -1
-                        [traj.loops_, traj.spin_, traj.kiqr_] = trajectory_loops_spin(traj.points);
-                    end
-                    v = traj.spin_;
-                case features.AVERAGE_SPEED
-                    v = trajectory_average_speed(traj.points, 1);
-                case features.CENTRE_DISTANCE_PLATFORM
-                    C = traj.centre;                        
-                    v = sqrt( (C(1) - g_config.PLATFORM_X)^2 + (C(2) - g_config.PLATFORM_Y)^2);
-                case features.BOUNDARY_COVERED_ANGLE
-                    if traj.covang_ == -1
-                        traj.compute_boundary;
-                        traj.covang_ = trajectory_covered_angle(traj.points, traj.ecentre_);
-                    end              
-                    v = traj.covang_;
-                case features.MEDIAN_INNER_RADIUS
-                    if traj.ri_ == -1
-                        % need the centre of the covering ellipe for this
-                        % traj.compute_boundary;                        
-                        [traj.ri_, traj.iqrri_] = trajectory_radius(traj.centralpts_, traj.ecentre_(1), traj.ecentre_(2));
-                    end              
-                    v = traj.ri_;    
-                case features.IQR_INNER_RADIUS
-                    if traj.iqrri_ == -1
-                        % need the centre of the covering ellipe for this
-                        % traj.compute_boundary;                        
-                        [traj.ri_, traj.iqrri_] = trajectory_radius(traj.centralpts_, traj.ecentre_(1), traj.ecentre_(2));
-                    end              
-                    v = traj.iqrri_;    
-                case features.CV_INNER_RADIUS
-                    if traj.iqrri_ == -1
-                        % need the centre of the covering ellipse for this
-                        % traj.compute_boundary;                        
-                        [traj.ri_, traj.iqrri_] = trajectory_radius(traj.centralpts_, traj.ecentre_(1), traj.ecentre_(2));
-                    end       
-                    v = traj.iqrri_ / traj.ri_;                    
-                case features.LONGEST_LOOP
-                    v= trajectory_longest_loop(traj.points, 40);
-                case features.CENTRE_DISPLACEMENT
-                    traj.compute_boundary;
-                    v = sqrt( (traj.ecentre_(1))^2 + (traj.ecentre_(2))^2) / g_config.ARENA_R;                
-                otherwise
-                    error('!!!');
-            end
+            
+            % see if value already cached
+            if isempty(inst.feat_val_) || ~inst.feat_val_.isKey(feat)
+                par = g_config.FEATURES{feat};                
+                f = str2func(par{3}); % function name
+                idx = 1; % return value index
+                if length(par) > 3
+                    idx = par{4};
+                end
+                switch idx
+                    case 1
+                        val = f(inst, par{5:end});
+                    case 2
+                        [~, val] = f(inst, par{5:end});
+                    case 3
+                        [~, ~, val] = f(inst, par{5:end});
+                    case 4
+                        [~, ~, ~, val] = f(inst, par{5:end});
+                    case 5
+                        [~, ~, ~, ~, val] = f(inst, par{5:end});
+                    otherwise
+                        error('need more of those');
+                end
+                                               
+                % cache value for next time
+                inst.cache_feature_value(feat, val);
+            else
+                val = inst.feat_val_(feat);
+            end           
         end    
         
         function plot(traj, varargin)
@@ -343,10 +249,11 @@ classdef trajectory < handle
         end        
         
         function pts = data_representation(inst, idx)
+            global g_config;
             assert(idx <= length(g_config.DATA_REPRESENTATION));
             % dispatch the call to the function registered globally
             name = g_config.DATA_REPRESENTATION{idx};
-            f = str2fun(name(2));
+            f = str2func(name{2});
             pts = f(inst);
         end
     end

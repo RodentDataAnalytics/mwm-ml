@@ -29,7 +29,7 @@ function cache_trajectories_classification
         classif = g_segments.classifier(param{1}, g_config.DEFAULT_FEATURE_SET, g_config.TAG_TYPE_BEHAVIOUR_CLASS);
         
         % classify segments
-        g_segments_classification = classif.cluster(param{4}, 0);    
+        g_segments_classification = classif.cluster(param{5}, 0);    
         g_segments_base_classification = g_segments_classification;
         
         % do now the other classifications

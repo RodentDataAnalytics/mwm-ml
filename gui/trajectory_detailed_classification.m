@@ -15,7 +15,7 @@ function trajectory_detailed_classification( traj_labels_fn, labels_fn, seg_len,
     end
     
     % select trajectories with at least length >= seg_len
-    len = arrayfun( @(t) t.compute_feature(features.LENGTH), traj.items);
+    len = arrayfun( @(t) t.compute_feature(g_config.FEATURE_LENGTH), traj.items);
     traj = trajectories( traj.items(len >= seg_len));
     
     % read tags for full trajectories

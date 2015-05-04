@@ -33,7 +33,7 @@ function plot_trajectory_segments( grp, id, trial, lseg, ovlp )
     set(hfig, 'Position', [50 50 1000 800]);
     for i = 1:length(seg)                
         subaxis(n, n, i, 'Spacing', 0.03, 'Padding', 0, 'Margin', 0.05);        
-        len = seg{i}.compute_feature(features.LENGTH);
+        len = seg{i}.compute_feature(g_config.FEATURE_LENGTH);
         str = sprintf('#%d (%.1f-%.1f)', i, seg{i}.offset,  seg{i}.offset + len(1));
         title(str, 'FontSize', 8);
         seg{i}.plot;               

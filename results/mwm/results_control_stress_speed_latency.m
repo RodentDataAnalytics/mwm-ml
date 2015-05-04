@@ -1,24 +1,23 @@
 function results_control_stress_speed_latency    
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/sigstar'));
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/export_fig'));
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/AnDarksamtest'));
-    
+    addpath(fullfile(fileparts(mfilename('fullpath')), '../../extern/sigstar'));
+    addpath(fullfile(fileparts(mfilename('fullpath')), '../../extern/export_fig'));        
     
     % global data initialized elsewhere
     global g_trajectories_speed;        
     global g_trajectories_length;        
-    global g_trajectories_efficiency;
     global g_animals_trajectories_map;
-
-    trajectories_latency = arrayfun( @(t) t.compute_feature(features.LATENCY), g_trajectories.items);      
+    global g_trajectories;
+    global g_config;
     
     cache_animals;
-    eff = g_trajectories_efficiency;
-    eff = eff + ones(1, length(eff))*3e-3;
-    vars = [trajectories_latency; eff; g_trajectories_speed; g_trajectories_length/100];
-    names = {'latency', 'efficiency', 'speed', 'length'};
-    ylabels = {'latency [s]', 'efficiency', 'speed [cm/s]', 'path length [m]'};
-    log_y = [0, 1, 0, 0];
+
+    trajectories_latency = arrayfun( @(t) t.compute_feature(g_config.FEATURE_LATENCY), g_trajectories.items);      
+    
+    cache_animals;
+     vars = [trajectories_latency; g_trajectories_speed; g_trajectories_length/100];
+    names = {'latency', 'speed', 'length'};
+    ylabels = {'latency [s]', 'speed [cm/s]', 'path length [m]'};
+    log_y = [0, 0, 0];
         
     for i = 1:size(vars, 1)
         figure;
@@ -35,8 +34,7 @@ function results_control_stress_speed_latency
                 tmp = mean(values(map(ti:tf, :)));                 
                 data = [data, tmp(:)'];
                 xpos = [xpos, repmat(pos(s*2 - 1 + g - 1), 1, length(tmp(:)))];             
-                groups = [groups, repmat(s*2 - 1 + g - 1, 1, length(tmp(:)))];             
-            
+                groups = [groups, repmat(s*2 - 1 + g - 1, 1, length(tmp(:)))];                         
             end
         end
         boxplot(data, groups, 'positions', pos, 'colors', [0 0 0; .7 .7 .7]);     
@@ -80,7 +78,7 @@ function results_control_stress_speed_latency
         data = [];
         groups = [];
         xpos = [];
-        d = 0.1;
+        d = .1;
         idx = 1;
         pos = zeros(1, 2*g_config.TRIALS);
         for s = 1:g_config.SESSIONS
@@ -117,7 +115,7 @@ function results_control_stress_speed_latency
         lbls = {};
         lbls = arrayfun( @(i) sprintf('%d', i), 1:g_config.TRIALS, 'UniformOutput', 0);     
         
-        set(gca, 'XTick', (pos(1:2:2*g_config.TRIALS - 1) + pos(2:2:2*g_config.TRIALS)) / 2, 'XTickLabel', lbls, 'FontSize', 0.75*g_config.FONT_SIZE);                 
+        set(gca, 'XLim', [0, max(pos) + 0.1], 'XTick', (pos(1:2:2*g_config.TRIALS - 1) + pos(2:2:2*g_config.TRIALS)) / 2, 'XTickLabel', lbls, 'FontSize', 0.75*g_config.FONT_SIZE);                 
                 
         if log_y(i)
             set (gca, 'Yscale', 'log');

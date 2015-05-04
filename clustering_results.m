@@ -253,6 +253,7 @@ classdef clustering_results < handle
         end
         
         function [cover, cov_flag] = coverage(inst)
+            global g_config;
             if isempty(inst.cover_)
                 id = [-1, -1, -1];
                 inst.cover_flag_ = zeros(1, inst.segments.count); 
@@ -270,7 +271,7 @@ classdef clustering_results < handle
                     if inst.class_map(i) > 0
                         % this segment is classified
                         off = inst.segments.items(i).offset;
-                        seg_end = inst.segments.items(i).compute_feature(features.LENGTH) + off;
+                        seg_end = inst.segments.items(i).compute_feature(g_config.FEATURE_LENGTH) + off;
                         inst.cover_flag_(i) = 1;
                         if last_idx > 0 && last_end >= off
                             % mark every segment in between as covered
@@ -459,6 +460,7 @@ classdef clustering_results < handle
         end
         
         function [major_classes, full_distr, seg_class, class_w] = mapping_ordered(inst, varargin)        
+            global g_config;
             % compute the prefered strategy for a small time window for each
             % trajectory
             addpath(fullfile(fileparts(mfilename('fullpath')), '/extern'));
@@ -534,7 +536,7 @@ classdef clustering_results < handle
 
                 wi = iseg;
                 wf = iseg;
-                xf = inst.segments.items(i).offset + inst.segments.items(i).compute_feature(features.LENGTH);
+                xf = inst.segments.items(i).offset + inst.segments.items(i).compute_feature(g_config.FEATURE_LENGTH);
                 for j = (i + 1):inst.segments.count
                     if ~isequal(id, inst.segments.items(j).data_identification) || inst.segments.items(j).offset > xf
                         wf = iseg - 1 + j - i - 1;

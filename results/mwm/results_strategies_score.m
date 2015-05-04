@@ -13,7 +13,7 @@ function results_strategies_score
     global g_animals_trajectories_map;   
 
     cache_animals;
-    trajectories_latency = arrayfun( @(t) t.compute_feature(features.LATENCY), g_trajectories.items);      
+    trajectories_latency = arrayfun( @(t) t.compute_feature(g_config.FEATURE_LATENCY), g_trajectories.items);      
 
     % classify trajectories
     cache_trajectories_classification; 

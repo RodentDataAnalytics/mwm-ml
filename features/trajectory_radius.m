@@ -1,9 +1,13 @@
-function [ r, var ] = trajectory_radius( traj, cx, cy )
-%SEGMENT_RADIUS Computes the median and iqr of the radius of a
-%trajectory/segment
-%   traj should be a vector of time, X and Y coordinates
+function [r, var] = trajectory_radius(traj, varargin)    
     global g_config;
-    d = sqrt( power(traj(:, 2) - cx, 2) + power(traj(:, 3) - cy, 2) ) / g_config.ARENA_R;   
-    r = median(d);
-    var = iqr(d);
+    [repr, x0, y0] = process_options(varargin, 'DataRepresentation', 1, ...
+                                               'CentreX', g_config.CENTRE_X, ...
+                                               'CentreY', g_config.CENTRE_Y);
+                                               
+    pts = traj.data_representation(repr);                                                   
+    d = sqrt( power(pts(:, 2) - x0, 2) + power(pts(:, 3) - y0, 2) ) / g_config.ARENA_R;       
+    r = median(d);    
+    if nargout > 1
+        var = iqr(d);
+    end
 end

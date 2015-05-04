@@ -3,9 +3,9 @@ classdef config_mwm < base_config
     properties(Constant)
         RESULTS_DIR = 'results/mwm';
         
-        TRIALS_PER_SESSION = 4;
-        SESSIONS = 3;
-        TRIALS = config_mwm.TRIALS_PER_SESSION*config_mwm.SESSIONS;        
+        TRIALS_PER_SESSION = [4 4 4];
+        SESSIONS = length(config_mwm.TRIALS_PER_SESSION);
+        TRIALS = sum(config_mwm.TRIALS_PER_SESSION);        
         TRIAL_TIMEOUT = 90; % seconds
         GROUPS = 2;
         
@@ -17,7 +17,10 @@ classdef config_mwm < base_config
         % platform position and radius
         PLATFORM_X = -50;
         PLATFORM_Y = 10;
-        PLATFORM_R = 6;        
+        PLATFORM_R = 6;               
+        % other parameters
+        PLATFORM_PROXIMITY_RADIUS = 5; % in platform radii
+        LONGEST_LOOP_EXTENSION = 40; % in cm
         
         TRAJECTORY_DATA_DIRS = {... % 1st set
             '/home/tiago/neuroscience/rat_navigation/data/set1/', ...                                      
@@ -35,7 +38,7 @@ classdef config_mwm < base_config
         % number of animals to discard from each group
         REGULARIZE_GROUPS = 1;
         NDISCARD = 0;
-        DISCARD_FEATURE = features.AVERAGE_SPEED;
+        DISCARD_FEATURE = base_config.FEATURE_AVERAGE_SPEED;
     
         % relation between animal ids and groups (1 = control, 2 = stress,
         % 3 = control + modified diet, 4 = stress + modified diet                
@@ -72,9 +75,20 @@ classdef config_mwm < base_config
         DEFAULT_SEGMENT_LENGTH = 250;
         DEFAULT_SEGMENT_OVERLAP = 0.90;        
         DEFAULT_NUMBER_OF_CLUSTERS = 120;
-                
-        DEFAULT_FEATURE_SET = [features.MEDIAN_RADIUS, features.IQR_RADIUS, features.FOCUS, features.CENTRE_DISPLACEMENT, ...
-                               features.CV_INNER_RADIUS, features.PLATFORM_SURROUNDINGS, features.BOUNDARY_ECCENTRICITY, features.LONGEST_LOOP]; 
+        
+        FEATURE_LONGEST_LOOP = base_config.FEATURE_LAST + 1;
+        FEATURE_CENTRE_DISPLACEMENT = base_config. FEATURE_LAST + 2;
+        FEATURE_PLATFORM_PROXIMITY = base_config.FEATURE_LAST + 3;
+        FEATURE_CV_INNER_RADIUS = base_config.FEATURE_LAST + 4;
+                        
+        DEFAULT_FEATURE_SET = [config_mwm.FEATURE_MEDIAN_RADIUS, ...
+                               config_mwm.FEATURE_IQR_RADIUS, ...
+                               config_mwm.FEATURE_FOCUS, ...
+                               config_mwm.FEATURE_CENTRE_DISPLACEMENT, ... 
+                               config_mwm.FEATURE_CV_INNER_RADIUS, ...
+                               config_mwm.FEATURE_PLATFORM_PROXIMITY, ...
+                               config_mwm.FEATURE_BOUNDARY_ECCENTRICITY, ...
+                               config_mwm.FEATURE_LONGEST_LOOP];
                                                                    
         %%
         %% Tags sets - number/indices have to match the list below        
@@ -85,10 +99,10 @@ classdef config_mwm < base_config
         TAGS300_70 = 4;
         
         TAGS_CONFIG = { ... % values are: file that stores the tags, segment length, overlap, default number of clusters
-            { '/home/tiago/neuroscience/rat_navigation/trajectories/labels_full.csv', 0, 0, 0}, ...
-            { '/home/tiago/neuroscience/rat_navigation/trajectories/segment_labels_250c.csv', 250, 0.90, 75}, ... 
-            { '/home/tiago/neuroscience/rat_navigation/trajectories/segment_labels_250_70.csv', 250, 0.70, 35}, ...
-            { '/home/tiago/neuroscience/rat_navigation/trajectories/segment_labels_300_70.csv', 300, 0.70, 37}, ...            
+            { '/home/tiago/neuroscience/rat_navigation/trajectories/labels_full.csv', 0, 0, 0, 0}, ...
+            { '/home/tiago/neuroscience/rat_navigation/trajectories/segment_labels_250c.csv', 250, 0.90, 2, 75}, ... 
+            { '/home/tiago/neuroscience/rat_navigation/trajectories/segment_labels_250_70.csv', 250, 0.70, 2, 35}, ...
+            { '/home/tiago/neuroscience/rat_navigation/trajectories/segment_labels_300_70.csv', 300, 0.70, 2, 37}, ...            
         };
                 
         OUTPUT_DIR = '/home/tiago/results/'; % where to put all the graphics and other generated output
@@ -112,14 +126,18 @@ classdef config_mwm < base_config
                  tag('CI', 'circling', base_config.TAG_TYPE_BEHAVIOUR_CLASS, 8), ...                                   
                  tag('CP', 'close pass', base_config.TAG_TYPE_TRAJECTORY_ATTRIBUTE), ...
                  tag('S1', 'selected 1', base_config.TAG_TYPE_TRAJECTORY_ATTRIBUTE) ], ...
-               [] ...% no additional data representation
+               [], ...% no additional data representation
+               { {'L_max', 'Longest loop', 'trajectory_longest_loop', 1, 40}, ...
+                 {'D_ctr', 'Centre displacement', 'trajectory_centre_displacement'}, ...
+                 {'P_plat', 'Platform proximity', 'trajectory_platform_proximity', 1, 3*config_mwm.PLATFORM_R}, ...
+                 {'Ri_CV', 'Inner radius variation', 'trajectory_cv_inner_radius'} } ...                 
             );   
         end
                 
         % Imports trajectories from Noldus data file's
         function traj = load_data(inst)
             addpath(fullfile(fileparts(mfilename('fullpath')),'../import/noldus'));
-            traj = load_trajectories(1:3, 1);
+            traj = load_trajectories(1:3, 1, 'DeltaX', -100, 'DeltaY', -100);
         end        
     end
 end

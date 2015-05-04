@@ -83,6 +83,7 @@ classdef trajectories < handle
             off = 0;
             for i = 1:obj.count
                 newseg = obj.items(i).divide_into_segments(lseg, ovlp);
+                
                 if newseg.count >= nmin                    
                     segments = segments.append(newseg);
                     partition(i) = newseg.count;
@@ -209,6 +210,7 @@ classdef trajectories < handle
         end
 
         function save_tags(obj, fn, tags, map, filter)
+            global g_config;
             %SAVE_TAGS Summary of this function goes here
             %   Detailed explanation goes here            
             if isempty(filter)
@@ -225,7 +227,7 @@ classdef trajectories < handle
                         l = 0; % len
                     else % a segment -> use real values for offset/length
                         d = floor(obj.items(filter(i)).offset); % take only the integer part
-                        l = floor(obj.items(filter(i)).compute_feature(features.LENGTH)); % idem, only integer part
+                        l = floor(obj.items(filter(i)).compute_feature(g_config.FEATURE_LENGTH)); % idem, only integer part
                     end
                     
                     % store set,session,track#,offset,length

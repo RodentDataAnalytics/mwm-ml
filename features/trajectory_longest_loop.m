@@ -1,9 +1,10 @@
 function max_loop = trajectory_longest_loop( traj, ext )
-    traj = trajectory_simplify(traj ,4);
-    d = zeros(size(traj, 1) - 1, 2);
+    global g_config;
+    pts = trajectory_simplify(traj.points, 4);
+    d = zeros(size(pts, 1) - 1, 2);
     % compute direction vectors for each pair of points
-    for i = 2:size(traj, 1)
-        d(i - 1, :) = traj(i, 2:3) - traj(i - 1, 2:3);
+    for i = 2:size(pts, 1)
+        d(i - 1, :) = pts(i, 2:3) - pts(i - 1, 2:3);
     end
 
     max_loop = 0;
@@ -14,7 +15,7 @@ function max_loop = trajectory_longest_loop( traj, ext )
             rs = cross(d(i, :), d(j, :));
             if rs ~= 0  % check if they intersect               
                 % vector from starting points of the 2 segments            
-                pq = traj(j, 2:3) - traj(i, 2:3);
+                pq = pts(j, 2:3) - pts(i, 2:3);
                 t = cross(pq, d(j, :)) / rs;
                 u = cross(pq, d(i, :)) / rs;
                 
@@ -55,39 +56,3 @@ function max_loop = trajectory_longest_loop( traj, ext )
         v = x(1)*y(2) - x(2)*y(1);
     end    
 end
-
-%     accum = 0;
-%     llen = 0;    
-%     ang = 0;
-%     max_loop = 0;
-%     traj = trajectory_simplify(traj, 4);
-%     for i = 1:(length(traj) - 2)                
-%         u = traj(i + 1, 2:3) - traj(i, 2:3);        
-%         v = traj(i + 2, 2:3) - traj(i + 1, 2:3);
-%         if det([u; v]') > 0
-%             sign_ang = 1;
-%         else
-%             sign_ang = -1;
-%         end
-%         if i == 1
-%             ang = sign_ang*acos(dot(u, v)/(norm(u)*norm(v)));
-%         else            
-%             ang = sign_ang*acos(dot(u, v)/(norm(u)*norm(v)))*.8 + .2*ang;        
-%         end
-%         if sign(accum)*sign(ang) == -1
-%             % changed direction            
-%             if abs(accum) >= 3*pi/2 %&& accum/llen > .002 % && accum/llen < .1
-%                 max_loop = max(max_loop, llen);
-%             end
-%             llen = 0;
-%             accum = 0;
-%         end         
-%         
-%         accum = accum + ang;
-%         llen = llen + norm(v);        
-%     end   
-%     if abs(accum) >= 3*pi/2 % && accum/llen > .002 % && accum/llen < .1
-%         max_loop = max(max_loop, llen);            
-%     end
-%     max_loop = max_loop / 100;
-%end

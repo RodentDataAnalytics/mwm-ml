@@ -76,7 +76,7 @@ function results_export_strategies
     off = 1;
     data = -1 + zeros(traj.count, N + 7);    
     for i = 1:traj.count
-        data(i, 1:7) = [traj.items(i).group, traj.items(i).id, traj.items(i).session, traj.items(i).trial, partitions(i), traj.items(i).compute_feature(features.LATENCY), traj.items(i).compute_feature(features.AVERAGE_SPEED)]; 
+        data(i, 1:7) = [traj.items(i).group, traj.items(i).id, traj.items(i).session, traj.items(i).trial, partitions(i), traj.items(i).compute_feature(g_config.FEATURE_LATENCY), traj.items(i).compute_feature(features.AVERAGE_SPEED)]; 
         if partitions(i) > 0
             data(i, 8:7 + N) = class_distr(off, :);
             off = off + 1;

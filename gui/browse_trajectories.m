@@ -10,10 +10,10 @@ function browse_trajectories(labels_fn, traj, varargin)
     filter = 1:traj.count;
     sorting = 1:traj.count;           
             
-    [tags, feat, selection, ref_set, n_hor, n_ver] = process_options(varargin, ...
+    [tags, feat, selection, ref_set, n_hor, n_ver, full_traj] = process_options(varargin, ...
                 'Tags', g_config.TAGS, 'Features', g_config.DEFAULT_FEATURE_SET, ...
                 'UserSelection', [], 'ReferenceClassification', [], ...
-                'ItemsHor', 2, 'ItemsVer', 2 ...
+                'ItemsHor', 2, 'ItemsVer', 2, 'FullTrajectories', []  ...
     );
     
     addpath(fullfile(fileparts(mfilename('fullpath')), '../extern'));
@@ -50,12 +50,12 @@ function browse_trajectories(labels_fn, traj, varargin)
     
     set(ctrl_box, 'Sizes', [200 100 -1 100 200 200]);
     % trajectories navigation
-    uicontrol('Parent', lnav_box, 'Style', 'pushbutton', 'Units', 'normalized', 'String', '<-', 'Callback', {@previous_callback});
-    uicontrol('Parent', rnav_box, 'Style', 'pushbutton', 'Units', 'normalized', 'String', '->', 'Callback',{@next_callback});    
-    uicontrol('Parent', lnav_box, 'Style', 'pushbutton', 'Units', 'normalized', 'String', '<<-', 'Callback',{@previous2_callback});
-    uicontrol('Parent', rnav_box, 'Style', 'pushbutton', 'Units', 'normalized', 'String', '->>', 'Callback',{@next2_callback});
-    uicontrol('Parent', lnav_box, 'Style', 'pushbutton', 'Units', 'normalized', 'String', '<<<-', 'Callback',{@previous3_callback});
-    uicontrol('Parent', rnav_box, 'Style', 'pushbutton', 'Units', 'normalized', 'String', '->>>', 'Callback',{@next3_callback});
+    uicontrol('Parent', lnav_box, 'Style', 'pushbutton', 'String', '<-', 'Callback', {@previous_callback});
+    uicontrol('Parent', rnav_box, 'Style', 'pushbutton', 'String', '->', 'Callback',{@next_callback});    
+    uicontrol('Parent', lnav_box, 'Style', 'pushbutton', 'String', '<<-', 'Callback',{@previous2_callback});
+    uicontrol('Parent', rnav_box, 'Style', 'pushbutton', 'String', '->>', 'Callback',{@next2_callback});
+    uicontrol('Parent', lnav_box, 'Style', 'pushbutton', 'String', '<<<-', 'Callback',{@previous3_callback});
+    uicontrol('Parent', rnav_box, 'Style', 'pushbutton', 'String', '->>>', 'Callback',{@next3_callback});
     
     % status text (middle)
     status_handle = uicontrol('Parent', stat_box, 'Style', 'text', 'String', '');  
@@ -68,13 +68,18 @@ function browse_trajectories(labels_fn, traj, varargin)
     % feature sorting control
     hfilter = [];
     sortstr = {'** none **', '** distance to centre (max) **', '** distance to centre (euclidean) **', '** combined **', '** random **' };
-    sortstr = [sortstr, arrayfun( @(f) features.feature_name(f), feat, 'UniformOutput', 0)];
+    for i = 1:length(feat) % have to do this way because of stupid matlab        
+        tmp = g_config.FEATURES{feat(i)};
+        sortstr = [sortstr, tmp{2}];
+    end
     sort_box = uiextras.HBox('Parent', filter_box);
+    uicontrol('Parent', sort_box, 'Style', 'text', 'String', 'Sort:');        
     hsort = uicontrol('Parent', sort_box, 'Style', 'popupmenu', 'String', sortstr, 'Callback', {@sorting_callback});
-    hsort_reverse = uicontrol('Parent', sort_box, 'Style', 'checkbox', 'String', 'Rev', 'Callback', {@sorting_callback});       
+    hsort_reverse = uicontrol('Parent', filter_box, 'Style', 'checkbox', 'String', 'Reverse', 'Callback', {@sorting_callback});       
+    set(sort_box, 'Sizes', [40, -1]);
     % cluster navigation and control (note: combo-box is created elsewhere
     % since it is dynamic
-    filter_box = uiextras.HBox('Parent', filter_box);
+    filter_combo_box = uiextras.HBox('Parent', filter_box);
     filter_nav_box = uiextras.HButtonBox('Parent', filter_box);
     hfilter_prev = uicontrol('Parent', filter_nav_box, 'Style', 'pushbutton', 'String', '<-', 'Callback', {@filter_prev_callback});    
     hfilter_next = uicontrol('Parent', filter_nav_box, 'Style', 'pushbutton', 'String', '->', 'Callback', {@filter_next_callback});
@@ -93,6 +98,9 @@ function browse_trajectories(labels_fn, traj, varargin)
     for i = 1:length(g_config.DATA_REPRESENTATION)
         tmp = g_config.DATA_REPRESENTATION{i};
         strs = [strs, tmp{1}];
+    end
+    if ~isempty(full_traj)
+        strs = [strs, 'Segment highlight'];
     end
     % 1st combo: main view
     box = uiextras.HBox('Parent', layout_box);
@@ -147,12 +155,8 @@ function browse_trajectories(labels_fn, traj, varargin)
             end
         end
     end
-           
-    % styles for plotting clusters
-    pointtypes = {'+r', 'xg', 'db', '.c', 'om', 'xy', '+b', 'ok'};
-
+    
     classif_res = [];
-    draw_boundary = 0;
     distr_status = '';
     covering = [];
     feat_values = traj.compute_features(feat);
@@ -261,17 +265,17 @@ function browse_trajectories(labels_fn, traj, varargin)
                 strings = [strings, sprintf('Cluster #%d (''%s'', N=%d, L=%d, I=%d)', ... 
                                             i, lbl, nclus, ...
                                             length(find(sum(labels_traj(classif_res.cluster_idx == i, :), 2) > 0)), ...
-                                            sum(isol(classif_res.cluster_idx == i)))];
+                                            sum(isol(classif_res.cluster_idx == i)))];  
             end
         end
         
-        hfilter = uicontrol('Parent', filter_box, 'Style', 'popupmenu', 'Units', 'normalized', 'String', strings, 'Callback', {@combobox_filter_callback});
+        hfilter = uicontrol('Parent', filter_combo_box, 'Style', 'popupmenu', 'String', strings, 'Callback', {@combobox_filter_callback});
         nitems_filter = length(strings);
     
         combobox_filter_callback(0, 0);
     end
         
-    function plot_trajectory(pts)
+    function plot_trajectory(pts, hl)
         axis off;
         daspect([1 1 1]);                      
         rectangle('Position',[g_config.CENTRE_X - g_config.ARENA_R, g_config.CENTRE_X - g_config.ARENA_R, g_config.ARENA_R*2, g_config.ARENA_R*2],...
@@ -279,7 +283,7 @@ function browse_trajectories(labels_fn, traj, varargin)
         hold on;
         axis square;
         % see if we have a platform to draw
-        if exist('g_config.PLATFORM_X')
+        if isprop(g_config, 'PLATFORM_X')
             rectangle('Position',[g_config.PLATFORM_X - g_config.PLATFORM_R, g_config.PLATFORM_Y - g_config.PLATFORM_R, 2*g_config.PLATFORM_R, 2*g_config.PLATFORM_R],...
                 'Curvature',[1,1], 'FaceColor',[1, 1, 1], 'edgecolor', [0.2, 0.2, 0.2], 'LineWidth', 3);             
         end
@@ -304,6 +308,10 @@ function browse_trajectories(labels_fn, traj, varargin)
 %             colorbar('eastoutside', 'position', pos);                        
         end
         
+        if ~isempty(hl)
+            plot(hl(:,2), hl(:,3), '-', 'LineWidth', 2, 'Color', [1 0 0]);
+        end
+        
         set(gca, 'LooseInset', [0,0,0,0]);
     end
 
@@ -312,32 +320,46 @@ function browse_trajectories(labels_fn, traj, varargin)
         for i = 1:nx*ny
             if cur + i < length(filter)
                 traj_idx = filter(sorting(cur + i - 1));
-                % plot the trajectory/segment
-                set(f, 'currentaxes', axis_handles(i));                                
                 
-                % plot main view
-                idx = get(main_view_combo, 'value');
-                tmp = g_config.DATA_REPRESENTATION{idx};
-                func = str2func(tmp{2});
-                vals = func(traj.items(traj_idx));
-                
-                % plot values
-                plot_trajectory(vals);
-                
-                % secondary views
-                for k = 1:2
-                    idx = get(sec_view_combos(k), 'value');
-                    if idx > 1
-                        tmp = g_config.DATA_REPRESENTATION{idx - 1};
-                        func = str2func(tmp{2});
-                        vals = func(traj.items(traj_idx));
-
-                        set(f, 'currentaxes', sec_view_handles((i - 1)*2 + k));
-                        % plot values
-                        plot_trajectory(vals);
+                % plot views
+                for k = 1:3
+                    if k == 1                        
+                        idx = get(main_view_combo, 'value');
+                        set(f, 'currentaxes', axis_handles(i));                                                
+                    else
+                        if isempty(sec_view_handles)
+                            break;
+                        end
+                        idx = get(sec_view_combos(k - 1), 'value'); % -1 because of the "none"                        
+                        if idx == 1
+                            continue; % "none"
+                        end
+                        idx = idx - 1;
+                        set(f, 'currentaxes', sec_view_handles((i - 1)*2 + k - 1));                        
                     end
+                    
+                    hl = [];                    
+                    if idx <= length(g_config.DATA_REPRESENTATION)
+                        tmp = g_config.DATA_REPRESENTATION{idx};
+                        func = str2func(tmp{2});
+                        vals = func(traj.items(traj_idx));                                   
+                    else
+                        % look for parent trajectory
+                        id = traj.items(traj_idx).identification;
+                        for l = 1:full_traj.count
+                            id2 = full_traj.items(l).identification;
+                            len = length(id) - 1;
+                            if isequal(id(1:len), id2(1:len))
+                                vals = trajectory_points(full_traj.items(l));
+                                hl = trajectory_points(traj.items(traj_idx));
+                                break;
+                            end
+                        end
+                    end
+                    
+                    plot_trajectory(vals, hl);
                 end
-                
+                                
                 hold on;                
                 if ~isempty(covering)
                     if covering(traj_idx)
@@ -346,20 +368,6 @@ function browse_trajectories(labels_fn, traj, varargin)
                         rectangle('Position', [80, 80, 10, 10], 'FaceColor', [1, 0.5, 0.5]);
                     end
                 end                                    
-                % draw surrounding ellipse?
-                if draw_boundary
-                    hold on;                    
-                    vals = traj.items(traj_idx).compute_features([ ...
-                        features.BOUNDARY_CENTRE_RADIUS, ...
-                        features.BOUNDARY_CENTRE_ANGLE, ...
-                        features.BOUNDARY_MAJOR_RADIUS, ...
-                        features.BOUNDARY_MINOR_RADIUS, ...
-                        features.BOUNDARY_INCLINATION ]);                    
-                    r = vals(1); ang = vals(2); a = vals(3); b = vals(4); inc = vals(5);
-                    draw_ellipse(r*cos(ang), r*sin(ang), b, a, inc, ':r');
-                    axis equal;
-                    hold off;
-                end
                 
                 % update the status text with feature values
                 str = '';
@@ -367,7 +375,8 @@ function browse_trajectories(labels_fn, traj, varargin)
                     if j > 1
                         str = strcat(str, ' | ');
                     end
-                    str = strcat(str, sprintf('%s: %.4f', features.feature_abbreviation(feat(j)), feat_values(traj_idx, j)));                    
+                    tmp = g_config.FEATURES{feat(j)};
+                    str = strcat(str, sprintf('%s: %.4f', tmp{1}, feat_values(traj_idx, j)));                    
                 end
                 set(desc_handles(i), 'String', str);
                 
@@ -432,9 +441,10 @@ function browse_trajectories(labels_fn, traj, varargin)
         
     function save_data        
         % save values from screen
-        for i = 0:3            
+        [nx, ny] = number_of_views;
+        for i = 0:nx*ny - 1
             if length(filter) >= cur + i
-                vals = arrayfun(@(h) get(h, 'Value'), cb_handles{i + 1});                
+                vals = arrayfun(@(h) get(h, 'Value'), cb_handles(i + 1, :));                
                 labels_traj(filter(sorting(cur + i)), :) = vals;
             end
         end
@@ -553,77 +563,7 @@ function browse_trajectories(labels_fn, traj, varargin)
         cur = 1;
         show_trajectories;
         
-        if ~isempty(classif_res)
-            % plot clusters in a separate window with pairwise features
-            n = length(feat)*(length(feat) -1)/2 + 1;
-            if n == 1
-                l = 1;
-                m = 1;
-            elseif n <= 4
-                l = 2;
-                m = 2;
-            elseif n <= 6
-                l = 3;
-                m = 2;
-            elseif n <= 9
-                l = 3;
-                m = 3;
-            elseif n <= 12
-                l = 4;
-                m = 3;
-            elseif n <= 16
-                l = 4;
-                m = 4;
-            elseif n <= 25
-                l =5;
-                m = 5;
-            else
-                % too many possible pairings
-                return;
-            end
-%             figure(27);        
-%             clf;
-%             n = 1;        
-%             for i = 1:(length(feat) - 1)
-%                 for j = (i + 1):length(feat)               
-%                     subplot(m, l, n);
-%                     n = n + 1;
-%                     % the "unknown" guys
-%                     pos = find(classif_res.class_map(filter) == 0);
-%                     plot(feat_values(filter(pos), i), feat_values(filter(pos), j), 'dk');
-%                     hold on;                
-%                     p = 1;
-%                     for k = 1:classif_res.nclasses
-%                         if ~strcmp(classif_res.classes(k).abbreviation, g_config.UNDEFINED_TAG_ABBREVIATION)
-%                             pos = find(classif_res.class_map(filter) == k);      
-%                             if ~isempty(pos)
-%                                 plot(feat_values(filter(pos), i), feat_values(filter(pos), j), pointtypes{p});
-%                                 p = p + 1;
-%                             end
-%                         end
-%                     end         
-%                     xlabel(features.feature_name(feat(i)));
-%                     ylabel(features.feature_name(feat(j)));                                                     
-%                     hold off;                                                
-%                 end
-%             end
-% 
-%             % plot legend in a separate sub-window
-%             subplot(m, l, n);                
-%             p = 1;
-%             for k = 1:classif_res.nclasses
-%                 if strcmp(classif_res.classes(k).abbreviation, g_config.UNDEFINED_TAG_ABBREVIATION)
-%                     plot(0, 0, 'dk');
-%                 else
-%                     plot(0, 0, pointtypes{p});
-%                     p = p + 1;
-%                 end
-%                 hold on;            
-%             end
-%             names = arrayfun( @(t) t.description, classif_res.classes, 'UniformOutput', 0);
-%             hold off;
-%             legend(names);                                    
-        end
+        
         update_filter_navigation();
     end
 
@@ -765,115 +705,7 @@ function browse_trajectories(labels_fn, traj, varargin)
         [~, covering] = classif_res.coverage();              
         
         update_filter_combo;        
-        set(gcf,'Pointer','arrow');                
-        
-        %% show correlation matrix
-%         figure(29);
-%         lbls = {};
-%         % sort the labels, otherwise the result will look meaningless
-%         [~, idx] = sort(cluster_map);
-%         for i = 1:nclusters        
-%             if cluster_map(idx(i)) == 0
-%                 lbl = '**';
-%             else
-%                 lbl = cluster_tags(cluster_map(idx(i))).abbreviation;
-%             end        
-%             lbls = [lbls, sprintf('%d: %s', idx(i), lbl)];
-%         end
-%         
-%         %%
-%         %% show labelled trajectories in another window
-%         %%
-%         
-%         n = length(feat)*(length(feat) -1)/2 + 1;
-%         if n == 1
-%             l = 1;
-%             m = 1;
-%         elseif n <= 4
-%             l = 2;
-%             m = 2;
-%         elseif n <= 6
-%             l = 3;
-%             m = 2;
-%         elseif n <= 9
-%             l = 3;
-%             m = 3;
-%         elseif n <= 12
-%             l = 4;
-%             m = 3;
-%         elseif n <= 16
-%             l = 4;
-%             m = 4;
-%         elseif n <= 25
-%             l =5;
-%             m = 5;
-%         else
-%             % too many possible pairings
-%             return;
-%         end
-%         
-%         figure(28);    
-%         % tagged segments        
-%         n = 1;
-%         % tags given as input
-%         abrev = arrayfun( @(t) t.abbreviation, tags, 'UniformOutput', 0);
-%         for i = 1:(length(feat) - 1)
-%             for j = (i + 1):length(feat)               
-%                 subplot(m, l, n);                
-%                 n = n + 1;
-%                 p = 1;
-%                 for k = 1:length(cluster_tags)                                                                                  
-%                     % match input tag
-%                     match = cellfun( @(t) strcmp(t, cluster_tags(k).abbreviation), abrev);
-%                     idx = find(match == 1);
-%                     if ~isempty(idx )                        
-%                         pos = find(labels_traj(:, idx));      
-%                         if ~strcmp(cluster_tags(k).abbreviation, g_config.UNDEFINED_TAG_ABBREVIATION)
-%                             pt = pointtypes{p};
-%                             p = p + 1;
-%                         else
-%                             pt = 'dk';
-%                         end
-%                         plot(feat_values(pos, i), feat_values(pos, j), pt);
-%                         hold on;                    
-%                     end
-%                 end
-%                 xlabel(features.feature_name(feat(i)));
-%                 ylabel(features.feature_name(feat(j)));                    
-%                         
-%                 hold off;                                                
-%             end
-%         end
-% 
-%         % plot only legend
-%         subplot(m, l, n);                
-%         p = 1;
-%         for k = 1:length(cluster_tags)                   
-%             if strcmp(cluster_tags(k).abbreviation, g_config.UNDEFINED_TAG_ABBREVIATION)
-%                 plot(0, 0, 'dk');
-%             else
-%                 plot(0, 0, pointtypes{p});
-%                 p = p + 1;
-%             end
-%             hold on;            
-%         end
-%         names = arrayfun( @(t) t.description, cluster_tags, 'UniformOutput', 0);
-%         hold off;
-%         legend(names);  
-% 
-%         centroids = cluster_centroids(:, idx);
-%         imagesc(corr(centroids));            %# Create a colored plot of the matrix values
-%         colormap('Jet');          
-%         % colorbar;
-% 
-%         set(gca,'XTick', 1:nclusters,...                         %# Change the axes tick marks
-%                 'XTickLabel', lbls,...  %#   and tick labels
-%                 'YTick', 1:nclusters,...
-%                 'YTickLabel', lbls,...
-%                 'TickLength',[0 0]);        
-%         rotateXLabels(gca, 90);                           
-%         axis square;
-%         daspect([1 1 1]);
+        set(gcf,'Pointer','arrow');                    
     end
 end     
                  
