@@ -53,24 +53,25 @@ classdef config_place_avoidance < base_config
                                     
         CLUSTER_CLASS_MINIMUM_SAMPLES_P = 0.01; % 2% o
         CLUSTER_CLASS_MINIMUM_SAMPLES_EXP = 0.75;
-           
-        DEFAULT_SEGMENT_LENGTH = 250;
-        DEFAULT_SEGMENT_OVERLAP = 0.90;        
-        DEFAULT_NUMBER_OF_CLUSTERS = 120;
-                
-        DEFAULT_FEATURE_SET = [g_config.FEATURE_MEDIAN_RADIUS, g_config.FEATURE_IQR_RADIUS, g_config.FEATURE_FOCUS, g_config.FEATURE_BOUNDARY_ECCENTRICITY];
-                                                          
-        %%
-        %% Tags sets - number/indices have to match the list below        
-        %%
-        TAGS_FULL = 1; 
-        TAGS500_70 = 2; % Important: go from "more detailed" to less detailed ones
         
-        TAGS_CONFIG = { ... % values are: file that stores the tags, segment length, overlap, default number of clusters
-            { '/home/tiago/neuroscience/place_avoidance/labels_full.csv', 0, 0, 0, 0}, ...
-            { '/home/tiago/neuroscience/place_avoidance/labels_t1_500_70.csv', 500, 0.70, 2, 50} ...             
-        };
-                
+        FEATURE_AVERAGE_SPEED_ARENA = base_config.FEATURE_LAST + 1;
+        FEATURE_LENGTH_ARENA = base_config. FEATURE_LAST + 2;
+        FEATURE_MEDIAN_RADIUS_ARENA = base_config. FEATURE_LAST + 3;
+        FEATURE_IQR_RADIUS_ARENA = base_config. FEATURE_LAST + 4;        
+        FEATURE_TIME_CENTRE = base_config. FEATURE_LAST + 5;  
+                                                             
+        DEFAULT_FEATURE_SET = [ base_config.FEATURE_LATENCY, ...
+                                config_place_avoidance.FEATURE_AVERAGE_SPEED_ARENA, ...                                
+                                config_place_avoidance.FEATURE_MEDIAN_RADIUS_ARENA, ...
+                                config_place_avoidance.FEATURE_IQR_RADIUS_ARENA, ...
+                                config_place_avoidance.FEATURE_TIME_CENTRE ...
+                              ];
+                          
+        CLUSTERING_FEATURE_SET = [ config_place_avoidance.FEATURE_TIME_CENTRE, ...
+                                   base_config.FEATURE_LATENCY, ...
+                                   config_place_avoidance.FEATURE_AVERAGE_SPEED_ARENA ...
+                                 ];
+                                                                          
         % plot properties
         OUTPUT_DIR = '/home/tiago/results/'; % where to put all the graphics and other generated output
         CLASSES_COLORMAP = @jet;   
@@ -82,48 +83,53 @@ classdef config_place_avoidance < base_config
         SECTION_FULL = 0; % complete trajectories
         
         DATA_REPRESENTATION_ARENA_COORD = base_config.DATA_REPRESENTATION_LAST + 1;
+        DATA_REPRESENTATION_ARENA_SPEED = base_config.DATA_REPRESENTATION_LAST + 2;
+        
+        %%%
+        %%% Segmentation
+        %%%
+        SEGMENTATION_PLACE_AVOIDANCE = base_config.SEGMENTATION_LAST + 1;       
+                %%
+        %% Tags sets - number/indices have to match the list below        
+        %%        
+        TAGS_CONFIG = { ... % values are: file that stores the tags, segment length, overlap, default number of clusters
+            { '/home/tiago/neuroscience/place_avoidance/labels_full.csv', 0, 0}, ...
+            { '/home/tiago/neuroscience/place_avoidance/labels_t1.csv', 10, config_place_avoidance.SEGMENTATION_PLACE_AVOIDANCE, 1, config_place_avoidance.SECTION_AVOID} ...
+        };
     end   
     
     properties(GetAccess = 'public', SetAccess = 'protected')
-        section = config_place_avoidance.SECTION_FULL;
-        rotation_frequency = 1;
+        ROTATION_FREQUENCY = 1;
     end
     
     methods        
-        function inst = config_place_avoidance(sec)
+        function inst = config_place_avoidance
             addpath(fullfile(fileparts(mfilename('fullpath')), 'place_avoidance'));    
-   
-            switch sec
-                case config_place_avoidance.SECTION_T1
-                    desc = 't < T1';                    
-                case config_place_avoidance.SECTION_TMAX
-                    desc = 't < Tmax';
-                case config_place_avoidance.SECTION_AVOID
-                    desc = 'Ti < t < Ti+1';
-                case config_place_avoidance.SECTION_FULL
-                    desc = 'full trajectories';
-            end
-            inst@base_config(sprintf('Place avoidance task (%s)', desc), ...                
+            inst@base_config('Place avoidance task', ...                
                [ tag('TT', 'thigmotaxis', base_config.TAG_TYPE_BEHAVIOUR_CLASS, 1), ... % default tags
                  tag('IC', 'incursion', base_config.TAG_TYPE_BEHAVIOUR_CLASS, 2), ...
                  tag('SS', 'scanning-surroundings', base_config.TAG_TYPE_BEHAVIOUR_CLASS, 7), ...                 
                  tag('CP', 'close pass', base_config.TAG_TYPE_TRAJECTORY_ATTRIBUTE), ...
-                 tag('S1', 'selected 1', base_config.TAG_TYPE_TRAJECTORY_ATTRIBUTE) ], ...
-               { {'Arena coordinates', 'trajectory_arena_coord' } } ...
-            );   
-            inst.section = sec;
+                 tag('S1', 'selected 1', base_config.TAG_TYPE_TRAJECTORY_ATTRIBUTE) ], ...                 
+               { {'Arena coordinates', 'trajectory_arena_coord' }, ...
+                 {'Speed (arena)', 'trajectory_speed', 'DataRepresentation', config_place_avoidance.DATA_REPRESENTATION_ARENA_COORD} ...
+               }, ...
+               { {'V_A', 'Average speed (arena)', 'trajectory_average_speed', 1, 'DataRepresentation', config_place_avoidance.DATA_REPRESENTATION_ARENA_COORD}, ...
+                 {'L_A', 'Length (arena)', 'trajectory_length', 1, 'DataRepresentation', config_place_avoidance.DATA_REPRESENTATION_ARENA_COORD}, ...
+                 {'R12_A', 'Median radius (arena)', 'trajectory_radius', 1, 'DataRepresentation', config_place_avoidance.DATA_REPRESENTATION_ARENA_COORD}, ...
+                 {'Riqr_A', 'IQR radius (arena)', 'trajectory_radius', 2, 'DataRepresentation', config_place_avoidance.DATA_REPRESENTATION_ARENA_COORD}, ...
+                 {'Tc_A', 'Time centre', 'trajectory_time_within_radius', 1, 0.75*config_place_avoidance.ARENA_R, 'DataRepresentation', config_place_avoidance.DATA_REPRESENTATION_ARENA_COORD} ...
+               }, ...
+               { {'Place avoidance', 'segmentation_place_avoidance'} } ...
+            );               
         end
-        
-        function val = hash(inst)
-            val = hash_combine(hash@base_config(inst), inst.section);
-        end
-        
+               
         % Imports trajectories from Noldus data file's
         function traj = load_data(inst)
             addpath(fullfile(fileparts(mfilename('fullpath')),'../import/place_avoidance'));
             % load only paths in the room reference frame and up to the
             % point of first entrance in the shock area
-            traj = load_trajectories(1, 1, inst.section_);
+            traj = load_trajectories(1, 1); % Room coordinates only
         end        
     end
 end

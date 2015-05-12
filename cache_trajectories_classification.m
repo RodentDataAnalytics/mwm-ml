@@ -35,7 +35,7 @@ function cache_trajectories_classification
         % do now the other classifications
         for i = 3:length(g_config.TAGS_CONFIG)
             param = g_config.TAGS_CONFIG{i};
-            segments = g_trajectories.divide_into_segments(param{2}, param{3}, 2);
+            segments = g_trajectories.divide_into_segments(param{2}, param{3}, abs(param{4}));
             % get classifier object
             classif = segments.classifier(param{1}, g_config.DEFAULT_FEATURE_SET, g_config.TAG_TYPE_BEHAVIOUR_CLASS);        
             % classify'em

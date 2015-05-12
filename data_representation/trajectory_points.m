@@ -1,4 +1,6 @@
-function pts = trajectory_points( traj )
-    pts = traj.points(:, 1:3);
+function pts = trajectory_points( traj, varargin )
+    [tol] = process_options(varargin, 'SimplificationTolerance', 0);
+    
+    pts = traj.simplify(tol); 
+    pts = pts(:, 1:3);
 end
-

@@ -1,1 +1,0 @@
-browse_set(g_config.TAGS_FULL, 0);

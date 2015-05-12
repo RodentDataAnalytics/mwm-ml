@@ -3,7 +3,7 @@ classdef config_mwm_nencki_short < base_config
     properties(Constant)
         RESULTS_DIR = 'results/mwm';
                 
-        TRIALS_PER_SESSION = [4, 4, 4, 1, 4];
+        TRIALS_PER_SESSION = [4, 4, 4, 4, 4];
         SESSIONS = length(config_mwm_nencki.TRIALS_PER_SESSION);
         TRIALS = sum(config_mwm_nencki.TRIALS_PER_SESSION);        
         TRIAL_TIMEOUT = 90; % seconds
@@ -40,7 +40,8 @@ classdef config_mwm_nencki_short < base_config
         DEFAULT_FEATURE_SET = [config_mwm_nencki_short.FEATURE_EFFICIENCY, ...
                                config_mwm_nencki_short.FEATURE_PLATFORM_PROXIMITY, ...
                                config_mwm_nencki_short.FEATURE_LONGEST_LOOP ];
-                                                                   
+         
+        CLUSTERING_FEATURE_SET = config_mwm_nencki_short.DEFAULT_FEATURE_SET;
         %%
         %% Tags sets - number/indices have to match the list below        
         %%        
@@ -64,8 +65,9 @@ classdef config_mwm_nencki_short < base_config
                  tag('S1', 'selected 1', base_config.TAG_TYPE_TRAJECTORY_ATTRIBUTE) ], ...
                [], ...% no additional data representation
                { {'L_max', 'Longest loop', 'trajectory_longest_loop', 1, 40}, ...
-                 {'P_plat', 'Platform proximity', 'trajectory_platform_proximity', 1, 3*config_mwm_nencki.PLATFORM_R }, ...                  
-                 {'eff', 'Trajectory efficiency', 'trajectory_efficiency' } } ...                  
+                 {'P_plat', 'Platform proximity', 'trajectory_time_within_radius', 1, 3*config_mwm.PLATFORM_R, 'X0', config_mwm_nencki.PLATFORM_X, 'Y0', config_mwm_nencki.PLATFORM_Y}, ...                  
+                 {'eff', 'Trajectory efficiency', 'trajectory_efficiency' } }, ...                  
+               {} ...
             );   
         end
                 

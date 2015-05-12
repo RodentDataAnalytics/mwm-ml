@@ -10,8 +10,9 @@ function browse_trajectories(labels_fn, traj, varargin)
     filter = 1:traj.count;
     sorting = 1:traj.count;           
             
-    [tags, feat, selection, ref_set, n_hor, n_ver, full_traj] = process_options(varargin, ...
+    [tags, feat, cluster_feat, selection, ref_set, n_hor, n_ver, full_traj] = process_options(varargin, ...
                 'Tags', g_config.TAGS, 'Features', g_config.DEFAULT_FEATURE_SET, ...
+                'ClusteringFeatures', g_config.CLUSTERING_FEATURE_SET, ...
                 'UserSelection', [], 'ReferenceClassification', [], ...
                 'ItemsHor', 2, 'ItemsVer', 2, 'FullTrajectories', []  ...
     );
@@ -19,12 +20,12 @@ function browse_trajectories(labels_fn, traj, varargin)
     addpath(fullfile(fileparts(mfilename('fullpath')), '../extern'));
         
     % create main window
-    f = figure('Visible','on', 'name', 'Trajectories tagging', ...
-        'Position', [200, 200, 900, 800], 'Menubar', 'none', 'Toolbar', 'none', 'resize', 'on');
+    f = figure('Visible','off', 'name', 'Trajectories tagging', ...
+        'Position', [200, 200, 1024, 800], 'Menubar', 'none', 'Toolbar', 'none', 'resize', 'on');
     
     % base layout
     bg_box = uiextras.VBox('Parent', f);           
-           
+                  
     %%
     %% Create controls
     %%%
@@ -48,7 +49,7 @@ function browse_trajectories(labels_fn, traj, varargin)
     layout_panel = uiextras.BoxPanel('Parent', ctrl_box, 'Title', 'Layout');
     layout_box = uiextras.VBox('Parent', layout_panel);
     
-    set(ctrl_box, 'Sizes', [200 100 -1 100 200 200]);
+    set(ctrl_box, 'Sizes', [200 75 -1 75 200 250]);
     % trajectories navigation
     uicontrol('Parent', lnav_box, 'Style', 'pushbutton', 'String', '<-', 'Callback', {@previous_callback});
     uicontrol('Parent', rnav_box, 'Style', 'pushbutton', 'String', '->', 'Callback',{@next_callback});    
@@ -58,12 +59,14 @@ function browse_trajectories(labels_fn, traj, varargin)
     uicontrol('Parent', rnav_box, 'Style', 'pushbutton', 'String', '->>>', 'Callback',{@next3_callback});
     
     % status text (middle)
-    status_handle = uicontrol('Parent', stat_box, 'Style', 'text', 'String', '');  
+    status_handle = uicontrol('Parent', stat_box, 'Style', 'text', 'String', '');
     % clustering controls        
     uicontrol('Parent', clus_box, 'Style', 'text', 'String', '# of clusters:');        
     vals = arrayfun( @(x) sprintf('%d', x), 1:500, 'UniformOutput', 0);
     hclusters = uicontrol('Parent', clus_box, 'Style', 'popupmenu', 'String', vals);         
-    hcv = uicontrol('Parent', clus_box, 'Style', 'checkbox', 'String', 'Enable CV');    
+    hbox = uiextras.HBox('Parent', clus_box);
+    hcv = uicontrol('Parent', hbox, 'Style', 'checkbox', 'String', 'Enable CV');    
+    hshow_results = uicontrol('Parent', hbox, 'Style', 'checkbox', 'String', 'Pop-out Res.', 'Callback', {@popout_results_callback});    
     uicontrol('Parent', clus_box, 'Style', 'pushbutton', 'String', 'Cluster', 'Callback', {@cluster_callback});
     % feature sorting control
     hfilter = [];
@@ -90,8 +93,12 @@ function browse_trajectories(labels_fn, traj, varargin)
     xviews_handle = uicontrol('Parent', box, 'Style', 'popupmenu', 'String', {'1', '2', '3', '4', '5', '6'}, 'Callback', {@layout_change_callback});
     set(xviews_handle, 'value', n_ver);
     uicontrol('Parent', box, 'Style', 'text', 'String', 'NY:');
-    yviews_handle = uicontrol('Parent', box, 'Style', 'popupmenu', 'String', {'1', '2', '3', '4', '5', '6'}, 'Callback', {@layout_change_callback});    
+    yviews_handle = uicontrol('Parent', box, 'Style', 'popupmenu', 'String', {'1', '2', '3', '4', '5', '6'}, 'Callback', {@layout_change_callback});      
     set(yviews_handle, 'value', n_hor);
+    uicontrol('Parent', box, 'Style', 'text', 'String', 'Tol:');
+    tol_str = arrayfun( @(x) num2str(x), 1:25, 'UniformOutput', 0);
+    simplify_tol_handle = uicontrol('Parent', box, 'Style', 'popupmenu', 'String', tol_str, 'Callback', {@layout_change_callback});
+    set(simplify_tol_handle, 'value', 5);
    
     % build a list with all the possible data representations
     strs = {};
@@ -106,20 +113,23 @@ function browse_trajectories(labels_fn, traj, varargin)
     box = uiextras.HBox('Parent', layout_box);
     uicontrol('Parent', box, 'Style', 'text', 'String', 'Main:');
     main_view_combo = uicontrol('Parent', box, 'Style', 'popupmenu', 'String', strs, 'Callback', {@layout_change_callback});        
-    set(box, 'Sizes', [50, -1]);
+    main_view_dir_check = uicontrol('Parent', box, 'Style', 'checkbox', 'String', 'Vec.', 'Callback', {@layout_change_callback});
+    set(box, 'Sizes', [50, -1, 50]);
     % 2nd combo: secondary view 1
     strs = ['None', strs];
     box = uiextras.HBox('Parent', layout_box);    
     uicontrol('Parent', box, 'Style', 'text', 'String', 'Sec. 1:');
     sec_view_combos = [uicontrol('Parent', box, 'Style', 'popupmenu', 'String', strs, 'Callback', {@layout_change_callback})];  
-    set(box, 'Sizes', [50, -1]);    
+    sec_view_dir_check = uicontrol('Parent', box, 'Style', 'checkbox', 'String', 'Vec.', 'Callback', {@layout_change_callback});    
+    set(box, 'Sizes', [50, -1, 50]);    
     % 3rd combo: secondary view 2
     box = uiextras.HBox('Parent', layout_box);    
     uicontrol('Parent', box, 'Style', 'text', 'String', 'Sec. 2:');
     sec_view_combos = [ sec_view_combos, ...
                         uicontrol('Parent', box, 'Style', 'popupmenu', 'String', strs, 'Callback', {@layout_change_callback}) ...
                       ];  
-    set(box, 'Sizes', [50, -1]);
+    sec_view_dir_check = [sec_view_dir_check, uicontrol('Parent', box, 'Style', 'checkbox', 'String', 'Vec.', 'Callback', {@layout_change_callback})];
+    set(box, 'Sizes', [50, -1, 50]);
     
     sec_view_handles = [];
     
@@ -129,9 +139,13 @@ function browse_trajectories(labels_fn, traj, varargin)
     desc_handles = [];
     view_panels = [];
     cb_handles = [];
+    simplify_level_prev = 0;
     
     ntags = length(tags);  
-  
+    % normalization values for speed and other scalar values
+    data_repr_norm = zeros(1, length(g_config.DATA_REPRESENTATION));
+    data_repr_off  = zeros(1, length(g_config.DATA_REPRESENTATION));
+    
     create_views();
                 
     cur = 1; %current index
@@ -165,7 +179,9 @@ function browse_trajectories(labels_fn, traj, varargin)
      
     update_filter_combo;
     show_trajectories;
-    set(f,'Visible','on');            
+    results_window = classification_results(traj);
+    set(f, 'Visible', 'on');            
+    
     
     %%
     %% nested functions
@@ -186,7 +202,7 @@ function browse_trajectories(labels_fn, traj, varargin)
         view_panels = [];
         desc_handles = [];
         cb_handles = [];
-        sec_view_handles = [];
+        sec_view_handles = [];        
         
         [nx, ny] = number_of_views();
         sec1 = get(sec_view_combos(1), 'value');
@@ -275,7 +291,7 @@ function browse_trajectories(labels_fn, traj, varargin)
         combobox_filter_callback(0, 0);
     end
         
-    function plot_trajectory(pts, hl)
+    function plot_trajectory(pts, hl, vec)
         axis off;
         daspect([1 1 1]);                      
         rectangle('Position',[g_config.CENTRE_X - g_config.ARENA_R, g_config.CENTRE_X - g_config.ARENA_R, g_config.ARENA_R*2, g_config.ARENA_R*2],...
@@ -289,23 +305,35 @@ function browse_trajectories(labels_fn, traj, varargin)
         end
         
         if size(pts, 2) == 3            
-            plot(pts(:,2), pts(:,3), '-', 'LineWidth', 1.1, 'Color', [0 0 0]);
-        elseif size(pts, 2) == 4
+            if vec
+                % simplify trajectory
+                sz = getpixelposition(gca);
+                for ii = 2:size(pts, 1)                    
+                    arrow(pts(ii - 1, 2:3), pts(ii, 2:3), 'LineWidth', 1.2, 'Length', min(sz(3), sz(4))*0.04);
+                end
+            else
+                plot(pts(:,2), pts(:,3), '-', 'LineWidth', 1.1, 'Color', [0 0 0]);
+            end
+        elseif size(pts, 2) == 4                        
             cm = jet;
             n = 20;
-            cm = cmapping(20, cm);
-            lb = min(pts(:, 4));
-            up = max(pts(:, 4));
-            fac = (up - lb)/(n - 1);
-            
-            for k = 2:size(pts, 1)
-                clr = cm(floor((pts(k, 4) - lb) / fac + 1), :);                
-                plot(pts(k - 1:k, 2), pts(k - 1:k, 3), '-', 'LineWidth', 2.5, 'Color', clr); 
+            cm = cmapping(n + 1, cm);
+            fac = 1/n;
+            np = size(pts, 1);
+                        
+            if vec
+                clr = cm(floor(pts(:, 4) ./ repmat(fac, np, 1)) + 1, :);
+                sz = getpixelposition(gca);
+                for ii = 2:size(pts, 1)
+                    arrow(pts(ii - 1, 2:3), pts(ii, 2:3), 'FaceColor', clr(ii, :), 'EdgeColor', clr(ii, :), 'LineWidth', 1.2, 'Length', min(sz(3), sz(4))*0.04);
+                end 
+            else
+                clr = floor(pts(:, 4) ./ repmat(fac, np, 1) + 1);
+                z = zeros(1,np);
+                surface( [pts(:,2)'; pts(:,2)'], [pts(:,3)'; pts(:,3)'], [z;z], [clr'; clr'], ...
+                     'facecol','no', 'edgecol', 'interp', 'linew', 2);            
+                colormap(cm);
             end
-            
-%             pos = get(gca, 'pos');
-%             pos = [pos(1) + pos(3)*.9, pos(2), pos(4)*.1, pos(4)];
-%             colorbar('eastoutside', 'position', pos);                        
         end
         
         if ~isempty(hl)
@@ -322,27 +350,59 @@ function browse_trajectories(labels_fn, traj, varargin)
                 traj_idx = filter(sorting(cur + i - 1));
                 
                 % plot views
-                for k = 1:3
+                for k = 1:3                                        
                     if k == 1                        
                         idx = get(main_view_combo, 'value');
+                        vec = get(main_view_dir_check, 'value');
                         set(f, 'currentaxes', axis_handles(i));                                                
                     else
                         if isempty(sec_view_handles)
                             break;
-                        end
-                        idx = get(sec_view_combos(k - 1), 'value'); % -1 because of the "none"                        
+                        end                        
+                        idx = get(sec_view_combos(k - 1), 'value'); % -1 because of the "none"
+                        vec = get(sec_view_dir_check(k - 1), 'value');
                         if idx == 1
                             continue; % "none"
                         end
-                        idx = idx - 1;
+                        idx = idx - 1;                        
                         set(f, 'currentaxes', sec_view_handles((i - 1)*2 + k - 1));                        
                     end
                     
                     hl = [];                    
-                    if idx <= length(g_config.DATA_REPRESENTATION)
-                        tmp = g_config.DATA_REPRESENTATION{idx};
-                        func = str2func(tmp{2});
-                        vals = func(traj.items(traj_idx));                                   
+                    if idx <= length(g_config.DATA_REPRESENTATION)                                              
+                        if vec
+                            tol = get(simplify_tol_handle, 'value')*0.01*g_config.ARENA_R;
+                        else
+                            tol = 0;
+                        end
+                        % if the tolerance changed re-scale everything
+                        if tol ~= simplify_level_prev
+                            data_repr_norm = zeros(1, length(data_repr_norm));
+                            simplify_level_prev = tol;
+                        end    
+                        
+                        vals = traj.items(traj_idx).data_representation(idx, 'SimplificationTolerance', tol);
+                        
+                        if size(vals, 2) >= 4
+                            % normalize values
+                            if data_repr_norm(idx) == 0
+                               val_min = []; 
+                               val_max = [];
+                               for ii = 1:length(traj.items)
+                                   tmp = traj.items(ii).data_representation(idx, 'SimplificationTolerance', tol);
+                                   if isempty(val_min)
+                                       val_min = min(tmp(:, 4));
+                                       val_max = max(tmp(:, 4));
+                                   else
+                                       val_min = min(val_min, min(tmp(:, 4)));
+                                       val_max = max(val_max, max(tmp(:, 4)));
+                                   end
+                               end
+                               data_repr_norm(idx) = 1/(val_max - val_min);
+                               data_repr_off(idx) = val_min;
+                            end
+                            vals(:, 4) = (vals(:, 4) - data_repr_off(idx))*data_repr_norm(idx);
+                        end                        
                     else
                         % look for parent trajectory
                         id = traj.items(traj_idx).identification;
@@ -357,7 +417,7 @@ function browse_trajectories(labels_fn, traj, varargin)
                         end
                     end
                     
-                    plot_trajectory(vals, hl);
+                    plot_trajectory(vals, hl, vec);
                 end
                                 
                 hold on;                
@@ -381,7 +441,7 @@ function browse_trajectories(labels_fn, traj, varargin)
                 set(desc_handles(i), 'String', str);
                 
                 % put segment identification in the title
-                str = sprintf('%d/%d/%d+%dcm', traj.items(traj_idx).set, traj.items(traj_idx).track, traj.items(traj_idx).trial, round(traj.items(traj_idx).offset));
+                str = sprintf('id: %d || %d/%d/%d+%dcm', traj.items(traj_idx).id, traj.items(traj_idx).set, traj.items(traj_idx).track, traj.items(traj_idx).trial, round(traj.items(traj_idx).offset));
                 if ~isempty(classif_res)
                     str = sprintf('  ||  %s cluster #%d', str, classif_res.cluster_idx(traj_idx));
                 end               
@@ -641,16 +701,18 @@ function browse_trajectories(labels_fn, traj, varargin)
     end
 
     function previous_callback(source, eventdata)
-        if cur >= 5
-            cur = cur - 4;
+        [nx, ny] = number_of_views();
+        if cur >= nx*ny + 1
+            cur = cur - nx*ny;
             show_trajectories;
         end        
     end
    
     function next_callback(source, eventdata)        
-        cur = cur + 4;
-        if cur > (length(filter) - 3)
-            cur = length(filter) - 3;                               
+        [nx, ny] = number_of_views();
+        cur = cur + nx*ny;
+        if cur > (length(filter) - nx*ny + 1)
+            cur = length(filter) - nx*ny + 1;                               
         end     
         show_trajectories;        
     end
@@ -696,7 +758,7 @@ function browse_trajectories(labels_fn, traj, varargin)
         else
             test_p = 0.;
         end
-        classif = traj.classifier(labels_fn, feat, g_config.TAG_TYPE_BEHAVIOUR_CLASS);
+        classif = traj.classifier(labels_fn, cluster_feat, g_config.TAG_TYPE_BEHAVIOUR_CLASS);
         classif_res = classif.cluster(nclusters, test_p);          
         if ~isempty(ref_set)
             diff_set = classif_res.difference(ref_set);
@@ -706,6 +768,12 @@ function browse_trajectories(labels_fn, traj, varargin)
         
         update_filter_combo;        
         set(gcf,'Pointer','arrow');                    
+        
+        results_window.set_results(classif_res);
+    end
+
+    function popout_results_callback(source, eventdata) 
+        results_window.show(get(hshow_results, 'value'));
     end
 end     
                  

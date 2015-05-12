@@ -5,14 +5,9 @@ function browse_set(set_num, set_comp, varargin)
 
     param = g_config.TAGS_CONFIG{set_num};    
     full_traj = [];
-    if param{2} > 0 && param{3} > 0
-        segments = g_trajectories.divide_into_segments(param{2}, param{3}, abs(param{4}));
-        if param{4} > 0            
-            full_traj = g_trajectories;
-        else
-            % take only the shorter trajectories
-            segments = trajectories(g_trajectories.items(segments.partitions == 0));
-        end
+    if param{3} > 0
+        segments = g_trajectories.partition(param{3}, param{4}, param{5:end});        
+        full_traj = g_trajectories;        
     else
         segments = g_trajectories;
     end
@@ -20,7 +15,9 @@ function browse_set(set_num, set_comp, varargin)
     if set_comp > 0
         % comparision set
         param_comp = g_config.TAGS_CONFIG{set_comp};
-        segments_comp = g_trajectories.divide_into_segments(param_comp{2}, param_comp{3}, param_comp{4});
+        if param_comp{3} > 0
+            segments_comp = g_trajectories.partition(param_comp{3}, param_comp{4}, param_comp{5:end});
+        end
         % get classifier object
         classif = segments_comp.classifier(param_comp{1}, g_config.DEFAULT_FEATURE_SET, g_config.TAG_TYPE_BEHAVIOUR_CLASS);        
         % classify'em

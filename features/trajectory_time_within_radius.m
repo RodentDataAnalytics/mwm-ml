@@ -1,20 +1,21 @@
-function prox = trajectory_platform_proximity( traj, rarea)
+function val = trajectory_time_within_radius( traj, r, varargin )
     global g_config;
-    prox = 0;
+    [repr, x0, y0] = process_options(varargin, 'DataRepresentation', 1, 'X0', g_config.CENTRE_X, 'Y0', g_config.CENTRE_Y);
+    pts = traj.data_representation(repr);
     ltot = 0;
     lins = 0;
-    for i = 2:size(traj.points, 1)
+    for i = 2:size(pts, 1)
        % direction vector of trajectory segment
-       d = traj.points(i, 2:3) - traj.points(i - 1, 2:3);
+       d = pts(i, 2:3) - pts(i - 1, 2:3);
        % vector from centre of platform to segment start
-       f = traj.points(i - 1, 2:3) - [g_config.PLATFORM_X, g_config.PLATFORM_Y];
+       f = pts(i - 1, 2:3) - [x0, y0];
        
        a = d*d';
        b = 2*(f*d');
-       c = f*f' - rarea^2;
+       c = f*f' - r^2;
        disc = b^2 - 4*a*c;
        
-       lseg = norm(traj.points(i, 2:3) - traj.points(i - 1, 2:3));
+       lseg = norm(pts(i, 2:3) - pts(i - 1, 2:3));
        ltot = ltot + lseg;
        if disc >= 0           
            % there is an intersection with the platform
@@ -34,13 +35,13 @@ function prox = trajectory_platform_proximity( traj, rarea)
            elseif t2 >= 0 && t2 <= 1
                % left the circle area
                lins = lins + t2*lseg;
-           elseif norm(traj.points(i - 1, 2:3) - [g_config.PLATFORM_X, g_config.PLATFORM_Y]) <= rarea ...
-               && norm(traj.points(i, 2:3) - [g_config.PLATFORM_X, g_config.PLATFORM_Y]) <= rarea
+           elseif norm(pts(i - 1, 2:3) - [x0, y0]) <= r ...
+               && norm(pts(i, 2:3) - [x0, y0]) <= r
                % segment fully contained in the circle
                lins = lins + lseg;
            end
-       end
-       
-       prox = lins / ltot;
-    end    
+       end              
+    end   
+    
+    val = lins / ltot;
 end

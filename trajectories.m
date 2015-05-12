@@ -70,7 +70,7 @@ classdef trajectories < handle
             out = obj.hash_;
         end
         
-        function [ segments, partition, cum_partitions ] = divide_into_segments(obj, lseg, ovlp, nmin)
+        function [ segments, partition, cum_partitions ] = partition(obj, idx, nmin, varargin)
         %   SEGMENT(LSEG, OVLP) breaks all trajectories into segments
         %   of length LEN and overlap OVL (given in %)   
         %   returns an array of trajectory segments
@@ -82,7 +82,7 @@ classdef trajectories < handle
             p = 1;
             off = 0;
             for i = 1:obj.count
-                newseg = obj.items(i).divide_into_segments(lseg, ovlp);
+                newseg = obj.items(i).partition(idx, varargin{:});
                 
                 if newseg.count >= nmin                    
                     segments = segments.append(newseg);
@@ -290,18 +290,24 @@ classdef trajectories < handle
         
         function res = classifier(inst, labels_fn, feat, tags_type, hyper_tags)
             global g_config;
-            if nargin > 3
-                [labels_data, tags] = trajectories.read_tags(labels_fn, tags_type);            
+            if exist(labels_fn, 'file')
+                if nargin > 3
+                    [labels_data, tags] = trajectories.read_tags(labels_fn, tags_type);            
+                else
+                    [labels_data, tags] = trajectories.read_tags(labels_fn);                            
+                end
+                
+                if nargin > 4 && ~isempty(hyper_tags)            
+                    [labels_map, labels_idx] = inst.match_tags(labels_data, tags, hyper_tags);
+                    tags = hyper_tags;
+                else
+                    [labels_map, labels_idx] = inst.match_tags(labels_data, tags);                
+                end                
             else
-                [labels_data, tags] = trajectories.read_tags(labels_fn);                            
+                labels_map = zeros(inst.count, 1);
+                tags = [];
+                labels_idx = [];
             end
-            
-            if nargin > 4 && ~isempty(hyper_tags)            
-                [labels_map, labels_idx] = inst.match_tags(labels_data, tags, hyper_tags);
-                tags = hyper_tags;
-            else
-                [labels_map, labels_idx] = inst.match_tags(labels_data, tags);                
-            end                
             
             % add the 'undefined' tag index
             undef_tag_idx = tag.tag_position(tags, g_config.UNDEFINED_TAG_ABBREVIATION);

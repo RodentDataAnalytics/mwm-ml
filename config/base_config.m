@@ -52,34 +52,40 @@ classdef base_config
         %%%
         DEFAULT_DATA_REPRESENTATION = { ...
             {'Coordinates', 'trajectory_points'}, ...
-            {'Speed', 'trajectory_speed'}, ...
-            {'Acceleration', 'trajectory_acceleration'}           
+            {'Speed', 'trajectory_speed'}, ...                        
         }; 
         DEFAULT_TAGS = [ tag('UD', 'undefined', base_config.TAG_TYPE_BEHAVIOUR_CLASS) ];           
         
         DATA_REPRESENTATION_COORD = 1;
-        DATA_REPRESENTATION_SPEED = 2;
-        DATA_REPRESENTATION_ACCEL = 3;
-        
+        DATA_REPRESENTATION_SPEED = 2;        
         % let this always point out to the last index above
-        DATA_REPRESENTATION_LAST = 3;
+        DATA_REPRESENTATION_LAST = 2;               
         
-        
+        %%%
+        %%% Segmentation
+        %%%
+        SEGMENTATION_CONSTANT_LENGTH = 1;
+        DEFAULT_SEGMENTATIONS = { ...
+            {'Constant lenght', 'trajectory_segmentation_constant'} ...
+        };
+        SEGMENTATION_LAST = 1;
     end
     
     properties(GetAccess = 'public', SetAccess = 'protected')
         DESCRIPTION = '';  
         TAGS = [];
         DATA_REPRESENTATION = [];
-        FEATURES = [];
+        FEATURES = [];  
+        SEGMENTATIONS = [];
     end
     
     methods
-        function inst = base_config(desc, extr_tags, extr_data_repr, extr_features)
+        function inst = base_config(desc, extr_tags, extr_data_repr, extr_features, extr_seg)
             inst.DESCRIPTION = desc;          
             inst.TAGS = [base_config.DEFAULT_TAGS, extr_tags];
             inst.DATA_REPRESENTATION = [base_config.DEFAULT_DATA_REPRESENTATION, extr_data_repr];
             inst.FEATURES = [base_config.DEFAULT_FEATURES, extr_features];
+            inst.SEGMENTATIONS = [base_config.DEFAULT_SEGMENTATIONS, extr_seg];
         end
         
         function val = hash(inst)
