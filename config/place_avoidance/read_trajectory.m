@@ -1,4 +1,4 @@
-function [ id, trial, pts ] = read_trajectory( fn )
+function pts = read_trajectory( fn, id_day_mask )
 %READ_TRAJECTORY Reads a trajectory from a file (native Ethovision format
 %supported)
     if ~exist(fn, 'file')
@@ -33,13 +33,7 @@ function [ id, trial, pts ] = read_trajectory( fn )
            end
        end
     end
-    
-    fprintf('\nPoints: %d', size(pts, 1));
-    pos = strfind(fn, 'rat');
-    temp = sscanf(fn(pos(end):end), 'rat%dd%d');
-    id = temp(1);
-    trial = temp(2);
-    
+        
     if err
         exit('invalid file format');
     end

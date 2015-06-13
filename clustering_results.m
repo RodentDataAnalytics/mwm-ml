@@ -6,8 +6,8 @@ classdef clustering_results < handle
         nclasses = 0;
         classes = []; % this is actually optional
         nconstraints = 0;
-        class_map = [];
-        cluster_idx = [];
+        class_map = []; 
+        cluster_index = [];
         nclusters = 0;
         cluster_class_map = [];
         centroids = [];
@@ -27,6 +27,8 @@ classdef clustering_results < handle
     properties(GetAccess = 'protected', SetAccess = 'protected')        
         cover_ = [];
         cover_flag_ = [];
+        cluster_idx_all_ = [];
+        hash_ = -1;
     end
     
     methods        
@@ -39,7 +41,8 @@ classdef clustering_results < handle
             inst.nexternal_labels = next;            
             inst.nconstraints = cstr;            
             inst.class_map = cm;
-            inst.cluster_idx = ci;
+            inst.cluster_idx_all_ = ci;
+            inst.cluster_index = ci(next + 1:end);
             inst.cluster_class_map = ccm;
             inst.nclusters = length(inst.cluster_class_map);            
             inst.centroids = ce;
@@ -47,7 +50,7 @@ classdef clustering_results < handle
             if nargin > 10
                 inst.classes = cl;
             end
-            
+                        
             % look for non-empty labels
             for i = 1:length(inst.input_labels)
                 tmp = inst.input_labels{i};
@@ -91,18 +94,41 @@ classdef clustering_results < handle
             if n > 0
                 inst.perrors = inst.nerrors / n;            
             end
+            
+            if inst.nlabels == 0 && inst.nclasses == 0
+                % create 1 class for each cluster
+                for ic = 1:inst.nclusters
+                    inst.classes = [inst.classes, tag(sprintf('C%d', ic), sprintf('Class %d', ic), 0)];
+                end
+                inst.nclasses = inst.nclusters;
+                inst.cluster_class_map = 1:inst.nclusters;
+                inst.class_map = inst.cluster_idx_all_;
+            end            
         end
-                        
+        
+        function val = hash_value(inst)
+            if inst.hash_ == -1
+                inst.hash_ = inst.segments.hash_value;                
+                inst.hash_ = hash_combine(inst.hash_, hash_value(inst.nclasses));
+                inst.hash_ = hash_combine(inst.hash_, hash_value(inst.input_labels));
+                inst.hash_ = hash_combine(inst.hash_, hash_value(inst.training_set)); 
+                inst.hash_ = hash_combine(inst.hash_, hash_value(inst.test_set));
+                inst.hash_ = hash_combine(inst.hash_, hash_value(inst.nexternal_labels));
+                inst.hash_ = hash_combine(inst.hash_, hash_value(inst.cluster_idx_all_));
+            end
+            val = inst.hash_;
+        end
+                                                
         function res = entropy(inst)
             % TODO: have to fix the clustering function to deal with
             % multiple labels per element
-            res = clustering_entropy(inst.nclusters, inst.cluster_idx(inst.non_empty_labels_idx), inst.nclasses, inst.input_labels(inst.non_empty_labels_idx));
+            res = clustering_entropy(inst.nclusters, inst.cluster_idx_all_(inst.non_empty_labels_idx), inst.nclasses, inst.input_labels(inst.non_empty_labels_idx));
         end
         
         function res = purity(inst)
             % TODO: have to fix the clustering function to deal with
             % multiple labels per element
-            res = clustering_purity(inst.nclusters, inst.cluster_idx(inst.non_empty_labels_idx), inst.input_labels(inst.non_empty_labels_idx));
+            res = clustering_purity(inst.nclusters, inst.cluster_idx_all_(inst.non_empty_labels_idx), inst.input_labels(inst.non_empty_labels_idx));
         end
         
         function res = confusion_matrix(inst)
@@ -112,42 +138,61 @@ classdef clustering_results < handle
         function compress(inst)
             inst.segments = [];
         end        
-        
+                                        
         % Allows to perform a non-standard mapping from clusters to classes
         % (e.g. for testing purposes). See global function custer_to_class
         % for possible parameters
-        function res = remap_clusters(inst, varargin)
-            % new cluster to class mappping
-            map = cluster_to_class( ...
-                arrayfun( @(ci) sum(inst.cluster_idx == ci), ...
-                1:inst.nclusters), ...
-                inst.input_labels(inst.non_empty_labels_idx(inst.training_set == 1)), ...
-                inst.cluster_idx(inst.non_empty_labels_idx(inst.training_set == 1)), ...
-                varargin{:} ... % non-default parameters are forwarded here
-            );
+        function res = remap_clusters(inst, varargin)            
+            [one2one] = process_options(varargin, ...
+                'One2One', 0);
+            if one2one
+                res = clustering_results( ...
+                    inst.segments, ...
+                    inst.nclasses, ...
+                    inst.input_labels, ...                
+                    inst.training_set, ...
+                    inst.test_set, ...
+                    inst.nexternal_labels, ...            
+                    inst.nconstraints, ...
+                    inst.cluster_idx_all_, ...  % map classes to clusters directly
+                    inst.cluster_idx_all_, ...
+                    1:inst.nclusters, ...  % map classes to clusters directly
+                    inst.nclusters, ...
+                    inst.centroids );       
+            else
+                % new cluster to class mappping
+                map = cluster_to_class( ...
+                    arrayfun( @(ci) sum(inst.cluster_idx_all_ == ci), ...
+                    1:inst.nclusters), ...
+                    inst.input_labels(inst.non_empty_labels_idx(inst.training_set == 1)), ...
+                    inst.cluster_idx_all_(inst.non_empty_labels_idx(inst.training_set == 1)), ...
+                    varargin{:} ... % non-default parameters are forwarded here
+                );
 
-            % remap elements
-            idx = zeros(1, length(inst.cluster_idx));
-            for i = 1:inst.nclusters
-                sel = find(inst.cluster_idx == i);        
-                if ~isempty(sel)
-                    idx(sel) = map(i);
+                % remap elements
+                idx = zeros(1, length(inst.cluster_idx_all_));
+                for i = 1:inst.nclusters
+                    sel = find(inst.cluster_idx_all_ == i);        
+                    if ~isempty(sel)
+                        idx(sel) = map(i);
+                    end
                 end
+
+                res = clustering_results( ...
+                    inst.segments, ...
+                    inst.nclasses, ...
+                    inst.input_labels, ...                
+                    inst.training_set, ...
+                    inst.test_set, ...
+                    inst.nexternal_labels, ...            
+                    inst.nconstraints, ...
+                    idx, ...
+                    inst.cluster_idx_all_, ...
+                    map, ...
+                    inst.nclusters, ...
+                    inst.centroids, ...
+                    inst.classes );       
             end
-                          
-            res = clustering_results( ...
-                inst.segments, ...
-                inst.nclasses, ...
-                inst.input_labels, ...                
-                inst.training_set, ...
-                inst.test_set, ...
-                inst.nexternal_labels, ...            
-                inst.nconstraints, ...
-                idx, ...
-                inst.cluster_idx, ...
-                map, ...
-                inst.nclusters, ...
-                inst.centroids);       
         end
         
         % This combines individual segment tags returned from the function
@@ -539,7 +584,7 @@ classdef clustering_results < handle
                 xf = inst.segments.items(i).offset + inst.segments.items(i).compute_feature(g_config.FEATURE_LENGTH);
                 for j = (i + 1):inst.segments.count
                     if ~isequal(id, inst.segments.items(j).data_identification) || inst.segments.items(j).offset > xf
-                        wf = iseg - 1 + j - i - 1;
+                        wf = iseg + j - i - 1;
                         break;
                     end
                 end                    
@@ -707,6 +752,40 @@ classdef clustering_results < handle
                 0, ...
                 inst.classes);       
              
+        end
+        
+        function tpm = transition_counts(inst, varargin)           
+            [grp] = process_options(varargin, 'Group', 0);
+            strat_distr = inst.mapping_ordered(-1, 'DiscardUnknown', 1, varargin{:});
+            tpm = zeros(inst.nclasses, inst.nclasses);
+            traj_idx = -1;            
+            prev_class = -1;        
+            seg_idx = inst.segments.segmented_mapping;
+            par_map = inst.segments.parent_mapping;
+            for i = 1:inst.segments.count                
+                if grp > 0 && inst.segments.items(i).group ~= grp
+                    continue;
+                end
+                
+                if par_map(i) ~= traj_idx                
+                    traj_idx = par_map(i);                    
+                    prev_class = strat_distr(seg_idx(traj_idx), inst.segments.items(i).segment);                    
+                end       
+                class = strat_distr(seg_idx(traj_idx), inst.segments.items(i).segment);
+                                
+                if prev_class ~= class
+                    % we have a transition
+                    if class > 0 && prev_class > 0                                                
+                        tpm(prev_class, class) = tpm(prev_class, class) + 1;                         
+                    end
+                    prev_class = class;
+                end                                
+            end
+        end
+        
+        function tpm = transition_probabilities(inst, varargin)           
+            tpm = inst.transition_counts(varargin{:});
+            tpm = tpm ./ repmat(sum(tpm, 2), 1, size(tpm, 1));
         end
     end    
 end

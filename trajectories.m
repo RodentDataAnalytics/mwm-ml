@@ -10,12 +10,16 @@ classdef trajectories < handle
     
     properties(GetAccess = 'public', SetAccess = 'protected')
         items = [];        
+        parent = []; % parent set of trajectories (if these are the segments)
     end
     
     properties(GetAccess = 'protected', SetAccess = 'protected')
         hash_ = -1;
         trajhash_ = [];
-        partitions_ = [];
+        partitions_ = [];       
+        parent_mapping_ = [];
+        segmented_idx_ = [];
+        segmented_map_ = [];
     end
     
     methods
@@ -99,6 +103,7 @@ classdef trajectories < handle
                 end
             end
             segments.partitions_ = partition;
+            segments.parent = obj;
             
             fprintf(': %d segments created.\n', segments.count);
         end
@@ -123,11 +128,41 @@ classdef trajectories < handle
             out = inst.partitions_;
         end
         
+        function out = parent_mapping(inst)
+            if inst.count > 0 && ~isempty(inst.partitions) && isempty(inst.parent_mapping_)
+                inst.parent_mapping_ = zeros(1, inst.count);
+                idx = 0;
+                tmp = inst.partitions();
+                for i = 1:length(tmp)
+                    for j = 1:tmp(i);
+                        idx = idx + 1;                        
+                        inst.parent_mapping_(idx) = i;
+                    end
+                end                                                
+            end
+            out = inst.parent_mapping_;
+        end
+        
+        function out = segmented_index(inst)
+            if inst.count > 0 && ~isempty(inst.partitions) && isempty(inst.segmented_idx_)
+                inst.segmented_idx_ = find(inst.partitions > 0);                
+            end
+            out = inst.segmented_idx_;
+        end
+        
+        function out = segmented_mapping(inst)
+            if inst.count > 0 && ~isempty(inst.partitions) && isempty(inst.segmented_map_)                
+                inst.segmented_map_ = zeros(1, length(inst.partitions));
+                inst.segmented_map_(inst.partitions > 0) = 1:sum(inst.partitions > 0);
+            end
+            out = inst.segmented_map_;
+        end
+        
         function out = remove_outliers(obj, feat, k, n)
             global g_feature_values_cache;            
             global g_outliers_cache;
             
-            % check if we already have the values cached
+            % check if we already have the values cached            
             key = hash_combine(obj.hash_value, hash_value(feat));
             key = hash_combine(key, k);
             key = hash_combine(key, n);
@@ -164,49 +199,54 @@ classdef trajectories < handle
             out = g_outliers_cache(key);            
         end
         
-        function V = compute_features(obj, feat)
+        function featval = compute_features(obj, feat)
             %COMPUTE_FEATURES Computes feature values for each trajectory/segment. Returns a vector of
             %   features.
             
             % cache feature values            
             global g_feature_values_cache;
-                        
-            % check if we already have the values cached
-            key = hash_combine(obj.hash_value, hash_value(feat));
+            global g_config;
             
-            if isempty(g_feature_values_cache) || ~g_feature_values_cache.isKey(key)                                        
-            	% compute it we shall
-                fprintf('Computing feature set for %d trajectories/segments...', obj.count);
-                featval = zeros(obj.count, length(feat));
-                
-                q = floor(obj.count / 1000);
-                fprintf('0.0% '); 
-                
-                for i = 1:obj.count
-                    % compute and append feature values for each segment
-                    featval(i, :) = obj.items(i).compute_features(feat);
-
-                    if mod(i, q) == 0
-                        val = 100.*i/obj.count;
-                        if val < 10.
-                            fprintf('\b\b\b\b\b%02.1f%% ', val);
-                        else
-                            fprintf('\b\b\b\b\b%04.1f%%', val);
-                        end    
-                    end                       
-                end
-                
-                fprintf('\b\b\b\b\bDone.\n');
+            featval = zeros(obj.count, length(feat));            
+            for idx = 1:length(feat)
+                att = g_config.FEATURES{feat(idx)};
+                % check if we already have the values for this feature cached
+                key = hash_combine(obj.hash_value, hash_value(att{2}));
+            
                 if isempty(g_feature_values_cache)
-                    g_feature_values_cache = containers.Map('KeyType','uint32', 'ValueType','any');
+                    trajectories.load_cache;
                 end
-                g_feature_values_cache(key) = featval;
-                trajectories.save_cache;
-            end    
+                    
+                if isempty(g_feature_values_cache) || ~g_feature_values_cache.isKey(key)                                                    
+                    % compute it we shall
+                    fprintf('\nComputing ''%s'' feature values for %d trajectories/segments...', att{2}, obj.count);
+                    
+                    q = floor(obj.count / 1000);
+                    fprintf('0.0% '); 
                 
-            % return it
-            V = g_feature_values_cache(key);                            
-            assert( size(V, 1) == obj.count );
+                    for i = 1:obj.count
+                        % compute and append feature values for each segment
+                        featval(i, idx) = obj.items(i).compute_feature(feat(idx));
+
+                        if mod(i, q) == 0
+                            val = 100.*i/obj.count;
+                            if val < 10.
+                                fprintf('\b\b\b\b\b%02.1f%% ', val);
+                            else
+                                fprintf('\b\b\b\b\b%04.1f%%', val);
+                            end    
+                        end                       
+                    end
+                    fprintf('\b\b\b\b\bDone.\n');
+                    if isempty(g_feature_values_cache)
+                        g_feature_values_cache = containers.Map('KeyType','uint32', 'ValueType','any');
+                    end
+                    g_feature_values_cache(key) = featval(:, idx);
+                    trajectories.save_cache;
+                else
+                    featval(:, idx) = g_feature_values_cache(key);
+                end                                                
+            end                                            
         end
 
         function save_tags(obj, fn, tags, map, filter)

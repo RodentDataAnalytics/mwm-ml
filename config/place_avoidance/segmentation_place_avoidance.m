@@ -1,4 +1,4 @@
-function segments = segmentation_place_avoidance(traj, section)
+function segments = segmentation_place_avoidance(traj, section, dt_min)
     segments = trajectories([]);
     switch section
         case config_place_avoidance.SECTION_T1
@@ -33,6 +33,9 @@ function segments = segmentation_place_avoidance(traj, section)
                     beg = k;
                 end                         
             end
+            if s == 0 && k > beg
+                sub_seg = [sub_seg; beg, k - 1];
+            end
 
             if section == config_place_avoidance.SECTION_TMAX
                 % select only the longest sub segment
@@ -52,7 +55,7 @@ function segments = segmentation_place_avoidance(traj, section)
                 % add all sub-segments
                 idx = 0;
                 for k = 1:size(sub_seg, 1)                        
-                    if sub_seg(k, 2) - sub_seg(k, 1) > 10
+                    if traj.points(sub_seg(k, 2), 1) - traj.points(sub_seg(k, 1), 1) >= dt_min
                         idx = idx + 1;
                         segments = segments.append( ...
                             trajectory(traj.points(sub_seg(k, 1):sub_seg(k, 2), :), traj.set, traj.track, traj.group, traj.id, traj.trial, idx, cum_dist(sub_seg(k, 1)), sub_seg(k, 1)) ...

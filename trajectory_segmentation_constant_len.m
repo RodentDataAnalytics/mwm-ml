@@ -1,4 +1,4 @@
-function segments = trajectory_segmentation_constant( traj, lseg, ovlp)
+function segments = trajectory_segmentation_constant_len( traj, lseg, ovlp)
     %SEGMENT_TRAJECTORY Splits the trajectory in segments of length
     % lseg with an overlap of ovlp %
     % Returns an array of instances of the same trajectory class (now repesenting segments)        

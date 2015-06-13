@@ -12,7 +12,7 @@ function pts = trajectory_arena_coord( traj, varargin )
         xx = x*cos(-dt*g_config.ROTATION_FREQUENCY) - y*sin(-dt*g_config.ROTATION_FREQUENCY);
         yy = x*sin(-dt*g_config.ROTATION_FREQUENCY) + y*cos(-dt*g_config.ROTATION_FREQUENCY);
         
-        pts = [pts; traj.points(i, 1), xx + g_config.CENTRE_X, yy + g_config.CENTRE_Y];
+        pts = [pts; traj.points(i, 1), xx + g_config.CENTRE_X, yy + g_config.CENTRE_Y, traj.points(i, 4:end)];
     end
  
     pts = trajectory_simplify_impl(pts, tol);    

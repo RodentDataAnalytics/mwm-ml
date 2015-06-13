@@ -307,7 +307,7 @@ classdef semisupervised_clustering < handle
                 end
             end
 
-            % see if we want the intermediate 1st stage results
+            % see if we want the intermediate 1st stage results            
             if nargout > 1
                 class_idx = zeros(1, length(cluster_idx));
                 for i = 1:icluster
@@ -317,7 +317,13 @@ classdef semisupervised_clustering < handle
                     end
                 end
 
-                res1st = clustering_results(inst.segments, length(inst.classes), inst.labels, training_set, test_set, inst.nexternal_labels, nconstr, class_idx, cluster_idx, cluster_map, centroids, inst.classes);             
+                res1st = clustering_results( inst.segments ...
+                                           , length(inst.classes) ...
+                                           , inst.labels(inst.nexternal_labels + 1:end) ...
+                                           , training_set, test_set ...
+                                           , inst.nexternal_labels ...
+                                           , nconstr, class_idx ...
+                                           , cluster_idx, cluster_map, centroids, inst.classes);             
             end
                         
             cluster_idx = new_cluster_idx;
@@ -333,7 +339,7 @@ classdef semisupervised_clustering < handle
             end
                                     
             % create return object
-            res = clustering_results(inst.segments, length(inst.classes), inst.labels, training_set, test_set, inst.nexternal_labels, [nconstr, nconstr2], class_idx, cluster_idx, cluster_map, centroids, inst.classes);             
+            res = clustering_results(inst.segments, length(inst.classes), inst.labels(inst.nexternal_labels + 1:end), training_set, test_set, inst.nexternal_labels, [nconstr, nconstr2], class_idx, cluster_idx, cluster_map, centroids, inst.classes);             
         end    
     end
 end

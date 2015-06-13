@@ -13,7 +13,8 @@ addpath(fullfile(fileparts(mfilename('fullpath')),'/data_representation'));
 addpath(fullfile(fileparts(mfilename('fullpath')),'/config'));
 global g_config;
 %% Change for desired configuration
-g_config = config_place_avoidance; 
+% g_config = config_place_avoidance(config_place_avoidance.DATA_SET_LARGE); 
+g_config = config_place_avoidance(config_place_avoidance.DATA_SET_SILVER); 
 % g_config = config_mwm; 
 % g_config = config_mwm_nencki;
 % g_config = config_mwm_nencki_short;

@@ -1,6 +1,6 @@
 function max_loop = trajectory_longest_loop( traj, ext )
     global g_config;
-    pts = trajectory_simplify(traj.points, 4);
+    pts = traj.simplify(0.04*g_config.ARENA_R);
     d = zeros(size(pts, 1) - 1, 2);
     % compute direction vectors for each pair of points
     for i = 2:size(pts, 1)

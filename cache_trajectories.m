@@ -26,11 +26,10 @@ function cache_trajectories
             save(fn, 'g_trajectories');
         end
         
-        % select only groups 1 and 2
-        g_trajectories_group = arrayfun( @(t) t.group, g_trajectories.items);                 
-        g_trajectories = trajectories(g_trajectories.items(g_trajectories_group == 1 | g_trajectories_group == 2));    
-                
-        % select stress-control group
+        % select only groups inside the range set in the config
+        g_trajectories_group = arrayfun( @(t) t.group, g_trajectories.items);                         
+        g_trajectories = trajectories(g_trajectories.items(g_trajectories_group >= 1 & g_trajectories_group <= g_config.GROUPS));    
+                        
         g_trajectories_group = arrayfun( @(t) t.group, g_trajectories.items);          
         g_trajectories_session = arrayfun( @(t) t.session, g_trajectories.items);
         g_trajectories_trial = arrayfun( @(t) t.trial, g_trajectories.items);

@@ -54,6 +54,16 @@ classdef trajectory < handle
             ident = [traj.group, traj.id, traj.trial, traj.segment];
         end
         
+        function set_trial(inst, new_trial)
+            inst.trial = new_trial;
+            inst.hash_ = -1;
+        end
+        
+        function set_track(inst, new_track)
+            inst.track = new_track;
+            inst.hash_ = -1;
+        end
+        
         function cache_feature_value(inst, feat, val)
             if isempty(inst.feat_val_)
                 inst.feat_val_ = containers.Map('KeyType', 'uint32', 'ValueType', 'any');
@@ -203,8 +213,8 @@ classdef trajectory < handle
             assert(idx <= length(g_config.DATA_REPRESENTATION));
             % dispatch the call to the function registered globally
             att = g_config.DATA_REPRESENTATION{idx};
-            f = str2func(att{2});
-            pts = f(inst, att{3:end}, varargin{:});
+            f = str2func(att{3});
+            pts = f(inst, att{4:end}, varargin{:});
         end
         
         function segs = partition(inst, idx, varargin)

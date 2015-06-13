@@ -24,13 +24,13 @@ function [ x, y, a, b, inc ] = trajectory_boundaries( traj, varargin )
         % see we have cached values
         if traj.has_feature_value(g_config.FEATURE_BOUNDARY_CENTRE_X)
             x = traj.compute_feature(g_config.FEATURE_BOUNDARY_CENTRE_X);
-            y = traj.compute_feature(g_config.FEATURE_BOUNDARY_CENTRE_X);
+            y = traj.compute_feature(g_config.FEATURE_BOUNDARY_CENTRE_Y);
             a = traj.compute_feature(g_config.FEATURE_BOUNDARY_RADIUS_MIN);
             b = traj.compute_feature(g_config.FEATURE_BOUNDARY_RADIUS_MAX);
             inc = traj.compute_feature(g_config.FEATURE_BOUNDARY_INCLINATION);
         else
             if size(traj.points, 1) > 3
-                [A, cntr] = min_enclosing_ellipsoid(traj.points(:, 2:3)', 1e-2);
+                [A, cntr] = min_enclosing_ellipsoid(traj.points(:, 2:3)', 1e-1);
                 x = cntr(1);
                 y = cntr(2);
                 if (sum(isinf(A)) + sum(isnan(A))) == 0

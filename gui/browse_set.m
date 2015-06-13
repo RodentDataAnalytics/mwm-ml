@@ -4,10 +4,8 @@ function browse_set(set_num, set_comp, varargin)
     cache_trajectories;
 
     param = g_config.TAGS_CONFIG{set_num};    
-    full_traj = [];
     if param{3} > 0
         segments = g_trajectories.partition(param{3}, param{4}, param{5:end});        
-        full_traj = g_trajectories;        
     else
         segments = g_trajectories;
     end
@@ -24,5 +22,5 @@ function browse_set(set_num, set_comp, varargin)
         ref_res = classif.cluster(param_comp{4}, 0);            
     end
     
-    browse_trajectories(param{1}, segments, 'ReferenceClassification', ref_res, 'FullTrajectories', full_traj, varargin{:});    
+    browse_trajectories(param{1}, segments, 'ReferenceClassification', ref_res, varargin{:});    
 end    
