@@ -13,6 +13,7 @@ classdef config_mwm < base_config
         TRIAL_TYPE = ones(1, config_mwm.TRIALS);
         TRIAL_TIMEOUT = 90; % seconds
         GROUPS = 2;
+        GROUPS_DESCRIPTION = {'Control', 'Stress', 'Control/Food', 'Stress/Food'};
         
         % centre point of arena in cm        
         CENTRE_X = 0;

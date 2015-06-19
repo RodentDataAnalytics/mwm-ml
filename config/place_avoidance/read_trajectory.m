@@ -9,7 +9,14 @@ function pts = read_trajectory( fn, id_day_mask )
     data = robustcsvread(fn);
     err = 0;
     pts = [];
-      
+     
+    % HACK because of some Matlab stupidity
+    for i = 1:length(data)        
+        if isempty(data{i, 1})
+            data{i, 1} = '';
+        end
+    end
+    
     %%
     %% parse the file
     %%
@@ -28,7 +35,9 @@ function pts = read_trajectory( fn, id_day_mask )
                stat = sscanf(data{i, 6}, '%f'); % point status
                % discard missing smaples
                if ~isempty(t) && ~isempty(x) && ~isempty(y) && ~isempty(stat) && stat ~= config_place_avoidance.POINT_STATE_BAD
-                   pts = [pts; t/1000. x y stat];
+                   if ~(x == 0 && y == 0) 
+                       pts = [pts; t/1000. x y stat];
+                   end
                end
            end
        end

@@ -9,6 +9,7 @@ classdef trajectory < handle
         group = -1;
         id = -1;
         trial = -1;
+        trial_type = -1;
         segment = -1;
         offset = -1;        
         session = -1;
@@ -25,7 +26,7 @@ classdef trajectory < handle
     
     methods
         % constructor
-        function traj = trajectory(pts, set, track, group, id, trial, segment, off, starti)   
+        function traj = trajectory(pts, set, track, group, id, trial, segment, off, starti, trial_type)
             global g_config;
             traj.points = pts;                       
             traj.set = set;
@@ -47,6 +48,11 @@ classdef trajectory < handle
             end
             traj.start_time = pts(1, 1);
             traj.end_time = pts(end, 1);
+            if nargin > 9
+                traj.trial_type = trial_type;
+            else
+                traj.trial_type = g_config.TRIAL_TYPE(trial);
+            end
         end
         
         % returns the full trajectory (or segment identification)
@@ -54,9 +60,15 @@ classdef trajectory < handle
             ident = [traj.group, traj.id, traj.trial, traj.segment];
         end
         
-        function set_trial(inst, new_trial)
+        function set_trial(inst, new_trial, trial_type)
+            global g_config;
             inst.trial = new_trial;
             inst.hash_ = -1;
+            if nargin > 2
+                inst.trial_type = trial_type;          
+            else
+                inst.trial_type = g_config.TRIAL_TYPE(inst.trial);
+            end
         end
         
         function set_track(inst, new_track)

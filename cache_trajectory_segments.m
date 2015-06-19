@@ -20,7 +20,8 @@ function cache_trajectory_segments
         % first settings (not-being the "Full set"
         param = g_config.TAGS_CONFIG{2};
         
-        [g_segments, g_partitions] = g_trajectories.divide_into_segments(param{2}, param{3}, param{4});
+        [g_segments, g_partitions] = g_trajectories.partition(param{3}, param{4}, param{5:end});
+    
         g_long_trajectories_idx = find(g_partitions ~= 0);
         g_long_trajectories_map = 1:length(g_partitions);
         g_long_trajectories_map(g_partitions == 0) = 0;

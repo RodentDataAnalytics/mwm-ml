@@ -455,7 +455,7 @@ classdef trajectories < handle
                     end
                     % all right now try to match the offset
                     if abs(inst.items(i).offset - seg_dist - other_seg.items(idx).offset) < tolerance && ...
-                       abs(inst.items(i).compute_feature(features.LENGTH) - other_seg.items(idx).compute_feature(features.LENGTH)) < len_tolerance
+                       abs(inst.items(i).compute_feature(base_config.FEATURE_LENGTH) - other_seg.items(idx).compute_feature(base_config.FEATURE_LENGTH)) < len_tolerance
                         % we have a match!
                         mapping(i) = idx;
                         idx = idx + 1;                  

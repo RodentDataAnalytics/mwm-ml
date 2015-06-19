@@ -6,12 +6,17 @@ function ang = trajectory_mean_angle( traj, varargin )
 
     d = [pts(:, 2) - x0, pts(:, 3) - y0];
     % normalize it
-    d = d ./ repmat(sqrt( d(:,1).^2 + d(:,2).^2), 1, 2);
+    norm_d = sqrt( d(:,1).^2 + d(:,2).^2);
+    norm_d(norm_d == 0) =1e-5;
+    
+    d = d ./ repmat(norm_d, 1, 2);
         
     u = [dx, dy];
     v = [sum(d(:, 1)), sum(d(:, 2))];
-    
+        
     ang = abs(acos(dot(u, v)/(norm(u)*norm(v))));  
+    
+    assert(~isnan(ang));
     if ang > pi
         ang = 2*pi - ang;
     end    

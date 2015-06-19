@@ -783,6 +783,30 @@ classdef clustering_results < handle
             end
         end
         
+        function tpm = transition_counts_trial(inst, varargin)                       
+            strat_distr = inst.mapping_ordered(-1, 'DiscardUnknown', 1, varargin{:});
+            tpm = zeros(1, inst.segments.parent.count);
+            traj_idx = -1;            
+            prev_class = -1;        
+            seg_idx = inst.segments.segmented_mapping;
+            par_map = inst.segments.parent_mapping;
+            for i = 1:inst.segments.count                                
+                if par_map(i) ~= traj_idx                
+                    traj_idx = par_map(i);                    
+                    prev_class = strat_distr(seg_idx(traj_idx), inst.segments.items(i).segment);                    
+                end       
+                class = strat_distr(seg_idx(traj_idx), inst.segments.items(i).segment);
+                                
+                if prev_class ~= class
+                    % we have a transition
+                    if class > 0 && prev_class > 0                                                
+                        tpm(traj_idx) = tpm(traj_idx) + 1;                        
+                    end
+                    prev_class = class;
+                end                                
+            end
+        end
+        
         function tpm = transition_probabilities(inst, varargin)           
             tpm = inst.transition_counts(varargin{:});
             tpm = tpm ./ repmat(sum(tpm, 2), 1, size(tpm, 1));

@@ -6,6 +6,7 @@ classdef classification_results < handle
         % selected groups and trials
         groups = [];
         trials = [];
+        trial_type = [];
         % selected cluster
         cluster = 0;                
         groups_colors = [];
@@ -161,9 +162,10 @@ classdef classification_results < handle
                 sig = 1;
             end
             inst.trials(first_trial:sig:last_trial) = 1;
-            if trial_type > 1
-                inst.trials = inst.trials & (g_config.TRIAL_TYPE == trial_type - 1);
-            end                
+            inst.trial_type = trial_type - 1;
+%             if trial_type > 1
+%                 inst.trials = inst.trials & (g_config.TRIAL_TYPE == trial_type - 1);
+%             end                
             
             inst.cluster = get(inst.cluster_combo, 'value') - 1;            
             

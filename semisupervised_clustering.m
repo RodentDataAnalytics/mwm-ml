@@ -339,7 +339,7 @@ classdef semisupervised_clustering < handle
             end
                                     
             % create return object
-            res = clustering_results(inst.segments, length(inst.classes), inst.labels(inst.nexternal_labels + 1:end), training_set, test_set, inst.nexternal_labels, [nconstr, nconstr2], class_idx, cluster_idx, cluster_map, centroids, inst.classes);             
+            res = clustering_results(inst.segments, length(inst.classes), inst.labels, training_set, test_set, inst.nexternal_labels, [nconstr, nconstr2], class_idx, cluster_idx, cluster_map, centroids, inst.classes);             
         end    
     end
 end

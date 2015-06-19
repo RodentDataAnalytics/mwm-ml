@@ -5,7 +5,9 @@ function traj = load_trajectories(path, traj_group, varargin)
     % 1 == room coordinate system only, 
     % 2 == arena coordinate system only
     % 3 == whatever, I don't care      
-    [filt_pat, id_day_mask, rev_day] = process_options(varargin, 'FilterPattern', '*Room*.dat', 'IdDayMask', 'r%dd%d', 'ReverseDayId', 0);
+    [filt_pat, id_day_mask, rev_day] = process_options(varargin, 'FilterPattern', '*Room*.dat', ...
+                                                                 'IdDayMask', 'r%dd%d', ...
+                                                                 'ReverseDayId', 0);
         
     % contruct object to hold trajectories
     traj = trajectories([]);
@@ -50,8 +52,8 @@ function traj = load_trajectories(path, traj_group, varargin)
             assert(~isempty(pos));
             group = traj_group(pos(1),2);
         end
-
-        traj = traj.append(trajectory(pts, 1, track, group, id, trial, -1, -1, 1));                      
+        
+        traj = traj.append(trajectory(pts, 1, track, group, id, trial, -1, -1, 1));  
         track = track + 1;
     end                                              
     

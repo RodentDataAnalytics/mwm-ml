@@ -97,6 +97,7 @@ classdef results_single_features < handle
             feat_val = traj.compute_features(inst.parent.feat);                
             groups = arrayfun( @(t) t.group, traj.items);       
             trials = arrayfun( @(t) t.trial, traj.items);                       
+            types = arrayfun( @(t) t.trial_type, traj.items);
             
             for i = 1:length(inst.parent.feat)                  
                 % store values for possible later significance test            
@@ -108,10 +109,15 @@ classdef results_single_features < handle
                         continue;
                     end
                     if g == 1
-                        sel = find(inst.parent.trials(trials) == 1);                        
+                        sel = (inst.parent.trials(trials) == 1);                        
                     else
-                        sel = find(groups == g - 1 & inst.parent.trials(trials) == 1);                        
+                        sel = (groups == g - 1 & inst.parent.trials(trials) == 1);                        
                     end
+                    if inst.parent.trial_type
+                        sel = (sel & types == inst.parent.trial_type);                        
+                    end
+                    sel = find(sel);
+                    
                     switch(plt)
                         case 1             
                             [Y, X] = hist(feat_val(sel, i), 15);

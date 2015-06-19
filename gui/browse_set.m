@@ -19,8 +19,8 @@ function browse_set(set_num, set_comp, varargin)
         % get classifier object
         classif = segments_comp.classifier(param_comp{1}, g_config.DEFAULT_FEATURE_SET, g_config.TAG_TYPE_BEHAVIOUR_CLASS);        
         % classify'em
-        ref_res = classif.cluster(param_comp{4}, 0);            
+        ref_res = classif.cluster(param_comp{2}, 0);            
     end
     
-    browse_trajectories(param{1}, segments, 'ReferenceClassification', ref_res, varargin{:});    
+    browse_trajectories(param{1}, segments, 'ReferenceClassification', ref_res, 'Name', g_config.DESCRIPTION, varargin{:});    
 end    

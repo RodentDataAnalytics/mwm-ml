@@ -68,6 +68,11 @@ classdef results_correlation < handle
             end
             trials = arrayfun( @(t) t.trial, traj.items);       
             groups = arrayfun( @(t) t.group, traj.items);    
+            if inst.parent.trial_type > 0
+                types = arrayfun( @(t) t.trial_type, traj.items);    
+            else
+                types = zeros(1, traj.count);
+            end
             
             vals = [];
             hor_str = {};
@@ -77,7 +82,7 @@ classdef results_correlation < handle
                 case 1
                     % feature-feature                    
                     feat_val = traj.compute_features(inst.parent.feat);  
-                    vals = corrcoef(feat_val(inst.parent.trials(trials) == 1, :));
+                    vals = corrcoef(feat_val(inst.parent.trials(trials) == 1 & types == inst.parent.trial_type, :));
                         
                     for fi = 1:length(inst.parent.feat)
                         % normalize feature                        
@@ -92,7 +97,7 @@ classdef results_correlation < handle
                         for fi = 1:length(inst.parent.feat)
                             feat_val = traj.compute_features(inst.parent.feat(fi));                            
                             for ic = 1:inst.parent.results.nclusters                                               
-                                vals(fi, ic) = mean(feat_val(inst.parent.results.cluster_index == ic & inst.parent.trials(trials) == 1));
+                                vals(fi, ic) = mean(feat_val(inst.parent.results.cluster_index == ic & inst.parent.trials(trials) == 1 & types == inst.parent.trial_type));
                             end
                             % normalize feature
                             vals(fi, :) = vals(fi, :) ./ repmat(norm(vals(fi, :)), 1, size(vals, 2));                      
@@ -107,7 +112,7 @@ classdef results_correlation < handle
                         vals = zeros(g_config.GROUPS, inst.parent.results.nclusters);
                         for gi = 1:g_config.GROUPS                           
                             for ic = 1:inst.parent.results.nclusters                                               
-                                vals(gi, ic) = sum(inst.parent.results.cluster_index == ic & groups == gi & inst.parent.trials(trials) == 1);
+                                vals(gi, ic) = sum(inst.parent.results.cluster_index == ic & groups == gi & inst.parent.trials(trials) == 1 & types == inst.parent.trial_type);
                             end                                                        
                             % vals(gi, :) = vals(gi, :) ./ repmat(norm(vals(gi, :)), 1, size(vals, 2));                      
                         end

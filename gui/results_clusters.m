@@ -94,18 +94,24 @@ classdef results_clusters < handle
                 set(inst.parent.window, 'currentaxes', inst.axis(idx));                
                 hold off;                
                 % plot all values in light gray first
-                plot(feat_val(:, comb(idx, 1)), feat_val(:, comb(idx, 2)), 'o', 'Color', [.6 .6 .6]);
+                leg = {'Undefined'};
+                h = plot(feat_val(:, comb(idx, 1)), feat_val(:, comb(idx, 2)), 'o', 'Color', [.6 .6 .6]);
+                set(h,'MarkerEdgeColor','none','MarkerFaceColor', [.6 .6 .6]);
                 hold on;                
                 
                 if grps(1) == 1 && clus == 0 && ~isempty(inst.parent.results) && sum(grps) == 1
                     % plot each cluster individually with different colors
+                    
                     clrs = cmapping(inst.parent.results.nclusters, jet);
                     for c = 1:inst.parent.results.nclusters
                         sel = find(inst.parent.results.cluster_index == c);                        
-                        plot(feat_val(sel, comb(idx, 1)), feat_val(sel, comb(idx, 2)), 'o', 'Color', clrs(c, :));
+                        h = plot(feat_val(sel, comb(idx, 1)), feat_val(sel, comb(idx, 2)), 'o', 'Color', clrs(c, :));
+                        set(h,'MarkerEdgeColor','none','MarkerFaceColor', clrs(c, :));
                         hold on;
-                    end
-                else        
+                        leg = [leg, inst.parent.results.classes(c).description];
+                    end                    
+                    legend(leg, 'Location', 'eastoutside');
+                else                            
                     for g = 1:g_config.GROUPS
                         if ~grps(g) 
                             continue;
@@ -120,11 +126,12 @@ classdef results_clusters < handle
                         sel_pos = find(sel);
 
                         % plot cluster
-                        plot(feat_val(sel_pos, comb(idx, 1)), feat_val(sel_pos, comb(idx, 2)), 'o', 'Color', inst.parent.groups_colors(g, :));                    
-                        vals = [vals, [feat_val(sel_pos, comb(idx, 1)), feat_val(sel_pos, comb(idx, 2))]];
-
+                        h = plot(feat_val(sel_pos, comb(idx, 1)), feat_val(sel_pos, comb(idx, 2)), 'o', 'Color', inst.parent.groups_colors(g, :));                    
+                        set(h,'MarkerEdgeColor','none','MarkerFaceColor', inst.parent.groups_colors(g, :));
+                        vals = [vals, [feat_val(sel_pos, comb(idx, 1)), feat_val(sel_pos, comb(idx, 2))]];                        
+                        
                         hold on;
-                    end
+                    end                    
                 end
                 att = g_config.FEATURES{inst.parent.feat(comb(idx, 1))};
                 xlabel(att{2});

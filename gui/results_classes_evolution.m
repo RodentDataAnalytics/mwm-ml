@@ -99,7 +99,7 @@ classdef results_classes_evolution < handle
                 end
                 inst.class_combo = uicontrol('Parent', inst.controls_box, 'Style', 'popupmenu', 'String', classes, 'Callback', @inst.update_plots);               
                 uicontrol('Parent', inst.controls_box, 'Style', 'text', 'String', 'Plot:');            
-                inst.plot_combo = uicontrol('Parent', inst.controls_box, 'Style', 'popupmenu', 'String', {'Box-plot', 'Distributions', 'Lines', 'Transition probabilities', 'Transition counts'}, 'Callback', @inst.update_plots, 'value', sel_plot);
+                inst.plot_combo = uicontrol('Parent', inst.controls_box, 'Style', 'popupmenu', 'String', {'Box-plot', 'Distributions', 'Lines', 'Transition probabilities', 'Transition counts', 'Transitions per trial'}, 'Callback', @inst.update_plots, 'value', sel_plot);
                 set(inst.controls_box, 'Sizes', [100, 200, 100, 200]);                                
             end
 
@@ -127,6 +127,8 @@ classdef results_classes_evolution < handle
                         inst.transitions_plot(1);
                     case 5
                         inst.transitions_plot(0);
+                    case 6
+                        inst.transitions_trial;
                 end                        
             end
         end        
@@ -198,7 +200,7 @@ classdef results_classes_evolution < handle
                             else
                                 % add only as many as animals as in the
                                 % first group as?
-                                if length(ids_grp) <= nanimals
+                                if length(ids_grp) < nanimals
                                     ids_grp = [ids_grp, id];
                                     id_pos = length(ids_grp);
                                 end
@@ -426,6 +428,139 @@ classdef results_classes_evolution < handle
                 end
                 set(inst.panels(ig), 'Title', gn);                
             end
+        end
+        
+        function transitions_trial(inst)            
+            global g_config;
+            
+            grps = inst.parent.groups;              
+                                                                        
+            vals = [];
+            vals_grps = [];           
+            d = 0.05;
+            pos = [];            
+            ngrp = 0;  
+            % for the friedman test
+            mfried = [];
+            ids = {};
+            nanimals = -1;
+            set(inst.panels(1), 'Title', 'Box plots');
+            
+            trans = inst.parent.results.transition_counts_trial;
+            trans = trans(inst.parent.traj.segmented_index);
+            
+            for t = 1:g_config.TRIALS
+                grp_idx = 0;                
+                for g = 1:length(grps)                                    
+                    ngrp = ngrp + 1;
+                    if ~grps(g) 
+                        continue;
+                    end
+                    grp_idx = grp_idx + 1;
+                    if t > 1
+                        ids_grp = ids{grp_idx};
+                    else
+                        ids_grp = [];
+                    end
+                    
+                    if g == 1
+                        sel = find(inst.all_trials == t);
+                    else
+                        sel = find(inst.all_trials == t & inst.all_groups == g - 1);
+                    end                                        
+                                                            
+                    for i = 1:length(sel)       
+                        if sel(i) == 0
+                            continue; % a weird/too short trajectory
+                        end
+                        
+                        val = trans(sel(i));
+                        
+                        vals = [vals, val];
+                        vals_grps = [vals_grps, ngrp];                        
+                        
+                        % put it in the matrix for the friedman test
+                        id = inst.parent.traj.parent.items(sel(i)).id;        
+                        id_pos = find(ids_grp == id);
+                        if length(ids) < grp_idx
+                            ids = [ids, grp_idx];
+                        end
+
+                        if isempty(id_pos)
+                            if grp_idx == 1                            
+                                if t == 1
+                                    ids_grp = [ids_grp, id];
+                                    id_pos = length(ids_grp);
+                                end
+                            else
+                                % add only as many as animals as in the
+                                % first group as?
+                                if length(ids_grp) < nanimals
+                                    ids_grp = [ids_grp, id];
+                                    id_pos = length(ids_grp);
+                                end
+                            end
+                        end                        
+                        if ~isempty(id_pos)
+                            assert((nanimals == -1 && t == 1) || id_pos <= nanimals);
+                            mfried( (t - 1)*nanimals + id_pos, grp_idx) = val;
+                        end
+                    end
+                    ids{grp_idx} = ids_grp;
+                    if t == 1 && grp_idx == 1
+                        nanimals = length(ids_grp);
+                        % now we know the size of the end matrix
+                        tmp = zeros(nanimals*g_config.TRIALS, sum(grps));
+                        tmp(1:nanimals, 1) = mfried;
+                        mfried = tmp;
+                    end
+                    pos = [pos, d];
+                    d = d + 0.05;
+                end
+                d = d + 0.05;
+            end
+            
+            set(inst.parent.window, 'currentaxes', inst.axis(1));
+            hold off;
+            % average each value                        
+            boxplot(vals, vals_grps, 'positions', pos, 'colors', [0 0 0]);     
+            h = findobj(gca,'Tag','Box');
+
+            sel_grp = find(grps > 0);                    
+            rev_map = length(sel_grp):-1:1;
+            for j = 1:length(h)                        
+                clr = mod(j - 1, length(sel_grp)) + 1;
+                clr = sel_grp(rev_map(clr));
+                patch(get(h(j),'XData'), get(h(j), 'YData'), inst.parent.groups_colors(clr, :));
+            end
+            set([h], 'LineWidth', 0.8);
+
+            if length(sel_grp) > 1
+                p = friedman(mfried, nanimals, 'off');
+                sig = 'ns';
+                if p < 0.05                        
+                    sig = '*';
+                    if p < 0.01
+                        sig = '**';
+                        if p < '0.001' 
+                            sig = '***';
+                        end
+                    end
+                end
+                title(sprintf('p = %.3e (%s)', p, sig), 'FontWeight', 'bold', 'FontSize', 14);
+            end
+
+            h = findobj(gca, 'Tag', 'Median');
+            for j = 1:length(h)
+                line('XData', get(h(j),'XData'), 'YData', get(h(j), 'YData'), 'Color', [.9 .9 .9], 'LineWidth', 2);
+            end
+
+            lbls = {};
+            sel = 1:g_config.TRIALS;
+            sel = sel(inst.parent.trials == 1);
+            lbls = arrayfun( @(i) sprintf('%d', i), sel, 'UniformOutput', 0);     
+
+            set(gca, 'XTick', 1:length(sel), 'XTickLabel', lbls);                                               
         end
     end         
 end

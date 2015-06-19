@@ -65,7 +65,12 @@ classdef results_features_evolution < handle
             
             feat_val = traj.compute_features(inst.parent.feat(feat));                
             groups = arrayfun( @(t) t.group, traj.items);       
-            trials = arrayfun( @(t) t.trial, traj.items);                   
+            trials = arrayfun( @(t) t.trial, traj.items);         
+            if inst.parent.trial_type > 0
+                types = arrayfun( @(t) t.trial_type, traj.items);    
+            else
+                types = zeros(1, traj.count);
+            end
             
             vals = {};
             set(inst.parent.window, 'currentaxes', inst.axis);
@@ -83,7 +88,7 @@ classdef results_features_evolution < handle
                 vals_trial = {};
                 for t = 1:g_config.TRIALS
                     if inst.parent.trials(t) == 1
-                        vals_trial = [vals_trial, feat_val(sel & trials == t)];
+                        vals_trial = [vals_trial, feat_val(sel & trials == t & types == inst.parent.trial_type)];
                     end
                 end
                 

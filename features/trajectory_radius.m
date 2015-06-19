@@ -9,6 +9,7 @@ function [r, var] = trajectory_radius(traj, varargin)
                                                
     pts = traj.data_representation(repr);                                                   
     d = sqrt( power(pts(:, 2) - x0, 2) + power(pts(:, 3) - y0, 2) ) / g_config.ARENA_R;       
+    d(d == 0) = 1e-5; % avoid zero-radius
     if ~isempty(f)
         d = f(d);
     end
