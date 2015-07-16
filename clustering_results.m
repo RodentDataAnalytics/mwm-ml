@@ -200,18 +200,21 @@ classdef clustering_results < handle
         function [distr, ext_distr] = classes_distribution(inst, partitions, varargin)
             % neeed the process_options function
             addpath(fullfile(fileparts(mfilename('fullpath')), '/extern'));
-            [normalize, ext_vals, empty_class, max_seg, reverse, ovlp, slen] = process_options(varargin, ...
+            [normalize, ext_vals, empty_class, max_seg, reverse, ovlp, slen, classes] = process_options(varargin, ...
                 'Normalize', 0, 'ExternalValues', [], 'EmptyClass', 0, ... 
-                'MaxSegments', 0, 'Reverse', 0, 'Overlap', 0, 'SegmentLength', 0 ...
+                'MaxSegments', 0, 'Reverse', 0, 'Overlap', 0, 'SegmentLength', 0, 'Classes', [] ...
             );
                                 
+            if isempty(classes)
+                classes = inst.classes;
+            end
             distr = [];
             ext_distr = [];            
             % number of classes
             if empty_class > 0
-                nc = length(unique([1:inst.nclasses, empty_class]));
+                nc = length(unique([1:length(classes), empty_class]));
             else
-                nc = inst.nclasses;
+                nc = length(classes);
             end
             % number of external labels (not in this set of
             % trajectories/segments)
@@ -231,7 +234,7 @@ classdef clustering_results < handle
                 distr_traj = zeros(1, nc);
             end                
                       
-            [~, ~, map] = inst.mapping_ordered;
+            [~, ~, map] = inst.mapping_ordered(varargin{:});
             if reverse
                 map = map(end:-1:1);
                 partitions = partitions(end:-1:1);

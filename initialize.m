@@ -11,12 +11,15 @@ addpath(fullfile(fileparts(mfilename('fullpath')),'/data_representation'));
 
 % select configuration
 addpath(fullfile(fileparts(mfilename('fullpath')),'/config'));
+addpath(fullfile(fileparts(mfilename('fullpath')),'/config/morris_water_maze'));
+addpath(fullfile(fileparts(mfilename('fullpath')),'/config/place_avoidance'));
+
 global g_config;
 %% Change for desired configuration
 % g_config = config_place_avoidance(config_place_avoidance.DATA_SET_LARGE); 
-% g_config = config_place_avoidance_mem; 
-g_config = config_place_avoidance_darkness2; 
-% g_config = config_mwm; 
+g_config = config_place_avoidance_mem; 
+% g_config = config_place_avoidance_darkness1; 
+g_config = config_mwm; 
 % g_config = config_mwm_nencki;
 % g_config = config_mwm_nencki_short;
 
