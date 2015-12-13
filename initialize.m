@@ -26,3 +26,14 @@ addpath(fullfile(fileparts(mfilename('fullpath')), '/extern'));
 addpath(fullfile(fileparts(mfilename('fullpath')), '/results'));
 addpath(fullfile(fileparts(mfilename('fullpath')), '/gui'));
 addpath(fullfile(fileparts(mfilename('fullpath')), '/utility'));
+
+% for the GUILayout package we have 2 different versions for (Matlab 2014a
+% and below and newer versions)
+
+ver = version();
+if str2num(v(1:3)) <= 8.3 % <= Matlab 2014a
+    addpath(fullfile(fileparts(mfilename('fullpath')), '/extern/GUILayout/v1'));
+    addpath(fullfile(fileparts(mfilename('fullpath')), '/extern/GUILayout/v1/Patch'));
+else
+    addpath(fullfile(fileparts(mfilename('fullpath')), '/extern/GUILayout/v2'));
+end

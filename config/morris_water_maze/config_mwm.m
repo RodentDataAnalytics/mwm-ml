@@ -82,7 +82,7 @@ classdef config_mwm < base_config
         TAGS250_70 = 3;
         TAGS300_70 = 4;
                         
-        OUTPUT_DIR = '/home/tiago/results/'; % where to put all the graphics and other generated output
+        OUTPUT_DIR = './results/'; % where to put all the graphics and other generated output
         CLASSES_COLORMAP = @jet;
     end
     

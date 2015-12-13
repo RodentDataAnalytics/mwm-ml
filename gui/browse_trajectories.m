@@ -3,8 +3,6 @@ function browse_trajectories(labels_fn, traj, varargin)
     % no filter at first
     global g_config;
     addpath(fullfile(fileparts(mfilename('fullpath')), '../extern'));    
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/GUILayout'));
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/GUILayout/Patch'));
     addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/cm_and_cb_utilities'));
     
     filter = 1:traj.count;

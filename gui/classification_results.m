@@ -38,8 +38,6 @@ classdef classification_results < handle
     methods
         function inst = classification_results(traj)
             global g_config;            
-            addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/GUILayout'));
-            addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/GUILayout/Patch'));
             addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/cm_and_cb_utilities'));
             
             inst.groups_colors = cmapping(g_config.GROUPS + 1, jet);
