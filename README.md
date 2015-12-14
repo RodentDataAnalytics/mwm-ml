@@ -12,7 +12,7 @@ Following main functionallity is provided in this repository:
 
 - A graphical user interface (GUI) for browsing and tagging trajectories or segments of trajectories (gui/browse_trajectories.m). From the GUI a secondary window providing multiple data visualizations (such as individual feature values and clusters) can be accessed. The GUI can also start the semi-supervised clustering algorithm used to classify similar trajectories/segments;
 
-<img src="gui.png" alt="GUI" style="width: 800px;"/>
+![GUI](gui.png?raw=true "GUI")
 
 - Semi-supervided clustering algorithm (semisupervised_clustering.m): this class is a frontend for the MPCKmeans semi-supervised algorithm. It uses manually labelled data (provided as mapping from trajectory segments to of one or more behavioural classes) to define *must-link* and *cannot-link* constracints. Again, for more details see the reference above. 
 
