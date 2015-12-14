@@ -141,7 +141,7 @@ function browse_trajectories(labels_fn, traj, varargin)
     
     views_grid = [];    
     views_panels = [];
-    axis_handles = [];initialize
+    axis_handles = [];
     desc_handles = [];
     view_panels = [];
     cb_handles = [];
