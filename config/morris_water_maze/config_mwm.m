@@ -139,11 +139,11 @@ classdef config_mwm < base_config
                 { fullfile(cur_dir, '../../data/mwm_peripubertal_stress/segment_labels_300_70.csv'), 37, base_config.SEGMENTATION_CONSTANT_LENGTH, 2, 300, 0.70}, ...
             };
 
+            addpath(fullfile(fileparts(mfilename('fullpath')),'../../import/noldus'));            
         end
                 
         % Imports trajectories from Noldus data file's
         function traj = load_data(inst)
-            addpath(fullfile(fileparts(mfilename('fullpath')),'../../import/noldus'));
             traj = load_trajectories(1:3, 1, 'DeltaX', -100, 'DeltaY', -100);
         end        
     end

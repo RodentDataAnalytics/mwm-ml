@@ -12,7 +12,7 @@ addpath(fullfile(fileparts(mfilename('fullpath')),'/data_representation'));
 % select configuration
 addpath(fullfile(fileparts(mfilename('fullpath')),'/config'));
 addpath(fullfile(fileparts(mfilename('fullpath')),'/config/morris_water_maze'));
-addpath(fullfile(fileparts(mfilename('fullpath')),'/config/place_avoidance'));
+% addpath(fullfile(fileparts(mfilename('fullpath')),'/config/place_avoidance'));
 
 global g_config;
 %% Change for desired configuration
@@ -23,6 +23,8 @@ addpath(fullfile(fileparts(mfilename('fullpath')), g_config.RESULTS_DIR));
 
 % add also some other folders to the path
 addpath(fullfile(fileparts(mfilename('fullpath')), '/extern')); 
+addpath(fullfile(fileparts(mfilename('fullpath')), '/extern/export_fig'));
+    
 addpath(fullfile(fileparts(mfilename('fullpath')), '/results'));
 addpath(fullfile(fileparts(mfilename('fullpath')), '/gui'));
 addpath(fullfile(fileparts(mfilename('fullpath')), '/utility'));

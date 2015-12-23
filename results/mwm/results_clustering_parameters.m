@@ -1,6 +1,8 @@
 function results_clustering_parameters
     addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/export_fig'));    
     % load trajectory segments
+    global g_config;
+    
     global g_segments;    
     % initialize data
     cache_trajectory_segments;                    
@@ -13,7 +15,7 @@ function results_clustering_parameters
     res3 = [];
     nc = [];
     test_set = [];      
-    covering = [];4
+    covering = [];
     param = g_config.TAGS_CONFIG{2};    
         
     for i = 1:10
