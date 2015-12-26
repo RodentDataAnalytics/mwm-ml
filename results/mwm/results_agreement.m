@@ -1,5 +1,4 @@
 function results_agreement
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/export_fig'));          
     global g_config;
     
     %%  load all trajectories and compute feature values if necessary (data is then cached)
@@ -15,7 +14,7 @@ function results_agreement
     for i = 2:length(g_config.TAGS_CONFIG)
         param = g_config.TAGS_CONFIG{i};
         l = [l, param{2}];
-        seg = g_trajectories.divide_into_segments(param{2}, param{3}, 2);
+        seg = g_trajectories.partition(param{3}, param{4}, param{5:end});
         segments = [segments, seg];
         % get classifier object
         classif = seg.classifier(param{1}, g_config.DEFAULT_FEATURE_SET, g_config.TAG_TYPE_BEHAVIOUR_CLASS);        
@@ -24,7 +23,7 @@ function results_agreement
         tags = [tags; res.classes];
         %[~, ~, map] = res.mapping_ordered(-1, 'DiscardUnknown', 1, 'MinSegments', 1);
         % mapping = [mapping, map];
-        mapping = [mapping, res.class_map];
+        mapping = [mapping, res.class_map(res.nexternal_labels + 1:end)];
     end
     
     for r1 = 1:length(mapping)

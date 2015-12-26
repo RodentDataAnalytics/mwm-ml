@@ -379,25 +379,29 @@ classdef trajectories < handle
             extra_lbl = {};
             extra_feat = []; 
             extra_ids = [];
-            if ~isempty(unmatched)
-                % load all trajectories
-                cache_trajectories;
             
-                for i = 1:length(unmatched)
-                    id = labels_data{unmatched(i), 1};
-                    % unmatched segments - look at the global trajectories cache               
-                    idx = g_trajectories.index_of(id(1), id(2), id(3), -1, 0);                
-                    if idx == -1
-                        fprintf('Warning: could not match label #%d to any trajectory\n', unmatched(i));
-                    else
-                        seg = g_trajectories.items(idx).sub_segment(id(4), id(5));
-                        extra_feat = [extra_feat; seg.compute_features(feat)];
-                        tmp = labels_data{unmatched(i), 2};
-                        extra_lbl = [extra_lbl, tag_new_idx(tmp)];
-                        extra_ids = [extra_ids; id];
-                    end
-                end
-            end
+% TG 12/2015: commented out the loading of external labels as it was causing
+% troubles
+%
+%             if ~isempty(unmatched)
+%                 % load all trajectories
+%                 cache_trajectories;
+%             
+%                 for i = 1:length(unmatched)
+%                     id = labels_data{unmatched(i), 1};
+%                     % unmatched segments - look at the global trajectories cache               
+%                     idx = g_trajectories.index_of(id(1), id(2), id(3), -1, 0);                
+%                     if idx == -1
+%                         fprintf('Warning: could not match label #%d to any trajectory\n', unmatched(i));
+%                     else
+%                         seg = g_trajectories.items(idx).sub_segment(id(4), id(5));
+%                         extra_feat = [extra_feat; seg.compute_features(feat)];
+%                         tmp = labels_data{unmatched(i), 2};
+%                         extra_lbl = [extra_lbl, tag_new_idx(tmp)];
+%                         extra_ids = [extra_ids; id];
+%                     end
+%                 end
+%             end
                                     
             res = semisupervised_clustering(inst, [extra_feat; inst.compute_features(feat)], [extra_lbl, labels], tags, length(extra_lbl));            
         end   

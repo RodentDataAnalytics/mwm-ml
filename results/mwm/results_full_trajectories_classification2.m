@@ -1,12 +1,11 @@
 function results_full_trajectories_classification2
 %RESULTS_FULL_TRAJECTORIES_CLASSIFICATION Compare classification of
-%trajectories with a manual classification
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/export_fig'));
-
+%trajectories with a manual classification  
     % global data initialized elsewhere
     global g_trajectories; 
     global g_long_trajectories_map;
-    global g_animals_trajectories_map;    
+    global g_animals_trajectories_map;
+    global g_config;
     cache_animals;
     cache_trajectory_segments;
        

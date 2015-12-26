@@ -2,8 +2,7 @@ function results_calibration
 %RESULTS_CALIBRATION Summary of this function goes here
 %   Detailed explanation goeshere
 % show calibration results   
-    global g_config;
-    addpath(fullfile(fileparts(mfilename('fullpath')),'/export_fig'));
+    global g_config;    
                 
     [traj, cal_data] = load_trajectories(1:3, 1);
     origtraj = load_trajectories(1:3, 0);  

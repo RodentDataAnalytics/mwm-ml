@@ -1,5 +1,4 @@
 function results_transition_counts()    
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../../extern/export_fig'));  
     
     global g_config;
     global g_trajectories;    

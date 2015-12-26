@@ -1,5 +1,4 @@
 function results_class_weights
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../../extern/export_fig'));      
     
     %%  load all trajectories and compute feature values if necessary (data is then cached)
     global g_segments_base_classification;
@@ -46,7 +45,9 @@ function results_class_weights
             end
         end
 
-        fac = g_config.DEFAULT_SEGMENT_LENGTH*(1 - g_config.DEFAULT_SEGMENT_OVERLAP);
+        param = g_config.TAGS_CONFIG{2};
+        
+        fac = param{5}*(1 - param{6});
         % show'em, will ya?
         for i = 1:g_segments_base_classification.nclasses
             fprintf('\n%s: %.2f (max: %d) == WEIGHT: %.2f', g_segments_base_classification.classes(i).description, fac*mean(vals{i}), fac*max(vals{i}), w(i));

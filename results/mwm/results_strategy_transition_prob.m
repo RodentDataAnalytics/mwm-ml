@@ -1,9 +1,8 @@
 function results_strategy_transition_prob
 %RESULTS_STRATEGY_TRANSITION_PROB Summary of this function goes here
 %   Detailed explanation goes here
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/cm_and_cb_utilities'));
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/export_fig'));  
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/legendflex'));
+    addpath(fullfile(fileparts(mfilename('fullpath')), '../../extern/cm_and_cb_utilities'));
+    addpath(fullfile(fileparts(mfilename('fullpath')), '../../extern/legendflex'));
       
     %%  load all trajectories and compute feature values if necessary (data is then cached)
     global g_trajectories;    

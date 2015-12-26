@@ -1,5 +1,4 @@
 function results_clustering_parameters
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../extern/export_fig'));    
     % load trajectory segments
     global g_config;
     
