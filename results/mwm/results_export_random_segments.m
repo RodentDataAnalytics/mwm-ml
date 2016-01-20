@@ -1,5 +1,4 @@
-function results_export_random_segments
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../../extern/export_fig'));  
+function results_export_random_segments    
 %RESULTS_EXPORT_SELECTED Export some trajectories/segments of interest
     global g_segments;    
     % initialize data

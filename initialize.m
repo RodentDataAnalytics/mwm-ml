@@ -22,9 +22,7 @@ fprintf('Configuration selected: %s\n', g_config.DESCRIPTION);
 addpath(fullfile(fileparts(mfilename('fullpath')), g_config.RESULTS_DIR)); 
 
 % add also some other folders to the path
-addpath(fullfile(fileparts(mfilename('fullpath')), '/extern')); 
-addpath(fullfile(fileparts(mfilename('fullpath')), '/extern/export_fig'));
-    
+addpath(fullfile(fileparts(mfilename('fullpath')), '/extern'));     
 addpath(fullfile(fileparts(mfilename('fullpath')), '/results'));
 addpath(fullfile(fileparts(mfilename('fullpath')), '/gui'));
 addpath(fullfile(fileparts(mfilename('fullpath')), '/utility'));
@@ -34,8 +32,10 @@ addpath(fullfile(fileparts(mfilename('fullpath')), '/utility'));
 
 v = version();
 if str2num(v(1:3)) <= 8.3 % <= Matlab 2014a
+    addpath(fullfile(fileparts(mfilename('fullpath')), '/extern/export_fig/v1'));
     addpath(fullfile(fileparts(mfilename('fullpath')), '/extern/GUILayout/v1'));
     addpath(fullfile(fileparts(mfilename('fullpath')), '/extern/GUILayout/v1/Patch'));
 else
+    addpath(fullfile(fileparts(mfilename('fullpath')), '/extern/export_fig/v2'));
     addpath(fullfile(fileparts(mfilename('fullpath')), '/extern/GUILayout/v2'));
 end

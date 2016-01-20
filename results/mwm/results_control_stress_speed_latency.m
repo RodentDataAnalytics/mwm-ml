@@ -1,6 +1,5 @@
 function results_control_stress_speed_latency    
     addpath(fullfile(fileparts(mfilename('fullpath')), '../../extern/sigstar'));
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../../extern/export_fig'));        
     
     % global data initialized elsewhere
     global g_trajectories_speed;        

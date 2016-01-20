@@ -1,6 +1,5 @@
 function results_trajectory_classification
     addpath(fullfile(fileparts(mfilename('fullpath')), '../../extern/cm_and_cb_utilities'));
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../../extern/export_fig'));  
     addpath(fullfile(fileparts(mfilename('fullpath')), '../../extern/legendflex'));
       
     %%  load all trajectories and compute feature values if necessary (data is then cached)
