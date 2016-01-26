@@ -4,5 +4,7 @@ function weka_init
         wekajarpath = fullfile(fileparts(mfilename('fullpath')), 'weka.jar');
         javaaddpath(wekajarpath);        
         javaaddpath(fullfile(fileparts(mfilename('fullpath')), 'Jama-1.0.3.jar'));
+        javaaddpath(fullfile(fileparts(mfilename('fullpath')), 'matlab2weka','matlab2weka','matlab2weka.jar'));
+        javaaddpath(fullfile(fileparts(mfilename('fullpath'))));
     end    
 end
