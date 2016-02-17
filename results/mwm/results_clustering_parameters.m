@@ -95,7 +95,9 @@ function results_clustering_parameters
     set(gca, 'FontSize', g_config.FONT_SIZE, 'LineWidth', g_config.AXIS_LINE_WIDTH);
     h1 = gca;
     box off;
-    export_fig(fullfile(g_config.OUTPUT_DIR, 'clusters_dep_err.eps'));
+    %%%%export_fig(fullfile(g_config.OUTPUT_DIR, 'clusters_dep_err.eps'));
+    export_figure(1, gcf, g_config.OUTPUT_DIR, 'clusters_dep_err');
+
 
     % percentage of unknown segments
     figure(78);
@@ -109,7 +111,8 @@ function results_clustering_parameters
     set(gca, 'FontSize', g_config.FONT_SIZE, 'LineWidth', g_config.AXIS_LINE_WIDTH);
     h2 = gca;
     box off;
-    export_fig(fullfile(g_config.OUTPUT_DIR, 'clusters_dep_undef.eps'));
+    %%%%export_fig(fullfile(g_config.OUTPUT_DIR, 'clusters_dep_undef.eps'));
+    export_figure(1, gcf, g_config.OUTPUT_DIR, 'clusters_dep_undef');
     
     % final number of clusters
     figure(79);
@@ -123,7 +126,9 @@ function results_clustering_parameters
     set(gca, 'FontSize', g_config.FONT_SIZE, 'LineWidth', g_config.AXIS_LINE_WIDTH);
     h3 = gca;
     box off;
-    export_fig(fullfile(g_config.OUTPUT_DIR, 'clusters_dep_deltan.eps'));        
+    %%%%export_fig(fullfile(g_config.OUTPUT_DIR, 'clusters_dep_deltan.eps'));
+    export_figure(1, gcf, g_config.OUTPUT_DIR, 'clusters_dep_deltan');
+  
 
     % covering
     figure(80);
@@ -135,5 +140,6 @@ function results_clustering_parameters
     set(gca, 'FontSize', g_config.FONT_SIZE, 'LineWidth', g_config.AXIS_LINE_WIDTH, 'YLim', [80, 100]);
     h1 = gca;
     box off;
-    export_fig(fullfile(g_config.OUTPUT_DIR, 'clusters_dep_coverage.eps'));
+    %%%%export_fig(fullfile(g_config.OUTPUT_DIR, 'clusters_dep_coverage.eps'));
+    export_figure(1, gcf, g_config.OUTPUT_DIR, 'clusters_dep_coverage');
 end
