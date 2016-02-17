@@ -138,9 +138,11 @@ function results_trajectory_classification
             set(gcf, 'Color', 'w');
 
             if iter == 1
-                export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('trajectory_detailed_%d.eps', i)));
+                %%export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('trajectory_detailed_%d.eps', i)));
+                export_figure(1, gcf, g_config.OUTPUT_DIR, sprintf('trajectory_detailed_%d', i));
             else
-                export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('trajectory_detailed_%d_const.eps', i)));
+                %%export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('trajectory_detailed_%d_const.eps', i)));
+                export_figure(1, gcf, g_config.OUTPUT_DIR, sprintf('trajectory_detailed_%d_const', i));
             end
             close;
         end
