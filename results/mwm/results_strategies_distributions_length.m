@@ -100,7 +100,8 @@ function results_strategies_distributions_length
         box off;  
         set(gcf,'papersize',[8,8], 'paperposition',[0,0,8,8]);
         
-        export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('control_stress_lenght_c%d.eps', c)));
+        %%%%export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('control_stress_lenght_c%d.eps', c)));
+        export_figure(1, gcf, g_config.OUTPUT_DIR, sprintf('control_stress_lenght_c%d', c));
     
         p = friedman(mfried, nanimals);
         % pa = anova2(m, nanimals);
