@@ -31,7 +31,7 @@ function results_calibration
         zlabel('correction [cm]');
         set(gcf, 'Color', 'w');
         set(gca, 'FontSize', g_config.FONT_SIZE, 'LineWidth', g_config.AXIS_LINE_WIDTH);
-        export_fig(sprintf(fullfile(g_config.OUTPUT_DIR, 'calibration_set%d_y.eps', i)));        
+        export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('calibration_set%d_y.eps', i)));
         
         % cross validation        
         n = length(cal_data{i});
