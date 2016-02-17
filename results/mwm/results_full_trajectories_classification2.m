@@ -91,7 +91,8 @@ function results_full_trajectories_classification2
         box off;  
         set(gcf,'papersize',[8,8], 'paperposition',[0,0,8,8]);
         
-        export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('full_traj_class_c%d.eps', c)));            
+        %%%%export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('full_traj_class_c%d.eps', c)));      
+        export_figure(1, gcf, g_config.OUTPUT_DIR, sprintf('full_traj_class_c%d', c));            
         
         p = friedman(mfried, nanimals);
         % pa = anova2(m, nanimals);
