@@ -56,23 +56,25 @@ public ArrayList<InstancePair> WekaPrepareConstraints(int [] [] constr)
    * @return ArrayList<InstancePair> ArrayList of weka InstancePairs
    */
     ArrayList<InstancePair> WekaConstraints = new ArrayList<InstancePair>();
-    int rows = constr.length;
-    int cols = constr[0].length;
-    
-    for(int i=0; i < rows; i++)
+    if (constr != null)
     {
-        if(constr[i][0] < constr[i][1])
+        int rows = constr.length;
+        int cols = constr[0].length;
+
+        for(int i=0; i < rows; i++)
         {
-            InstancePair pair = new InstancePair(constr[i][0] - 1, constr[i][1] - 1, InstancePair.MUST_LINK);
-            WekaConstraints.add(pair);
-        }
-        else
-        {
-            InstancePair pair = new InstancePair(constr[i][1] - 1, constr[i][0] - 1, InstancePair.CANNOT_LINK);
-            WekaConstraints.add(pair);
+            if(constr[i][0] < constr[i][1])
+            {
+                InstancePair pair = new InstancePair(constr[i][0] - 1, constr[i][1] - 1, InstancePair.MUST_LINK);
+                WekaConstraints.add(pair);
+            }
+            else
+            {
+                InstancePair pair = new InstancePair(constr[i][1] - 1, constr[i][0] - 1, InstancePair.CANNOT_LINK);
+                WekaConstraints.add(pair);
+            }
         }
     }
-    
     return(WekaConstraints);
   }
 

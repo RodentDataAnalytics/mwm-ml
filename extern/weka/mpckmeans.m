@@ -21,9 +21,10 @@ function [ distr, centroids ] = mpckmeans( x, constr, k )
     
     wInterface = WekaInterface();
     data = wInterface.WekaCreateInstances(x,'data',attr);
+    
     % constraints 
     c = wInterface.WekaPrepareConstraints(constr);
-                
+    
     mpck = weka.clusterers.MPCKMeans();
     mpck.setTotalTrainWithLabels(data);    
 
