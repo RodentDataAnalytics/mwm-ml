@@ -23,7 +23,8 @@ function results_calibration
         zlabel('correction [cm[');
         set(gcf, 'Color', 'w');
         set(gca, 'FontSize', g_config.FONT_SIZE, 'LineWidth', g_config.AXIS_LINE_WIDTH);
-        export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('calibration_set%d_x.eps', i)));
+        %%%%export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('calibration_set%d_x.eps', i)));
+        export_figure(1, gcf, g_config.OUTPUT_DIR, sprintf('calibration_set%d_x', i));
         figure('name', sprintf('Calibration function Y (set %d)', i));
         mesh(xq, yq, Fy(xq, yq));
         xlabel('X [cm]');
@@ -31,7 +32,9 @@ function results_calibration
         zlabel('correction [cm]');
         set(gcf, 'Color', 'w');
         set(gca, 'FontSize', g_config.FONT_SIZE, 'LineWidth', g_config.AXIS_LINE_WIDTH);
-        export_fig(sprintf(fullfile(g_config.OUTPUT_DIR, 'calibration_set%d_y.eps', i)));        
+        %%%%export_fig(sprintf(fullfile(g_config.OUTPUT_DIR, 'calibration_set%d_y.eps', i))); %doesn't work
+        %%export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('calibration_set%d_y.eps', i))); %works
+        export_figure(1, gcf, g_config.OUTPUT_DIR, sprintf('calibration_set%d_y', i));
         
         % cross validation        
         n = length(cal_data{i});
@@ -64,7 +67,8 @@ function results_calibration
         errorbar(pts(:,1), pts(:,2), pts(:,3), 'k:', 'LineWidth', g_config.LINE_WIDTH);
         xlabel('number of calibration points');
         ylabel('error [cm]');        
-        export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('calibration_error%d.eps', i)));        
+        %%export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('calibration_error%d.eps', i)));
+        export_figure(1, gcf, g_config.OUTPUT_DIR, sprintf('calibration_error%d', i));
     end
     
 %     traj_cal = [];
