@@ -138,9 +138,11 @@ function results_trajectory_classification
             set(gcf, 'Color', 'w');
 
             if iter == 1
-                export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('trajectory_detailed_%d.eps', i)));
+                %%export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('trajectory_detailed_%d.eps', i)));
+                export_figure(1, gcf, g_config.OUTPUT_DIR, sprintf('trajectory_detailed_%d', i));
             else
-                export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('trajectory_detailed_%d_const.eps', i)));
+                %%export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('trajectory_detailed_%d_const.eps', i)));
+                export_figure(1, gcf, g_config.OUTPUT_DIR, sprintf('trajectory_detailed_%d_const', i));
             end
             close;
         end
@@ -158,7 +160,8 @@ function results_trajectory_classification
     hleg = figure;
     set(gcf, 'Color', 'w');
     legendflex(handles, leg, 'box', 'off', 'nrow', 8, 'ncol', 1, 'ref', hleg, 'fontsize', 8, 'anchor', {'n','n'});
-    export_fig(fullfile(g_config.OUTPUT_DIR, 'strategies_line_legend_vert.eps'));
+    %%export_fig(fullfile(g_config.OUTPUT_DIR, 'strategies_line_legend_vert.eps'));
+    export_figure(1, gcf, g_config.OUTPUT_DIR, 'strategies_line_legend_vert');
 
     close(hleg);
     close(hdummy);      
