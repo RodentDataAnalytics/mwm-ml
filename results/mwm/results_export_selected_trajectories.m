@@ -23,8 +23,9 @@ function results_export_selected_trajectories
         for i = 1:length(pos)
            g_trajectories.items(pos(i)).plot;
            set(gcf, 'Color', 'w');
-           fn = fullfile(g_config.OUTPUT_DIR, sprintf('/trajectory_s%d_d%d_t%d.eps', g_trajectories.items(pos(i)).set, g_trajectories.items(pos(i)).session, g_trajectories.items(pos(i)).track));
-           export_fig(fn);           
+           %fn = fullfile(g_config.OUTPUT_DIR, sprintf('/trajectory_s%d_d%d_t%d.eps', g_trajectories.items(pos(i)).set, g_trajectories.items(pos(i)).session, g_trajectories.items(pos(i)).track));
+           %export_fig(fn);  
+           export_figure(1, gcf, g_config.OUTPUT_DIR, sprintf('/trajectory_s%d_d%d_t%d', g_trajectories.items(pos(i)).set, g_trajectories.items(pos(i)).session, g_trajectories.items(pos(i)).track));
         end       
     end
     
@@ -83,9 +84,11 @@ function results_export_selected_trajectories
         clf;
         g_trajectories.items(idx).plot;
         set(gcf, 'Color', 'w');
-        export_fig(fullfile(g_config.OUTPUT_DIR, ...
-           sprintf('/traj_s%d_d%d_t%d.eps', g_trajectories.items(idx).set, g_trajectories.items(idx).session, ...
-                g_trajectories.items(idx).track)...                
-           ));
+        %export_fig(fullfile(g_config.OUTPUT_DIR, ...
+        %   sprintf('/traj_s%d_d%d_t%d.eps', g_trajectories.items(idx).set, g_trajectories.items(idx).session, ...
+        %        g_trajectories.items(idx).track)...                
+        %   ));
+        export_figure(1, gcf, g_config.OUTPUT_DIR,...
+                sprintf('/traj_s%d_d%d_t%d', g_trajectories.items(idx).set, g_trajectories.items(idx).session,g_trajectories.items(idx).track));
     end
 end
