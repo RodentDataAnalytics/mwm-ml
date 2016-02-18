@@ -17,7 +17,8 @@ function results_classes_legend
     hleg = figure;
     set(gcf, 'Color', 'w');
     legendflex(dummyplot, leg, 'box', 'off', 'nrow', 3, 'ncol', 3, 'ref', hleg, 'fontsize', 6, 'anchor', {'n','n'}, 'xScale', 0.5);
-    export_fig(fullfile(g_config.OUTPUT_DIR, 'strategies_legend.eps'));
+    %%export_fig(fullfile(g_config.OUTPUT_DIR, 'strategies_legend.eps'));
+    export_figure(1, gcf, g_config.OUTPUT_DIR, 'strategies_legend');
     
     close(hleg);
     close(hdummy);      
@@ -33,7 +34,8 @@ function results_classes_legend
     colormap(cm);    
     set(gcf, 'Color', 'w');
     legendflex(dummyplot, leg, 'box', 'off', 'nrow', length(g_trajectories_strat) - 1, 'ncol', 1, 'ref', hleg, 'fontsize', 8, 'anchor', {'n','n'});
-    export_fig(fullfile(g_config.OUTPUT_DIR, 'strategies_legend_vert.eps'));
+    %%export_fig(fullfile(g_config.OUTPUT_DIR, 'strategies_legend_vert.eps'));
+    export_figure(1, gcf, g_config.OUTPUT_DIR, 'strategies_legend_vert');
     
     close(hleg);
     close(hdummy);       
