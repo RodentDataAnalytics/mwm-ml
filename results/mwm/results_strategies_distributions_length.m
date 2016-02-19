@@ -70,7 +70,7 @@ function results_strategies_distributions_length
         end
        
         figure;
-        boxplot(data, groups, 'positions', pos, 'colors', [0 0 0]);     
+        boxplot(data./1000, groups, 'positions', pos, 'colors', [0 0 0]);     
         h = findobj(gca,'Tag','Box');
         for j=1:2:length(h)
              patch(get(h(j),'XData'), get(h(j), 'YData'), [0 0 0]);
@@ -90,8 +90,8 @@ function results_strategies_distributions_length
         lbls = {};
         lbls = arrayfun( @(i) sprintf('%d', i), 1:g_config.TRIALS, 'UniformOutput', 0);     
         
-%%%%%   set(gca, 'DataAspectRatio', [1, lim(c)*1.25, 1], 'XTick', (pos(1:2:2*g_config.TRIALS - 1) + pos(2:2:2*g_config.TRIALS)) / 2, 'XTickLabel', lbls, 'Ylim', [0, lim(c)], 'FontSize', 0.75*g_config.FONT_SIZE);
-%%%%%   set(gca, 'LineWidth', g_config.AXIS_LINE_WIDTH);   
+        set(gca, 'DataAspectRatio', [1, lim(c)*1.25/1000, 1], 'XTick', (pos(1:2:2*g_config.TRIALS - 1) + pos(2:2:2*g_config.TRIALS)) / 2, 'XTickLabel', lbls, 'Ylim', [0, lim(c)/1000], 'FontSize', 0.75*g_config.FONT_SIZE);
+        set(gca, 'LineWidth', g_config.AXIS_LINE_WIDTH);   
                  
         ylabel(g_segments_classification.classes(c).description, 'FontSize', 0.75*g_config.FONT_SIZE);
         xlabel('trial', 'FontSize', g_config.FONT_SIZE);        
