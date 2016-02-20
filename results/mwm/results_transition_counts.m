@@ -1,4 +1,4 @@
-function results_transition_counts()    
+function results_transition_counts()
     
     global g_config;
     global g_trajectories;    
@@ -127,7 +127,8 @@ function results_transition_counts()
     box off;  
     set(gcf,'papersize',[8,8], 'paperposition',[0,0,8,8]);
 
-    export_fig(fullfile(g_config.OUTPUT_DIR, 'transision_counts.eps'));
+    %%export_fig(fullfile(g_config.OUTPUT_DIR, 'transision_counts.eps'));
+    export_figure(1, gcf, g_config.OUTPUT_DIR, 'transision_counts.eps');
 
     p = friedman(mfried, nanimals, 'off');
     % pa = anova2(m, nanimals);
