@@ -169,7 +169,7 @@ function results_control_stress_speed_latency
         set(gcf,'papersize',[8,8], 'paperposition',[0,0,8,8]);
       
         %%export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('control_stress_trial_%s.eps', names{i})));
-        export_figure(1, gcf, g_config.OUTPUT_DIR, sprintf('control_stress_trial_%s.eps', names{i}));
+        export_figure(1, gcf, g_config.OUTPUT_DIR, sprintf('control_stress_trial_%s', names{i}));
         
         % run friedman test            
         p = friedman(fried, n);
