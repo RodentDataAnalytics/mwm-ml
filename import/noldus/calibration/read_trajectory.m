@@ -54,7 +54,7 @@ function [ rat, trial, pts, day ] = read_trajectory( fn, varargin)
         err = 1;
     else
        for i = (l + 1):length(data)
-           if ~isempty(data{i, 1})
+          % if ~isempty(data{i, 1})
                % extract time, X and Y coordinates
                t = sscanf(data{i, 2}, '%f');
                x = sscanf(data{i, 3}, '%f');
@@ -63,7 +63,7 @@ function [ rat, trial, pts, day ] = read_trajectory( fn, varargin)
                if ~isempty(t) && ~isempty(x) && ~isempty(y)
                    pts = [pts; t x y];
                end
-           end
+         %  end
        end
     end
         

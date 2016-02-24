@@ -30,7 +30,7 @@ function [ x, y, a, b, inc ] = trajectory_boundaries( traj, varargin )
             inc = traj.compute_feature(g_config.FEATURE_BOUNDARY_INCLINATION);
         else
             if size(traj.points, 1) > 3
-                [A, cntr] = min_enclosing_ellipsoid(traj.points(:, 2:3)', 1e-1);
+                [A, cntr] = min_enclosing_ellipsoid(traj.points(:, 2:3)', 1e-2);
                 x = cntr(1);
                 y = cntr(2);
                 if (sum(isinf(A)) + sum(isnan(A))) == 0
