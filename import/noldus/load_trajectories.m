@@ -67,7 +67,7 @@ function [ traj, cal_data ] = load_trajectories(sets, calibrate, varargin)
              npts = size(pts, 1);
              cuti = npts;
              for k = 0:(size(pts, 1) - 1)
-                 if sqrt((pts(npts - k, 2) - g_config.PLATFORM_X)^2 + (pts(npts - k, 3) - g_config.PLATFORM_Y)^2) > g_config.PLATFORM_R
+                 if sqrt((pts(npts - k, 2) - g_config.PLATFORM_X)^2 + (pts(npts - k, 3) - g_config.PLATFORM_Y)^2) > 1.5*g_config.PLATFORM_R
                      break;
                  end
                  cuti = npts - k - 1;
