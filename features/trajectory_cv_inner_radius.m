@@ -3,5 +3,5 @@ function val = trajectory_cv_inner_radius(traj, varargin)
     [x0, y0] = trajectory_boundaries(traj, varargin{:});
 
     [r, iqr] = trajectory_radius(traj, 'CentreX', x0, 'CentreY', y0, varargin{:});    
-    val = r / iqr;                    
+    val = iqr / r;                    
 end
