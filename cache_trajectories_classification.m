@@ -33,17 +33,17 @@ function cache_trajectories_classification
         g_segments_base_classification = g_segments_classification;
         
         % do now the other classifications
-%         for i = 3:length(g_config.TAGS_CONFIG)
-%             param = g_config.TAGS_CONFIG{i};
-%             segments = g_trajectories.partition(param{3}, param{4}, param{5:end});
-%             % get classifier object
-%             classif = segments.classifier(param{1}, g_config.DEFAULT_FEATURE_SET, g_config.TAG_TYPE_BEHAVIOUR_CLASS);        
-%             % classify'em
-%             res = classif.cluster(param{2}, 0);
-%             % combine results
-%             g_segments_classification = g_segments_classification.combine(res); 
-%         end
-%         
+         for i = 3:length(g_config.TAGS_CONFIG)
+             param = g_config.TAGS_CONFIG{i};
+             segments = g_trajectories.partition(param{3}, param{4}, param{5:end});
+             % get classifier object
+             classif = segments.classifier(param{1}, g_config.DEFAULT_FEATURE_SET, g_config.TAG_TYPE_BEHAVIOUR_CLASS);        
+             % classify'em
+             res = classif.cluster(param{2}, 0);
+             % combine results
+             g_segments_classification = g_segments_classification.combine(res); 
+         end
+         
         % trajectory classes - segment classes + "direct finding" class        
         df_pos = tag.tag_position(g_segments_classification.classes, 'DF'); 
         if ~df_pos
