@@ -44,7 +44,7 @@ function results_transition_counts()
                 end
 
                 if par(sel(i)) == 0
-                    continue;
+                     continue;
                 end
                 
                 val = trans(sel(i));

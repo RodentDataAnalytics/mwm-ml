@@ -608,7 +608,7 @@ classdef clustering_results < handle
             w = repmat(max_max_len, 1, inst.nclasses) ./ max_len;
         end
         
-         function [major_classes, full_distr, seg_class] = mapping_ordered(inst, varargin)        
+         function [major_classes, full_distr, seg_class, class_w] = mapping_ordered(inst, varargin)        
             % compute the prefered strategy for a small time window for each
             % trajectory
             addpath(fullfile(fileparts(mfilename('fullpath')), '/extern'));
@@ -624,13 +624,15 @@ classdef clustering_results < handle
                 map = 1:inst.nclasses;
                 nclasses = inst.nclasses;
                 if isempty(class_w)                
-                    class_w = arrayfun( @(x) x.weight, inst.classes);
+                    % class_w = arrayfun( @(x) x.weight, inst.classes);
+                    class_w = inst.classes_weights;
                 end            
             else
                 map = tag.mapping(classes, inst.classes);
                 nclasses = length(classes);
                 if isempty(class_w)                
-                    class_w = arrayfun( @(x) x.weight, classes);
+                    class_w = inst.classes_weights;
+                    % class_w = arrayfun( @(x) x.weight, classes);
                 end            
             end
             
@@ -860,7 +862,7 @@ classdef clustering_results < handle
         
         function tpm = transition_counts(inst, varargin)           
             [grp] = process_options(varargin, 'Group', 0);
-            strat_distr = inst.mapping_ordered(-1, 'DiscardUnknown', 1, varargin{:});
+            strat_distr = inst.mapping_ordered('DiscardUnknown', 1, varargin{:}, 'MinSegments', 4);
             tpm = zeros(inst.nclasses, inst.nclasses);
             traj_idx = -1;            
             prev_class = -1;        
@@ -888,7 +890,7 @@ classdef clustering_results < handle
         end
         
         function tpm = transition_counts_trial(inst, varargin)                       
-            strat_distr = inst.mapping_ordered(-1, 'DiscardUnknown', 1, varargin{:});
+            strat_distr = inst.mapping_ordered('DiscardUnknown', 1, varargin{:}, 'MinSegments', 4);
             tpm = zeros(1, inst.segments.parent.count);
             traj_idx = -1;            
             prev_class = -1;        
