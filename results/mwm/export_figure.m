@@ -24,7 +24,7 @@
 function export_figure(flag, get_current_figure, get_path, get_name)
 
     if flag == 1
-        saveas(get_current_figure, strcat(get_path,get_name,'.fig')); %default export format
+       % saveas(get_current_figure, strcat(get_path,get_name,'.fig')); %default export format
         saveas(get_current_figure, strcat(get_path,get_name,'.eps'),'epsc2');
     else
         while (1)
