@@ -121,12 +121,17 @@ function plot_distribution_strategies(distributions, varargin)
                 tmp(vals(k, :) >= 0) = wbin(vals(k, :) >= 0);
                 barh([k, k + 1], [tmp; zeros(1, nbins)], bh, 'Stacked');
                 % color the patches
-                P = findobj(gca, 'type', 'patch');
+                %P = findobj(gca, 'type', 'patch');
+                P = patch;
                 for l = 1:nbins                    
                     if vals(k, l) > 0                     
-                        set(P(nbins - l + 1), 'edgecolor', cm(vals(k, l), :), 'facecolor', cm(vals(k, l), :));
+                        %set(P(nbins - l + 1), 'edgecolor', cm(vals(k, l), :), 'facecolor', cm(vals(k, l), :));
+                        P.EdgeColor = cm(vals(k, l),:);
+                        P.FaceColor = cm(vals(k, l),:);
                     elseif vals(k, l) == 0                     
-                        set(P(nbins - l + 1), 'edgecolor', [1, 1, 1], 'facecolor', [1, 1, 1]);
+                        %set(P(nbins - l + 1), 'edgecolor', [1, 1, 1], 'facecolor', [1, 1, 1]);
+                        P.EdgeColor = [1, 1, 1];
+                        P.FaceColor = [1, 1, 1];
                     end
                 end
                 hold on;
