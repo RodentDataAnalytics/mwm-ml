@@ -624,15 +624,15 @@ classdef clustering_results < handle
                 map = 1:inst.nclasses;
                 nclasses = inst.nclasses;
                 if isempty(class_w)                
-                    % class_w = arrayfun( @(x) x.weight, inst.classes);
-                    class_w = inst.classes_weights;
+                    class_w = arrayfun( @(x) x.weight, inst.classes);
+                    %class_w = inst.classes_weights;
                 end            
             else
                 map = tag.mapping(classes, inst.classes);
                 nclasses = length(classes);
                 if isempty(class_w)                
-                    class_w = inst.classes_weights;
-                    % class_w = arrayfun( @(x) x.weight, classes);
+                    %class_w = inst.classes_weights;
+                    class_w = arrayfun( @(x) x.weight, classes);
                 end            
             end
             
