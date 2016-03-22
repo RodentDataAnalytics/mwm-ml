@@ -14,6 +14,7 @@ function results_class_weights
             strat_distr = g_segments_base_classification.mapping_ordered('DiscardUnknown', 1, 'MinSegments', 1, 'ClassesWeights', w);
         else
             [strat_distr, ~, ~, w] = g_segments_base_classification.mapping_ordered('DiscardUnknown', 1, 'MinSegments', 1);
+            w = g_segments_base_classification.classes_weights();
         end
         
         vals = arrayfun( @(x) [], 1:g_segments_base_classification.nclasses, 'UniformOutput', 0);
