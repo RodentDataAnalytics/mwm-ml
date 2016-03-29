@@ -1,6 +1,14 @@
+% Produces the Mean and Maximum Length of consecutive segments of each
+% class for the 250 cm / 90% overlap classification with constant weights
+% and after adopting differentiated weights for minor and major classes.
+
+% Publication:
+% Supplementary Material
+% page 8 Table 2
+
 function results_class_weights
     
-    %%  load all trajectories and compute feature values if necessary (data is then cached)
+    % load all trajectories and compute feature values if necessary (data is then cached)
     global g_segments_base_classification;
     global g_config;
     
@@ -48,8 +56,8 @@ function results_class_weights
 
         param = g_config.TAGS_CONFIG{2};
         
-        fac = param{5}*(1 - param{6});
-        % show'em, will ya?
+        fac = param{5}*(1 - param{6}); % length * ( 1 - overlap% )
+        % show results
         for i = 1:g_segments_base_classification.nclasses
             fprintf('\n%s: %.2f (max: %d) == WEIGHT: %.2f', g_segments_base_classification.classes(i).description, fac*mean(vals{i}), fac*max(vals{i}), w(i));
         end
