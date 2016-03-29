@@ -1,3 +1,12 @@
+% Classification results for the 6 first trials and 12 animals from the 
+% control and stress group. Each bar represents a full trial 
+% (up to 90 seconds) and shows changes in exploration strategies over 
+% the trial.
+
+% Publication:
+% Main Paper
+% page 7 Figure 4
+
 function results_strategies_individual_evolution
     
     v = version();
@@ -15,8 +24,7 @@ function results_strategies_individual_evolution
         cache_trajectories_classification;
 
         figure;
-
-        % bins = [10, 15, 25, 40];        
+    
         bins = repmat(2, 1, 45);
         nbins = length(bins);
 
