@@ -1,8 +1,12 @@
+% Computes the confusion matrix for the classification of segments.
+
+% Publication:
+% Supplementary Material
+% page 6 Table 1
+
 function results_confusion_matrix
     global g_config;
         
-%RESULTS_CLUSTERING_CONFUSION_MATRIX Computes the confusion matrix of the
-%classification
     fn = fullfile(g_config.OUTPUT_DIR, 'confusion_matrix.mat');
     
     % if output file already exists do nothing
