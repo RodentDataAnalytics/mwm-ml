@@ -1,7 +1,5 @@
 classdef results_classes_evolution < handle
-    %RESULTS_SINGLE_FEATURES Summary of this class goes here
-    %   Detailed explanation goes here
-    
+
     properties(GetAccess = 'protected', SetAccess = 'protected')
         window = [];        
         parent = [];                

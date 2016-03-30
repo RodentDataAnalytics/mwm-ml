@@ -126,8 +126,6 @@ classdef clustering_results < handle
         end
         
         function res = purity(inst)
-            % TODO: have to fix the clustering function to deal with
-            % multiple labels per element
             res = clustering_purity(inst.nclusters, inst.cluster_idx_all_(inst.non_empty_labels_idx), inst.input_labels(inst.non_empty_labels_idx));
         end
         
@@ -197,7 +195,6 @@ classdef clustering_results < handle
         % This combines individual segment tags returned from the function
         % above into a single distribution per trajectory
         function [distr, ext_distr] = classes_distribution(inst, partitions, varargin)
-            % neeed the process_options function
             addpath(fullfile(fileparts(mfilename('fullpath')), '/extern'));
             [normalize, ext_vals, empty_class, max_seg, reverse, ovlp, slen] = process_options(varargin, ...
                 'Normalize', 0, 'ExternalValues', [], 'EmptyClass', 0, ... 
@@ -296,111 +293,6 @@ classdef clustering_results < handle
             end
         end
         
-        % This combines individual segment tags returned from the function
-        % above into a single distribution per trajectory
-%         function [distr, ext_distr] = classes_distribution(inst, partitions, varargin)
-%             % neeed the process_options function
-%             addpath(fullfile(fileparts(mfilename('fullpath')), '/extern'));
-%             [normalize, ext_vals, empty_class, max_seg, reverse, ovlp, slen, classes] = process_options(varargin, ...
-%                 'Normalize', 0, 'ExternalValues', [], 'EmptyClass', 0, ... 
-%                 'MaxSegments', 0, 'Reverse', 0, 'Overlap', 0, 'SegmentLength', 0, 'Classes', [] ...
-%             );
-%                                 
-%             if isempty(classes)
-%                 classes = inst.classes;
-%             end
-%             distr = [];
-%             ext_distr = [];            
-%             % number of classes
-%             if empty_class > 0
-%                 nc = length(unique([1:length(classes), empty_class]));
-%             else
-%                 nc = length(classes);
-%             end
-%             % number of external labels (not in this set of
-%             % trajectories/segments)
-%             next = inst.nexternal_labels;
-%             nt = 1; % trajectory number           
-%             ns = 0; % segment number 
-%                 
-%             distr = zeros(length(partitions), nc);
-%             if ~isempty(ext_vals)
-%                 ext_distr = zeros(length(partitions), nc);
-%             end    
-%             
-%             if ovlp > 0
-%                 % both overlap and segment lenghts have to provided                
-%                 assert( slen > 0 ) ;
-%                 nbin = ceil(slen / ovlp);
-%                 distr_traj = zeros(1, nc);
-%             end                
-%                       
-%             [~, ~, map] = inst.mapping_ordered(varargin{:});
-%             if reverse
-%                 map = map(end:-1:1);
-%                 partitions = partitions(end:-1:1);
-%                 ext_vals = ext_vals(end:-1:1);
-%             end
-%             
-%             for i = (next + 1):length(map)
-%                 if ns >= partitions(nt)
-%                     ns = 0;                        
-%                     if partitions(nt) == 0
-%                         % do we have a default class ?                        
-%                         if empty_class > 0
-%                             distr(nt, empty_class) = 1;
-%                         end
-%                         nt = nt + 1;
-%                         continue;
-%                     else
-%                         if ovlp > 0
-%                             for j = 1:size(distr_traj, 1)
-%                                 v = max(distr_traj(j, :));                                    
-%                                 if v > 0
-%                                     % allow for more than one maximum
-%                                     p = find(distr_traj(j, :) == v);
-%                                     distr(nt, p) = distr(nt, p) + 1 / length(p);
-%                                 end
-%                             end                            
-%                         end
-%                     end
-%                     if ovlp > 0
-%                         distr_traj = zeros(1, nc);
-%                     end
-%                     nt = nt + 1;
-%                 end
-%                 
-%                 if map(i) ~= 0
-%                     if max_seg == 0 || ns <= max_seg
-%                         if ovlp == 0                        
-%                             distr(nt, map(i)) = distr(nt, map(i)) + 1;
-%                     
-%                             if ~isempty(ext_vals)
-%                                 ext_distr(nt, map(i)) = ext_distr(nt, map(i)) + ext_vals(i);
-%                             end
-%                         else                           
-%                             for j = ns:(ns + nbin) 
-%                                 distr_traj(j, map(i)) = distr_traj(j, map(i)) + 1;
-%                             end
-%                         end
-%                     end
-%                 end
-%                 ns = ns + 1;
-%             end
-%             
-%             if normalize
-%                 distr= distr ./ repmat(sum(distr, 2) + (sum(distr, 2) == 0)*1e-5, 1, nc);
-%             end
-%             
-%             if reverse
-%                 % un-reverse distribution
-%                 distr = distr(end:-1:1, :);
-%                 if ~isempty(ext_distr)
-%                     ext_distr = ext_distr(end:-1:1, :);
-%                 end
-%             end
-%         end
-        
         function [cover, cov_flag] = coverage(inst)
             global g_config;
             if isempty(inst.cover_)
@@ -438,9 +330,7 @@ classdef clustering_results < handle
             cov_flag = inst.cover_flag_;
         end
         
-        % TODO: (tiago) remove this and replace by classes_mapping_ordered;
-        % The should do the same but somehow I broke the other function ...
-        % need to investigate
+        
         function [major_classes, full_distr] = mapping_time(inst, bins, varargin)        
             % compute the prefered strategy for a small time window for each
             % trajectory

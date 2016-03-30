@@ -1,24 +1,33 @@
+% Comparison of full trajectory metrics for two groups of animals over a 
+% set of 12 trials. The generated plots show:
+% 1. The escape latency.
+% 2. The average movement speed.
+% 3. The average path length.
+
+% Publication:
+% Main Paper
+% page 3 Figure 1
+
 function results_control_stress_speed_latency    
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../../extern/sigstar'));
     
-    % global data initialized elsewhere
-    global g_trajectories_speed;        
-    global g_trajectories_length;        
-    global g_animals_trajectories_map;
-    global g_trajectories;
-    global g_config;
+    % global variables
+    global g_trajectories_speed;  % movement speed  
+    global g_trajectories_length; % path length     
+    global g_animals_trajectories_map; % matrix of trajectory indices for each trial and group of animals.
+    global g_trajectories; % total trajectories
+    global g_config; % configurations
     
     cache_animals;
-
+    
+    % compute features only for groups 1,2 (controlled, stressed)
     trajectories_latency = arrayfun( @(t) t.compute_feature(g_config.FEATURE_LATENCY), g_trajectories.items);      
     
-    cache_animals;
-     vars = [trajectories_latency; g_trajectories_speed; g_trajectories_length/100];
+    vars = [trajectories_latency; g_trajectories_speed; g_trajectories_length/100];
     names = {'latency', 'speed', 'length'};
     ylabels = {'latency [s]', 'speed [cm/s]', 'path length [m]'};
     log_y = [0, 0, 0];
         
-    for i = 1:size(vars, 1)
+    for i = 1:size(vars, 1) % for the first trial
         figure;
         values = vars(i, :);
         data = [];
@@ -68,12 +77,9 @@ function results_control_stress_speed_latency
         set(gca, 'LineWidth', g_config.AXIS_LINE_WIDTH);
         box off;        
         ylabel(ylabels{i}, 'FontSize', g_config.FONT_SIZE);
-        
-        %%export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('control_stress_%s.eps', names{i})));
         export_figure(1, gcf, g_config.OUTPUT_DIR, sprintf('control_stress_%s', names{i}));
         
-        %%
-        %% Do the same for each trial
+        % Do the same for each trial
         clf;
         data = [];
         groups = [];
@@ -155,20 +161,12 @@ function results_control_stress_speed_latency
                 else
                   alpha = 0.05;
                 end
-                 
-               % add significance stars
-               % h = sigstar( {[pos(2*t - 1), pos(t*2)]}, [alpha]);
-               % set(h(:, 1), 'LineWidth', 1.5);
-               % set(h(:, 2), 'FontSize', 0.7*g_config.FONT_SIZE);
             end
         end
                 
         set(gcf, 'Color', 'w');
         box off;        
-        
         set(gcf,'papersize',[8,8], 'paperposition',[0,0,8,8]);
-      
-        %%export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('control_stress_trial_%s.eps', names{i})));
         export_figure(1, gcf, g_config.OUTPUT_DIR, sprintf('control_stress_trial_%s', names{i}));
         
         % run friedman test            
@@ -176,7 +174,5 @@ function results_control_stress_speed_latency
         str = sprintf('Friedman p-value (%s): %g', ylabels{i}, p);
         disp(str);          
     end
-    
-    close;
 end
 

@@ -1,5 +1,5 @@
 function browse_trajectories(labels_fn, traj, varargin)
-%BROWSE_TRAJECTORIES Summary of this function goes here                
+              
     % no filter at first
     global g_config;
     addpath(fullfile(fileparts(mfilename('fullpath')), '../extern'));    

@@ -1,15 +1,19 @@
+% Transition probabilities of strategies within trials for the control 
+% and stress group of animals. Rows and columns indicate the starting
+% and ending strategies respectively. Row values are normalised.
+
+% Publication:
+% Main Paper
+% page 9 Table 3
+
 function results_strategy_transition_prob
-%RESULTS_STRATEGY_TRANSITION_PROB Summary of this function goes here
-%   Detailed explanation goes here
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../../extern/cm_and_cb_utilities'));
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../../extern/legendflex'));
-      
-    %%  load all trajectories and compute feature values if necessary (data is then cached)
-    global g_trajectories;    
-    global g_segments_classification;
-    global g_partitions;
-    global g_long_trajectories_map;
-    global g_trajectories_group;
+
+    %  load all trajectories and compute feature values if necessary (data is then cached)
+    global g_trajectories; % total trajectories
+    global g_segments_classification; % classification of segments (splited trajectories).
+    global g_partitions; % Number of instances of the same trajectory class.
+    global g_long_trajectories_map; % matrix of trajectory indices for each trial and group of animals
+    global g_trajectories_group; % In which group each trajectory belongs to
     
     cache_trajectories_classification;
         

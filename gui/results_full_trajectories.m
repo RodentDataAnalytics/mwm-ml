@@ -1,6 +1,4 @@
 classdef results_full_trajectories < handle
-    %RESULTS_FULL_TRAJECTORIES Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties(GetAccess = 'protected', SetAccess = 'protected')
         window = [];

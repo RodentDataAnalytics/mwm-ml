@@ -1,11 +1,17 @@
+% Comparison between classification of trajectories and a manual 
+% classification 
+
+% Publication:
+% Supplementary Material
+% page 8 Figure 4
+
 function results_full_trajectories_classification2
-%RESULTS_FULL_TRAJECTORIES_CLASSIFICATION Compare classification of
-%trajectories with a manual classification  
+
     % global data initialized elsewhere
-    global g_trajectories; 
-    global g_long_trajectories_map;
-    global g_animals_trajectories_map;
-    global g_config;
+    global g_trajectories; % total trajectories
+    global g_long_trajectories_map; % keeps only the trajectory with length > 0
+    global g_animals_trajectories_map; % matrix of trajectory indices for each trial and group of animals.
+    global g_config; % configurations
     cache_animals;
     cache_trajectory_segments;
        
@@ -90,12 +96,9 @@ function results_full_trajectories_classification2
         set(gcf, 'Color', 'w');
         box off;  
         set(gcf,'papersize',[8,8], 'paperposition',[0,0,8,8]);
-        
-        %%export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('full_traj_class_c%d.eps', c)));      
         export_figure(1, gcf, g_config.OUTPUT_DIR, sprintf('full_traj_class_c%d', c));
         
         p = friedman(mfried, nanimals);
-        % pa = anova2(m, nanimals);
         str = sprintf('Class: %s\tp_frdm: %g', full_tags(c).description, p);            
         disp(str);
     end    

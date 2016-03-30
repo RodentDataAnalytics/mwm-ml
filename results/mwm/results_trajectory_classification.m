@@ -1,21 +1,29 @@
+% Runs the classification process twice for 15 Trajectories:
+% (a) once using a mapping with constant weight
+%     (see generated files ending with '_const' inside the results\generated, 
+% (b) once using different weights per class.
+% The generated file 'strategies_line_legend_vert' contains the legend.
+
+% Publication:
+% Main Paper
+% page 4 Figure 2
+
 function results_trajectory_classification
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../../extern/cm_and_cb_utilities'));
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../../extern/legendflex'));
-      
-    %%  load all trajectories and compute feature values if necessary (data is then cached)
-    global g_config;
-    global g_trajectories;    
-    global g_segments;
-    global g_segments_classification;
-    global g_segments_base_classification;
-    global g_long_trajectories_map;
-    global g_partitions;
+    
+    % load all trajectories and compute feature values if necessary (data is then cached)
+    global g_config; % configurations
+    global g_trajectories; % total trajectories    
+    global g_segments; % total segments produced from the splitting of trajectories
+    global g_segments_classification; % classification of segments (splited trajectories)
+    global g_segments_base_classification; % classification data of all segments
+    global g_long_trajectories_map; % matrix of trajectory indices for each trial and group of animals
+    global g_partitions; % number of instances of the same trajectory class
     
     cache_trajectories_classification;
        
     fprintf('\nCOVERAGE: %.2f | UNKNOWN: %.2f', g_segments_classification.coverage()*100, g_segments_classification.punknown*100);
     
-    % run the thing twice: once using a mapping with constant weight, once
+    % run twice: once using a mapping with constant weight, once
     % using different weights per class
     for iter = 1:2
         if iter == 2
@@ -24,6 +32,7 @@ function results_trajectory_classification
             w = [];
         end
         strat_distr = g_segments_classification.mapping_ordered('DiscardUnknown', 1, 'MinSegments', 4, 'ClassesWeights', w);
+        % set, session, track
         ids = [2, 2, 19; ... 
                1, 1, 57; ...
                1, 1, 6; ...
@@ -116,11 +125,7 @@ function results_trajectory_classification
 
                 if p
                     starti = g_segments.items(seg0 + lasti).start_index;
-                   % if j == nseg
-                    %    endi = g_segments.items(seg0 + j).start_index + size(g_segments.items(seg0 + j).points, 1) - 1;                
-                    %else
-                        endi = g_segments.items(seg0 + j).start_index;
-                    % end
+                    endi = g_segments.items(seg0 + j).start_index;
                     if distr(j - 1) > 0                    
                         clr = lclr(distr(j - 1), :);
                         lspec = ls{distr(j - 1)};
@@ -138,10 +143,8 @@ function results_trajectory_classification
             set(gcf, 'Color', 'w');
 
             if iter == 1
-                %%export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('trajectory_detailed_%d.eps', i)));
                 export_figure(1, gcf, g_config.OUTPUT_DIR, sprintf('trajectory_detailed_%d', i));
             else
-                %%export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('trajectory_detailed_%d_const.eps', i)));
                 export_figure(1, gcf, g_config.OUTPUT_DIR, sprintf('trajectory_detailed_%d_const', i));
             end
             close;
@@ -160,7 +163,6 @@ function results_trajectory_classification
     hleg = figure;
     set(gcf, 'Color', 'w');
     legendflex(handles, leg, 'box', 'off', 'nrow', 8, 'ncol', 1, 'ref', hleg, 'fontsize', 8, 'anchor', {'n','n'});
-    %%export_fig(fullfile(g_config.OUTPUT_DIR, 'strategies_line_legend_vert.eps'));
     export_figure(1, gcf, g_config.OUTPUT_DIR, 'strategies_line_legend_vert');
 
     close(hleg);

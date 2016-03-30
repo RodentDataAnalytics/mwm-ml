@@ -1,5 +1,19 @@
+% Generates three figures indicating the impact of the number of clusters 
+% on the clustering performance for a set of 29,476 segments:
+% 1. Percentage of classification errors.
+% 2. Percentage of segments belonging to clusters that could not be mapped
+%    unambiguously to a single class.
+% 3. Percentage of the full swimming paths that are covered by at least 
+%    one segment of a known class.
+% The calculated data from the clustering proceedures are also saved.
+
+% Publication:
+% Supplementary Material
+% page 3 Figure 2
+
 function results_clustering_parameters
-    % load trajectory segments
+    
+% load trajectory segments
     global g_config;
     
     global g_segments;    
@@ -73,7 +87,7 @@ function results_clustering_parameters
     save(fullfile(g_config.OUTPUT_DIR, 'clustering_parameters.mat'), 'res1', 'res2', 'res3');
     
     % remap the classes as to not invalidate mixed clusters
-    % we want to compare clustering errors after all
+    % because we want to compare the clustering errors
     res1bare = [];
     res2bare = [];    
     for i = 1:length(res1)
@@ -95,7 +109,6 @@ function results_clustering_parameters
     set(gca, 'FontSize', g_config.FONT_SIZE, 'LineWidth', g_config.AXIS_LINE_WIDTH);
     h1 = gca;
     box off;
-    %%export_fig(fullfile(g_config.OUTPUT_DIR, 'clusters_dep_err.eps'));
     export_figure(1, gcf, g_config.OUTPUT_DIR, 'clusters_dep_err');
 
     % percentage of unknown segments
@@ -110,7 +123,6 @@ function results_clustering_parameters
     set(gca, 'FontSize', g_config.FONT_SIZE, 'LineWidth', g_config.AXIS_LINE_WIDTH);
     h2 = gca;
     box off;
-    %%export_fig(fullfile(g_config.OUTPUT_DIR, 'clusters_dep_undef.eps'));
     export_figure(1, gcf, g_config.OUTPUT_DIR, 'clusters_dep_undef');
     
     % final number of clusters
@@ -125,10 +137,10 @@ function results_clustering_parameters
     set(gca, 'FontSize', g_config.FONT_SIZE, 'LineWidth', g_config.AXIS_LINE_WIDTH);
     h3 = gca;
     box off;
-    %%export_fig(fullfile(g_config.OUTPUT_DIR, 'clusters_dep_deltan.eps'));
     export_figure(1, gcf, g_config.OUTPUT_DIR, 'clusters_dep_deltan');
 
-    % covering
+    % percentage of the full swimming paths that are covered by at least
+    % one segment of a known class
     figure(80);
     ci_fac = 1.96/sqrt(length(nc));
     plot( nc, covering*100,  'k-', 'LineWidth', g_config.LINE_WIDTH);                       
@@ -138,6 +150,5 @@ function results_clustering_parameters
     set(gca, 'FontSize', g_config.FONT_SIZE, 'LineWidth', g_config.AXIS_LINE_WIDTH, 'YLim', [80, 100]);
     h1 = gca;
     box off;
-    %%export_fig(fullfile(g_config.OUTPUT_DIR, 'clusters_dep_coverage.eps'));
     export_figure(1, gcf, g_config.OUTPUT_DIR, 'clusters_dep_coverage');
 end

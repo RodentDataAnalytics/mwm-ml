@@ -1,13 +1,19 @@
-function results_strategies_distributions_length
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../../extern/sigstar'));    
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../../extern/cm_and_cb_utilities'));
-    addpath(fullfile(fileparts(mfilename('fullpath')), '../../'));
+% Complutes the average segment lengths for each strategy adopted by 
+% stress and control group for a set of 12 trials divided in 3 sessions 
+% (days). The generated plots show the average length in meters that 
+% animals spent in one strategy during each trial (8 total strategies). 
 
-    % global data initialized elsewhere
-    global g_config;
-    global g_segments_classification;
-    global g_animals_trajectories_map;
-    global g_long_trajectories_map;        
+% Publication:
+% Main Paper
+% page 8 Figure 5 (A-H)
+
+function results_strategies_distributions_length
+
+    % global data
+    global g_config; % configurations
+    global g_segments_classification; % classification of segments (splited trajectories).
+    global g_animals_trajectories_map; % matrix of trajectory indices for each trial and group of animals.
+    global g_long_trajectories_map; % % keeps only the trajectory with length > 0       
     
     % classify trajectories
     cache_animals;
@@ -99,12 +105,10 @@ function results_strategies_distributions_length
         set(gcf, 'Color', 'w');
         box off;  
         set(gcf,'papersize',[8,8], 'paperposition',[0,0,8,8]);
-        
-        %%export_fig(fullfile(g_config.OUTPUT_DIR, sprintf('control_stress_lenght_c%d.eps', c)));
+
         export_figure(1, gcf, g_config.OUTPUT_DIR, sprintf('control_stress_lenght_c%d', c));
     
         p = friedman(mfried, nanimals);
-        % pa = anova2(m, nanimals);
         str = sprintf('Class: %s\tp_frdm: %g', g_segments_classification.classes(c).description, p);            
         disp(str);        
     end     

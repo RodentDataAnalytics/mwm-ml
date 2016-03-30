@@ -1,6 +1,6 @@
 classdef trajectories < handle
-    %TRAJECTORIES Summary of this class goes here
-    %   Detailed explanation goes here
+    %TRAJECTORIES stores trajectories or segments of trajectories
+    
     properties(GetAccess = 'public', SetAccess = 'public')
         % use two-phase clustering
         clustering_two_phase = 1;

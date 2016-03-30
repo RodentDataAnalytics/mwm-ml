@@ -1,9 +1,16 @@
+% Computes and presents the number of transitions between strategies 
+% for the control and the stressed groups of animals.
+
+% Publication:
+% Main Paper
+% page 8 Figure 5 (I)
+
 function results_transition_counts()
     
-    global g_config;
-    global g_trajectories;    
-    global g_segments;        
-    global g_segments_classification;    
+    global g_config; % configurations
+    global g_trajectories; % total trajectories     
+    global g_segments; % total segments produced from the splitting of trajectories       
+    global g_segments_classification; % classification of segments (splited trajectories)   
             
     cache_trajectories_classification;
           
@@ -19,6 +26,7 @@ function results_transition_counts()
     
     trans = g_segments_classification.transition_counts_trial;
     
+    % select only animal groups controlled and stressed
     all_trials = arrayfun( @(t) t.trial, g_trajectories.items);                   
     all_groups = arrayfun( @(t) t.group, g_trajectories.items);                       
     all_groups = all_groups(g_trajectories.segmented_index);
@@ -127,15 +135,12 @@ function results_transition_counts()
     box off;  
     set(gcf,'papersize',[8,8], 'paperposition',[0,0,8,8]);
 
-    %%export_fig(fullfile(g_config.OUTPUT_DIR, 'transision_counts.eps'));
-    export_figure(1, gcf, g_config.OUTPUT_DIR, 'transision_counts.eps');
+    export_figure(1, gcf, g_config.OUTPUT_DIR, 'transision_counts');
 
     p = friedman(mfried, nanimals, 'off');
-    % pa = anova2(m, nanimals);
     str = sprintf('p_frdm: %g', p);            
     disp(str);
     
     p = anova2(mfried, nanimals, 'off');
-    % pa = anova2(m, nanimals);
     str = sprintf('p_anova: %g', p);            
     disp(str);
