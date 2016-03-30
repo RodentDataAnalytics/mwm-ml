@@ -1,6 +1,5 @@
 function trajectory_detailed_classification( traj_labels_fn, labels_fn, seg_len, ovlp, feat, clusters, grps )
-%CLASSIFY_TRAJECTORIES Summary of this function goes here
-%   Detailed explanation goes here
+
     global g_trajectories;
     cache_trajectories;
     
