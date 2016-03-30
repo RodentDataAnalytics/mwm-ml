@@ -1,6 +1,5 @@
 function [ distr ] = segment_classes_distribution(classes, k)
-%CLASSIFY_TRAJECTORIES_DISTR Summary of this function goes here
-%   Detailed explanation goes here    
+%CLASSIFY_TRAJECTORIES_DISTR distributes segments to classes
     % number of distinct trajectories
     ntraj = max(classes(:, 1));
     distr = zeros(ntraj, k);
