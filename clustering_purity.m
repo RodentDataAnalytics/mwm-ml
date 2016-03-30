@@ -1,6 +1,6 @@
 function [ purity ] = clustering_purity( k, idxs, labels )
-%CLUSTERING_PURITY Summary of this function goes here
-%   Detailed explanation goes here
+%CLUSTERING_PURITY computes cluster sizes and returns the averaged entropy
+
     % compute cluster sizes
     szs = zeros(1, k);
     for i = 1:k
