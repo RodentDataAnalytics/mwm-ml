@@ -1,9 +1,9 @@
 function plot_distribution_strategies(distributions, varargin)
-%PLOT_DISTRIBUTION_STRATEGIES Summary of this function goes here
-%   Detailed explanation goes here    
-    addpath(fullfile(fileparts(mfilename('fullpath')), './extern/cm_and_cb_utilities'));
-    addpath(fullfile(fileparts(mfilename('fullpath')), './extern/'));
-    
+%PLOT_DISTRIBUTION_STRATEGIES 
+%This function is called by results_strategies_individual_evolution and it
+%is used to produced a figure showing the various animals strategies
+%throughtout each trial.
+   
     global g_config;
     
     [mean_row, mean_col, row_labels, col_labels, ticks, ticks_labels, markers, ordered, widths, cm, bh, avgh, ar] = ...
