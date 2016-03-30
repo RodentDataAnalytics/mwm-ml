@@ -1,7 +1,5 @@
 classdef results_correlation < handle
-%RESULTS_CORRELATION Summary of this function goes here
-%   Detailed explanation goes here
-   
+
     properties(GetAccess = 'protected', SetAccess = 'protected')
         window = [];    
         parent = [];
