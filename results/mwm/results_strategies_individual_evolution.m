@@ -1,4 +1,4 @@
-% Classification results for the 6 first trials and 12 animals from the 
+% Classification results for each trial and 27 animals from the 
 % control and stress group. Each bar represents a full trial 
 % (up to 90 seconds) and shows changes in exploration strategies over 
 % the trial.
@@ -13,11 +13,11 @@ function results_strategies_individual_evolution
     if str2num(v(1:3)) <= 8.3 % <= Matlab 2014a
 
         % global data initialized elsewhere
-        global g_segments_classification;
-        global g_partitions;
-        global g_animals_ids;
-        global g_animals_trajectories_map;
-        global g_config;
+        global g_segments_classification; % classification of segments (splited trajectories)
+        global g_partitions; % number of instances of the same trajectory class
+        global g_animals_ids; % animal ids (controlled and streessed groups)
+        global g_animals_trajectories_map; % matrix of trajectory indices for each trial and group of animals
+        global g_config; % configurations
 
         % classify trajectories
         cache_animals; 
@@ -70,9 +70,22 @@ function results_strategies_individual_evolution
                 plot_distribution_strategies(distr, 'Ordered', 1, 'Widths', bins, ...
                            'ColumnLabels', col_labels, ... %'RowLabels', row_labels, ...
                            'Ticks', [10, 50, 90], 'TicksLabels', {'10s', '50s', '90s'}, 'BarHeight', 0.25, 'AverageBarsHeight', 0);
-                export_figure(1, gcf, g_config.OUTPUT_DIR, sprintf('individual_strategies_g%d_s%d.eps', g, s));  
+               %% To export the generated figures uncomment the line below. Note that the exporting process is very slow for these figures. 
+               %export_figure(1, gcf, g_config.OUTPUT_DIR, sprintf('individual_strategies_g%d_s%d.eps', g, s));  
             end
-        end
+        end    
+        %% Generate legend
+        hdummy = figure;
+        cm = cmapping(g_segments_classification.nclasses, g_config.CLASSES_COLORMAP);             
+        dummyplot = barh(repmat(1:g_segments_classification.nclasses+1, 4, 1), 'Stack');
+        leg = arrayfun(@(t) t.description, g_segments_classification.classes, 'UniformOutput', 0);
+        leg = [leg, 'Direct Finding'];
+        colormap(cm);    
+        hleg = figure;
+        set(gcf, 'Color', 'w');
+        legendflex(dummyplot, leg, 'box', 'off', 'nrow', 3, 'ncol', 3, 'ref', hleg, 'fontsize', 6, 'anchor', {'n','n'}, 'xScale', 0.5);
+        export_figure(1, gcf, g_config.OUTPUT_DIR, 'individual_strategies_legend');
+        close(hdummy);
     else
         disp('This function (results_strategies_individual_evolution) may only be run with MATLAB version 2014a or earlier.');
     end
