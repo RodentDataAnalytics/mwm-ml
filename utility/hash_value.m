@@ -1,6 +1,5 @@
 function hash = hash_value( val )
-%HASH_VALUE Summary of this function goes here
-%   Detailed explanation goes here
+%HASH_VALUE generates a hash value
     if length(val) > 1
         hash = hash_value(val(1));
         for i = 2:length(val)
