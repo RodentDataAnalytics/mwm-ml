@@ -71,7 +71,7 @@ function results_strategies_individual_evolution
                            'ColumnLabels', col_labels, ... %'RowLabels', row_labels, ...
                            'Ticks', [10, 50, 90], 'TicksLabels', {'10s', '50s', '90s'}, 'BarHeight', 0.25, 'AverageBarsHeight', 0);
                %% To export the generated figures uncomment the line below. Note that the exporting process is very slow for these figures. 
-               %export_figure(1, gcf, g_config.OUTPUT_DIR, sprintf('individual_strategies_g%d_s%d.eps', g, s));  
+               %export_figure(1, gcf, g_config.OUTPUT_DIR, sprintf('individual_strategies_g%d_s%d', g, s));  
             end
         end    
         %% Generate legend
