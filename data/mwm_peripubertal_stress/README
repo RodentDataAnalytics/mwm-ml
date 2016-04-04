@@ -1,4 +1,4 @@
-This folder contains the original Morris Water Maze trajectories of rats induced to peri-pubertal stress (PPS). The data was acquired Carmen Sandi's group, Laboratory of Behavioural Genetics, EPFL. For more information about the experiments see Gehhring et al., "Detailed analysis of swimming paths in the Morris Water Maze", Scientific Reports, 2015.
+This folder contains the original Morris Water Maze trajectories of rats induced to peri-pubertal stress (PPS). The data was acquired from the Laboratory of Behavioural Genetics, EPFL. For more information about the experiments see Gehhring et al., "Detailed analysis of swimming paths in the Morris Water Maze", Scientific Reports, 2015.
 
 Trajectories were acquired with Ethovision 3.1 and need to be first calibrated (details of the calibration are given in the supplementary information of the referecence given above). A ready to use calibration procedure is given in the import/noldus/calibration directory in the root folder.  
 
