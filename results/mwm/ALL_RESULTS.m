@@ -2,7 +2,7 @@ results_agreement;
 results_calibration;
 results_class_weights;
 results_classes_legend;
-results_clustering_paremeters;
+results_clustering_parameters;
 results_confusion_matrix;
 results_control_stress_speed_latency;
 results_full_trajectories_classification2;
