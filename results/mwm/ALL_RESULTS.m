@@ -1,7 +1,5 @@
-results_agreement;
 results_calibration;
 results_class_weights;
-results_classes_legend;
 results_clustering_parameters;
 results_confusion_matrix;
 results_control_stress_speed_latency;
@@ -10,3 +8,6 @@ results_strategies_distributions_length;
 results_strategies_transition_prob;
 results_trajectory_classification;
 results_transition_counts;
+results_strategies_individual_evolution;
+% results_export_random_segments;
+% results_export_selected_trajectories;
