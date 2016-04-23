@@ -80,7 +80,7 @@
 
 \indent This software can be used to analyse the trajectories of animals by means of a semi-supervised clustering algorithm.
 
-For more details of the analysis procedure, as applied to trajectories in the Morris Water Maze, please refer to \href{http://www.nature.com/articles/srep14562}{Gehring et al., 2015}. The data used in this article is also provided here as an example application of the code. Although this code was initially applied to trajectories in the Morris Water Maze, the method is general enough as to be applied to other types of experiment
+For more details of the analysis procedure, as applied to trajectories in the Morris Water Maze, please refer to \href{http://www.nature.com/articles/srep14562}{Gehring et al., 2015}. The data used in this article is also provided here as an example application of the code. Although this code was initially applied to trajectories in the Morris Water Maze, the method is general enough as to be applied to other types of experiment.
 
 Please note that this code works only with the specific data provided and for the experimental set up of Morris Water Maze described in the paper. A generalized and updated version is provided \href{https://github.com/RodentDataAnalytics/roda}{here}. The updated version has an improved graphical user interface and a complete description on how the code may be used with user defined experimental setups and data.
 
@@ -89,22 +89,22 @@ Please note that this code works only with the specific data provided and for th
 
 This software provides the following main functionality:
 \begin{itemize}
-	\item A graphical user interface (GUI) for browsing and tagging trajectories or segments of trajectories (gui$/$browse\_trajectories.m). A secondary window, from the GUI, providing multiple data visualizations (such as individual feature values and clusters) can be accessed. The GUI can also start the semi-supervised clustering algorithm used to classify similar trajectories/segments;
+	\item A graphical user interface (GUI) for browsing and tagging trajectories or segments of trajectories (\textbf{gui$/$browse\_trajectories.m}). A secondary window, from the GUI, providing multiple data visualizations (such as individual feature values and clusters) can be accessed. The GUI can also start the semi-supervised clustering algorithm used to classify similar trajectories or segments;
 	
-	\item Semi-supervised clustering algorithm (semisupervised\_clustering.m): this class is a front end for the MPCKmeans semi-supervised algorithm. It uses manually labelled data (provided as mapping from trajectory segments to of one or more behavioural classes) to define must-link and cannot-link constraints.
+	\item Semi-supervised clustering algorithm (\textbf{semisupervised\_clustering.m}): this class is a front end for the MPCKmeans semi-supervised algorithm. It uses manually labelled data (provided as mapping from trajectory segments to of one or more behavioural classes) to define must-link and cannot-link constraints.
 	
-	\item Plotting routines for plotting trajectories (plot\_trajectory.m) or the classification results in the form of color bars (one color for each behavioural class) for each trajectory (plot\_distribution\_strategies.m);
+	\item Plotting routines for plotting trajectories (\textbf{plot\_trajectory.m}) or the classification results in the form of color bars (one color for each behavioural class) for each trajectory (\textbf{plot\_distribution\_strategies.m});
 	
-	\item Various other functions for analyzing and validating the clustering results. These functions are inside the results$/$mwm folder and are used to generate the results and figures of the publication referenced above. This publication focuses on the comparison of the behaviour between stressed and non-stressed rats in the Morris Water Maze experiment.
+	\item Various other functions for analyzing and validating the clustering results. These functions are inside the \textbf{results$/$mwm} folder and are used to generate the results and figures of the publication referenced above. This publication focuses on the comparison of the behaviour between stressed and non-stressed rats in the Morris Water Maze experiment.
 \end{itemize}
 
 
 \section{Using the Code}
 \subsection{Quick Run}
 
-In order to reproduce any of the results of the paper the file \textit{initialize.m} needs to run. Then, by calling each of the scripts, available in the results$/$mwm folder, the various figures and results of the paper can be generated. For convenience, a script called ALL\_RESULTS, which generates all the results and figures at once, is provided. The generated figures and the results are stored inside the results$/$generated folder.
+In order to reproduce any of the results of the paper the file \textbf{initialize.m} needs to run. Then, by calling each of the scripts, available in the \textbf{results$/$mwm folder}, the various figures and results of the paper can be generated. For convenience, a script called \textbf{ALL\_RESULTS}, which generates all the results and figures at once, is provided. The generated figures and the results are stored inside the \textbf{results$/$generated} folder.
 
-To activate the GUI first run the file initialize.m and then one of the following commands:
+To activate the GUI first run the file \textbf{initialize.m} and then one of the following commands:
 \begin{itemize}
 	\item browse\_set(1,0): the full (i.e. non-segmented) trajectories.
 	\item browse\_set(2,0): segmented swimming paths without any reference configuration.
@@ -112,11 +112,11 @@ To activate the GUI first run the file initialize.m and then one of the followin
 
 \subsection{Generating the paper's results}
 
-The scripts in the results$/$mwm folder are used to generate the results and figures of the published paper, including the supplementary material. Refer to table 1 for a complete synopsis of each script's generated result as well as its connection to the paper.
+The scripts in the \textbf{results$/$mwm} folder are used to generate the results and figures of the published paper, including the supplementary material. Refer to table 1 for a complete synopsis of each script's generated result as well as its connection to the paper.
 
-Before running any of the scripts it is mandatory to run the script "\textit{initialize.m}" which is located inside the home folder (mwm-ml-master$/$). This script loads the WEKA library (for more information refer to "1.4 Two-stage clustering algorithm description" of the supplementary material of the publication), the Morris water maze configurations and adds to MATLAB path the appropriate folders.
+Before running any of the scripts it is mandatory to run the script \textbf{initialize.m} which is located inside the home folder (\textbf{mwm-ml-master$/$}). This script loads the WEKA library (for more information refer to ``1.4 Two-stage clustering algorithm'' description of the supplementary material of the publication), the Morris water maze configurations and adds to MATLAB path the appropriate folders.
 
-Note that the results generated by running the scripts may have differences compared to the ones in the paper. For more information on this issue please refer to section "Differences between current code results and paper".
+Note that the results generated by running the scripts may have differences compared to the ones in the paper. For more information on this issue please refer to section ``Differences between current code results and paper''.
 
 \begin{table}[H]
 \centering
@@ -183,7 +183,7 @@ Note that the results generated by running the scripts may have differences comp
 
 The GUI (figure \ref{gui}) can be used to label path segments, cluster the data and visualize the clustering results.
 
-To activate the GUI first the script "\textit{initialize.m}" which is located inside the home folder (mwm-ml-master$/$) needs to run. This script loads the WEKA library (for more information refer to "1.4 Two-stage clustering algorithm description" of the supplementary material of the publication), the Morris water maze configurations and adds to MATLAB path the appropriate folders. Afterwards the GUI can be activated by running any of the commands below:
+To activate the GUI first the script \textbf{initialize.m} which is located inside the home folder (\textbf{mwm-ml-master$\textbf{/}$}) needs to run. This script loads the WEKA library (for more information refer to ``1.4 Two-stage clustering algorithm description'' of the supplementary material of the publication), the Morris water maze configurations and adds to MATLAB path the appropriate folders. Afterwards the GUI can be activated by running any of the commands below:
 \begin{itemize}
 	\item browse\_set(1,0): loads the full (i.e. non-segmented) trajectories.
 	\item browse\_set(2,0): loads the segmented swimming paths without any reference configuration.
@@ -219,15 +219,15 @@ The clustering algorithm can be run by clicking in the 'cluster' button. Before 
 
 \section{Input Data Description}
 
-The folder data$/$mwm\_peripubertal\_streess contains the original Morris Water Maze trajectories of rats induced to peri-pubertal stress (PPS). The data was acquired from the Laboratory of Behavioural Genetics, EPFL. For more information about the experiments see \href{http://www.nature.com/articles/srep14562}{Gehring et al., 2015}.
+The folder \textbf{data$/$mwm\_peripubertal\_stress} contains the original Morris Water Maze trajectories of rats induced to peri-pubertal stress (PPS). The data was acquired from the Laboratory of Behavioural Genetics, EPFL. For more information about the experiments see \href{http://www.nature.com/articles/srep14562}{Gehring et al., 2015}.
 
-Trajectories were acquired with Ethovision 3.1. A total of 3 experiments were performed, which are split into three folders: set1, set2, and set3. Specific details of each trial separately may be found inside the .csv files of the three above folders.
+Trajectories were acquired with Ethovision 3.1. A total of 3 experiments were performed, which are split into three folders: set1, set2, and set3. Specific details of each trial separately may be found inside the CSV files of the three above folders.
 
-The data provided by the Laboratory of Behavioral Genetics needs to be calibrated. Details of the calibration are given in the supplementary information of \href{http://www.nature.com/articles/srep14562}{Gehring et al., 2015}. A ready to use calibration procedure is given in the import$/$noldus$/$calibration directory in the root folder.  For this procedure screenshots of the trajectories need to be provided. These screenshots are the .png files inside the screenshots folder.
+The data provided by the Laboratory of Behavioral Genetics needs to be calibrated. Details of the calibration are given in the supplementary information of \href{http://www.nature.com/articles/srep14562}{Gehring et al., 2015}. A ready to use calibration procedure is given in the \textbf{import$/$noldus$/$calibration$/$} directory in the root folder.  For this procedure screenshots of the trajectories need to be provided. These screenshots are the PNG files inside the screenshots folder.
 
 Finally inside the data folder the segment\_labels and the labels\_full .csv files contain labelling data of specific trajectories for the classification process. Starting from the first column each column represents the following: experimental set, day, track, off, length and the rest are labels.
 
-For more information about the experiment properties (platform position, radius, etc) and the data (animal groups, ids, etc) refer to the config$/$morris\_water\_maze$/$config\_mwm.m
+For more information about the experiment properties (platform position, radius, etc) and the data (animal groups, ids, etc) refer to the \textbf{config$/$morris\_water\_maze$/$config\_mwm.m}
 
 
 \section{Code Adaptation}
@@ -252,7 +252,7 @@ It is tested and working with MATLAB versions 2013, 2014a, 2015b.
 \section{Differences between current code results and paper}
 The user should note that there are differences between the software's results and the results of the published paper. These changes are only quantitative and are caused due to improving the labelling quality of the data after the paper was published. Nevertheless, the results and the conclusions remain qualitatively the same.
 
-Below there is a list of the exact results that this software produces by running the scripts inside the results$/$mwm folder.\\
+Below there is a list of the exact results that this software produces by running the scripts inside the \textbf{results$/$mwm} folder.\\
 
 \begin{itemize}
 \item \textbf{results\_control\_stress\_speed\_latency.m}\\
@@ -265,7 +265,7 @@ Below there is a list of the exact results that this software produces by runnin
 \end{figure}
 \item \textbf{results\_strategies\_individual\_evolution.m}\\
 (paper page 7, figure 4)\\
-The first figure refers to the controlled group while the second to the stressed group. Note that in the paper only 12 animals from each group were selected. Also the "Direct Finding" strategy (which means that the animal managed to find the platform directly) was removed from the paper.
+The first figure refers to the controlled group while the second to the stressed group. Note that in the paper only 12 animals from each group were selected. Also the ``Direct Finding'' strategy (which means that the animal managed to find the platform directly) was removed from the paper.
 \begin{figure}[H]
 	\begin{center}
 		\includegraphics[width=1\textwidth]{f4.jpg}\\
@@ -294,11 +294,11 @@ The first figure refers to the controlled group while the second to the stressed
 		\label{code_table3}
 	\end{center}
 \end{figure}
-\item \textbf{results\_clustering\_parameters.m}//
+\item \textbf{results\_clustering\_parameters.m}\\
 (supplementary page 3, figure 2)	
 \begin{figure}[H]
 	\begin{center}
-		\includegraphics[width=1\textwidth]{sfig2.jpg}\\
+		\includegraphics[width=1\textwidth]{sfig2.jpg}
 		\label{code_sfig2}
 	\end{center}
 \end{figure}
@@ -347,17 +347,17 @@ The first figure refers to the controlled group while the second to the stressed
 \section{In-depth Code Explanation}
 
 \subsection{Configurations}
-Inside the 'config' folder are the configuration files of the software.
+Inside the \textbf{config} folder are the configuration files of the software.
 
-The base\_config.m is used as the base configuration upon which other configuration files for specific experiments and experimental setups can be build. The config\_mwm.m contains the configurations of the specific Morris Water Maze experimental setup which was used for the publication of \href{http://www.nature.com/articles/srep14562}{Gehring et al., 2015}.
+The \textbf{base\_config.m} is used as the base configuration upon which other configuration files for specific experiments and experimental setups can be build. The \textbf{config\_mwm.m} contains the configurations of the specific Morris Water Maze experimental setup which was used for the publication of \href{http://www.nature.com/articles/srep14562}{Gehring et al., 2015}.
 
 As mentioned in the Code Adaptation section, the current code is linked to the specific Morris Water Maze setup described in the publication above. Thus, in order to adapt the code to other experiments please refer to this \href{https://github.com/RodentDataAnalytics/roda}{link}
 
 \subsection{Data Representation}
-The scripts inside the folder 'data\_representation' among with trajectory\_simplify\_implementation.m are called to compute values along the trajectories (e.g. speed) or to change the coordinate system.
+The scripts inside the folder \textbf{data\_representation} among with trajectory\_simplify\_implementation.m are called to compute values along the trajectories (e.g. speed) or to change the coordinate system.
 
 \subsection{Utility}
-The 'utility' folder contains scripts for the generation of hash values. Hash values are used throughout the code and assigned to trajectories, segments of trajectories, classification process, etc in order to boost the running speed of the software.
+The \textbf{utility} folder contains scripts for the generation of hash values. Hash values are used throughout the code and assigned to trajectories, segments of trajectories, classification process, etc in order to boost the running speed of the software.
 
 \subsection{The Noldus Functions}
 
@@ -383,29 +383,29 @@ The Noldus functions inside the import folder are responsible for parsing variou
 
 \begin{itemize}
 	\item\textbf{load\_trajectories.m:}
-	 Imports trajectories from set(1...N) folders inside\\ data$/$mwm\_peripubertal\_stress$/$
+	 Imports trajectories from set(1...N) folders inside \textit{data$/$mwm\_peripubertal\_stress$/$}
 	\item\textbf{load\_calibration\_data.m:}
 	 Loads calibrated data if available else calibrates raw data and load them.
 	\item\textbf{trajectory\_points\_from\_snapshots:}
 	 Processes a directory with a series of trajectory snapshots. Returns a list of time and coordinates for this trajectory.
 	\item\textbf{trajectory\_snapshot\_position:}
-	 Extracts position from snapshots located inside  data$/$mwm\_peripubertal\_stress$/$screenshots$/$set(1...N)$/$
+	 Extracts position from snapshots located inside  \textit{data$/$mwm\_peripubertal\_stress$/$screenshots$/$set(1...N)$/$}
 	\item\textbf{read\_trajectory.m:}
 	 Parses various information about the animals and their trajectories. Calls \textbf{read\_ethovision.m} which reads a trajectory from a CSV data file created by Ethovision 3.1.
 \end{itemize}
 
 \subsection{The features Scripts}
-The folder 'features' contains scripts for the calculation of the segments' features. For more information about each feature refer to the main paper, page 10, section 'Methods'.
+The folder \textbf{features} contains scripts for the calculation of the segments' features. For more information about each feature refer to the main paper, page 10, section ``Methods''.
 
 \subsection{The Graphical User Interface}
 The 'gui' folder contains the code which builds the graphical user interface. As the GUI is used mainly for visualisation purposes, the reader may refer to the section Result Files for a complete review of the background processes.
 
 \subsection{Results}
-Inside the results$/$mwm folder there are scripts that generate the results and figures of the publication \href{http://www.nature.com/articles/srep14562}{Gehring et al., 2015}. The flowchart of each of these files can be found in the subsections below. Note the export\_figure.m is only used for exporting the generated figures and does not generate any results. 
+Inside the \textbf{results$/$mwm} folder there are scripts that generate the results and figures of the publication \href{http://www.nature.com/articles/srep14562}{Gehring et al., 2015}. The flowchart of each of these files can be found in the subsections below. Note the \textbf{export\_figure.m} is only used for exporting the generated figures and does not generate any results. 
 
-The results of the scripts are stored inside the results$/$generated folder. The already generated 'calibration\_data\_123.mat' contains the correct trajectories after the calibration process.
+The results of the scripts are stored inside the \textbf{results$/$generated} folder. The already generated file \textbf{calibration\_data\_123.mat} contains the correct trajectories after the calibration process.
 
-Running the various result scripts will lead to the generation of the 'cache' folder which will contain the files features\_values.mat and trajectories\_\%id.mat. The first file contains the calculated features and the second one all the trajectories (\%id refers to a unique generated number, for this program the generated one is 1147731521). 
+Running the various result scripts will lead to the generation of the \textbf{cache} folder which will contain the files \textbf{features\_values.mat} and \textbf{trajectories\_\%id.mat}. The first file contains the calculated features and the second one all the trajectories (\%id refers to a unique generated number, for this program the generated one is 1147731521). 
 
 \subsubsection{results\_control\_stress\_speed\_latency.m}
 Comparison of full trajectory metrics for two groups of animals over a set of 12 trials (produces: paper page 3, figure 1).
@@ -425,11 +425,11 @@ Comparison of full trajectory metrics for two groups of animals over a set of 12
 	 (d) \textit{g\_trajectories:} total trajectories (only for two animal groups, controlled and stressed)
 	\item\textbf{cache\_animals:} calculates or loads (if already exist) the data of the global variables above.
 	\item\textbf{check significances:} uses the external function sigstar \href{http://www.mathworks.com/matlabcentral/fileexchange/39696-sigstar-groups-stats-nosort-}{(Rob Campbell, 2013)} to add significance stars and lines highlighting significant differences between pairs of groups.
-	\item\textbf{export\_figure:} exports the current figure in .eps and .fig format (default).
+	\item\textbf{export\_figure:} exports the current figure in EPS and FIG format (default).
 \end{itemize}
 
 \subsubsection{results\_trajectory\_classification.m}
-Runs the classification process twice for 15 trajectories: (a) once using a mapping with constant weight (see generated files ending with '\_const' inside the results$/$generated folder, (b) once using different weights per class. The generated file 'strategies\_line\_legend\_vert' contains the legend of the figures (produces: paper page 4, figure 2).
+Runs the classification process twice for 15 trajectories: (a) once using a mapping with constant weight (see generated files ending with ``\_cons'' inside the \textbf{results$/$generated} folder, (b) once using different weights per class. The generated file \textbf{strategies\_line\_legend\_vert} contains the legend of the figures (produces: paper page 4, figure 2).
 
 \begin{figure}[H]
 	\begin{center}
@@ -447,7 +447,7 @@ Runs the classification process twice for 15 trajectories: (a) once using a mapp
 	(e) \textit{g\_long\_trajectories\_map:} matrix of trajectory indices for each trial and group of animals.\\
 	(f) \textit{g\_partitions:} number of instances of the same trajectory class.
 	\item\textbf{cache\_trajectories\_classification:}  calculates the data of the global variables above.
-	\item\textbf{export\_figure:} exports the current figure in .eps and .fig format (default).
+	\item\textbf{export\_figure:} exports the current figure in EPS and FIG format (default).
 \end{itemize}
 
 \subsubsection{results\_strategies\_individual\_evolution.m}
@@ -472,8 +472,8 @@ needs to be uncommented (remove the \% character). The exporting process require
 	(b) \textit{g\_partitions:} number of instances of the same trajectory class.\\
 	(c) \textit{g\_animals\_ids:} animal ids (controlled and streessed groups).\\
 	(d) \textit{g\_animals\_trajectories\_map:} matrix of trajectory indices for each trial and group of animals.
-	\item\textbf{cache\_animals:} calculates or loads (if already exist) the data of the global variables g\_animals\_trajectories\_map and g\_animals\_ids.
-	\item\textbf{cache\_trajectories\_classification:}  calculates the data of the global variables g\_segments\_classification and g\_partitions.
+	\item\textbf{cache\_animals:} calculates or loads (if already exist) the data of the global variables \textit{g\_animals\_trajectories\_map} and \textit{g\_animals\_ids}.
+	\item\textbf{cache\_trajectories\_classification:}  calculates the data of the global variables \textit{g\_segments\_classification} and \textit{g\_partitions}.
 \end{itemize}
 
 \subsubsection{results\_strategies\_distributions\_length.m}
@@ -491,9 +491,9 @@ Average length in meters that animals spent in each one strategy, for a total of
 	(a) \textit{g\_segments\_classification:} classification of segments (splited trajectories).\\
 	(b) \textit{g\_animals\_trajectories\_map:} matrix of trajectory indices for each trial and group of animals.\\
 	(c) \textit{g\_long\_trajectories\_map:} Through the segmentation process some trajectory segments may end with illogical length (length $=$ 0). This variable holds  indication of the ones with length $>$ 0 only.
-	\item\textbf{cache\_animals:} calculates or loads (if already exist) the data of the global variable g\_animals\_trajectories\_map.
-	\item\textbf{cache\_trajectories\_classification:}  calculates the data of the global variables g\_long\_trajectories\_map and g\_segments\_classification.
-	\item\textbf{export\_figure:} exports the current figure in .eps and .fig format (default).
+	\item\textbf{cache\_animals:} calculates or loads (if already exist) the data of the global variable \textit{g\_animals\_trajectories\_map}.
+	\item\textbf{cache\_trajectories\_classification:}  calculates the data of the global variables \textit{g\_long\_trajectories\_map} and \textit{g\_segments\_classification}.
+	\item\textbf{export\_figure:} exports the current figure in EPS and FIG format (default).
 \end{itemize}
 
 
@@ -514,7 +514,7 @@ strategies for both groups (produces: paper page 8, figure 5 [I]).
 	(b) \textit{g\_trajectories:} total trajectories (only for two animal groups, controlled and stressed).\\
 	(c) \textit{g\_segments:} total segments produced from the splitting of trajectories.
 	\item\textbf{cache\_trajectories\_classification:}  calculates the data of the global variables g\_long\_trajectories\_map and g\_segments\_classification.
-	\item\textbf{export\_figure:} exports the current figure in .eps and .fig format (default).
+	\item\textbf{export\_figure:} exports the current figure in EPS and FIG format (default).
 \end{itemize}
 
 \subsubsection{results\_strategy\_transition\_prob.m}
@@ -551,7 +551,7 @@ Shows the impact of the number of clusters on the clustering performance for a s
 	\item\textbf{initialize global variables:} loads the Morris water maze configurations and initializes the global variable below:\\
 	(a) \textit{g\_segments:} total segments produced from the splitting of trajectories.
 	\item\textbf{cache\_trajectory\_segments:} Loads trajectories if not already loaded and segmented them using the default segmentation parameters as defined in the global constants.
-	\item\textbf{export\_figure:} exports the current figure in .eps and .fig format (default).
+	\item\textbf{export\_figure:} exports the current figure in EPS and FIG format (default).
 \end{itemize}
 
 \subsubsection{results\_confusion\_matrix.m}
@@ -603,7 +603,7 @@ Results of manual classification of complete swimming paths for all the behaviou
 	(c) \textit{g\_animals\_trajectories\_map:} matrix of trajectory indices for each trial and group of animals.
 	\item\textbf{cache\_animals:} calculates or loads (if already exist) the data of the global variable g\_animals\_trajectories\_map.
 	\item\textbf{cache\_trajectory\_segments:} Loads trajectories if not already loaded and segmented them using the default segmentation parameters as defined in the global constants.
-	\item\textbf{export\_figure:} exports the current figure in .eps and .fig format (default).
+	\item\textbf{export\_figure:} exports the current figure in EPS and FIG format (default).
 \end{itemize}
 
 \subsubsection{results\_calibration.m}
@@ -618,7 +618,7 @@ Produces the calibration functions (x and y axis correction) and the calibration
 
 \begin{itemize}
 	\item\textbf{load\_trajectories:} refer to Noldus Functions.
-	\item\textbf{export\_figure:} exports the current figure in .eps and .fig format (default).
+	\item\textbf{export\_figure:} exports the current figure in EPS and FIG format (default).
 \end{itemize}	
 
 \subsubsection{results\_export\_random\_segments.m}
