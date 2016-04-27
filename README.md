@@ -54,4 +54,14 @@ The clustering algorithm can be run by clicking in the "cluster" button. Before 
 
 This code works only with the specific data provided and for the experimental set up of Morris Water Maze described in the paper. A generalized and updated version is provided at the following link https://github.com/RodentDataAnalytics/roda. The updated version has an improved graphical user interface and a complete description on how the code may be used with user defined experimental setups and data.
 
-For more information feel free to contact Tiago Gehring (tiagogehring@gmail.com).
+# Contact
+
+For more information feel free to contact a member of the team:
+
+• Tiago Gehring (tiagogehring@gmail.com)
+
+• Avgoustinos Vouros (av.vouros@gmail.com)
+
+• Mike Croucher (m.croucher@sheffield.ac.uk)
+
+• Eleni Vasilaki (e.vasilaki@sheffield.ac.uk)
