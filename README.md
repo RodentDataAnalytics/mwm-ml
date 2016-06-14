@@ -52,7 +52,7 @@ The clustering algorithm can be run by clicking in the "cluster" button. Before 
 
 # Adapting the code to other experiments
 
-This code works only with the specific data provided and for the experimental set up of Morris Water Maze described in the paper. A generalized and updated version is provided at the following link https://github.com/RodentDataAnalytics/roda. The updated version has an improved graphical user interface and a complete description on how the code may be used with user defined experimental setups and data.
+This code works only with the specific data provided and for the experimental set up of Morris Water Maze described in the paper. A generalized and updated version is provided at the following link https://github.com/RodentDataAnalytics/mwm-ml-gen. The updated version has an improved graphical user interface and a complete description on how the code may be used with user defined experimental setups and data.
 
 # Contact
 
